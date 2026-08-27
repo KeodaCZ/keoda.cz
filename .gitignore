@@ -12,3 +12,4 @@ Thumbs.db
 
 # local-only design playground — never deploy
 src/pages/design-nahled.astro
+public/fonts-preview/
