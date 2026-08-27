@@ -1,0 +1,120 @@
+{
+  "categories": [
+    {
+      "name": "PC sestava",
+      "items": [
+        {
+          "label": "Procesor",
+          "name": "AMD Ryzen 7 7700X"
+        },
+        {
+          "label": "Grafika",
+          "name": "MSI GeForce RTX 4080 16GB GAMING X TRIO"
+        },
+        {
+          "label": "RAM",
+          "name": "Kingston Fury Beast 32GB (2×16GB) DDR5-6000 CL36, AMD EXPO"
+        },
+        {
+          "label": "Deska",
+          "name": "ASUS TUF GAMING B650-PLUS"
+        },
+        {
+          "label": "Disk 1",
+          "name": "Samsung SSD 980 PRO 500GB (M.2)"
+        },
+        {
+          "label": "Disk 2",
+          "name": "WD Black SN850X 1TB (M.2)"
+        },
+        {
+          "label": "Chlazení",
+          "name": "MSI MAG CoreLiquid 360R V2"
+        },
+        {
+          "label": "Zdroj",
+          "name": "Corsair RM1000e"
+        },
+        {
+          "label": "Skříň",
+          "name": "NZXT H7 Matte Black"
+        }
+      ]
+    },
+    {
+      "name": "Stream a natáčení",
+      "items": [
+        {
+          "label": "Mikrofon",
+          "name": "HyperX QuadCast S"
+        },
+        {
+          "label": "Bezdrátový mikrofon",
+          "name": "DJI Mic Mini 2"
+        },
+        {
+          "label": "Webkamera",
+          "name": "Logitech C922 Pro Stream"
+        },
+        {
+          "label": "Capture card",
+          "name": "AVerMedia Live Gamer HD 2"
+        },
+        {
+          "label": "Světla",
+          "name": "Rollei Lumis Mini LED RGB (2×)"
+        }
+      ]
+    },
+    {
+      "name": "Periferie & konzole",
+      "items": [
+        {
+          "label": "Myš",
+          "name": "Logitech G502 Hero"
+        },
+        {
+          "label": "Klávesnice",
+          "name": "Logitech G213"
+        },
+        {
+          "label": "Sluchátka",
+          "name": "HyperX Cloud II Wireless"
+        },
+        {
+          "label": "Konzole",
+          "name": "PlayStation 5"
+        },
+        {
+          "label": "VR headset",
+          "name": "Meta Quest 2 (Oculus)"
+        }
+      ]
+    },
+    {
+      "name": "Software",
+      "items": [
+        {
+          "label": null,
+          "name": "OBS Studio"
+        },
+        {
+          "label": null,
+          "name": "Aitum Multistream"
+        },
+        {
+          "label": null,
+          "name": "Aitum Vertical"
+        },
+        {
+          "label": null,
+          "name": "Streamer.bot"
+        },
+        {
+          "label": null,
+          "name": "Elgato Wave Link"
+        }
+      ]
+    }
+  ]
+}

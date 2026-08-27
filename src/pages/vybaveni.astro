@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import gear from '../data/gear.json';
+---
+<Base
+  title="Vybavení"
+  description="Na čem KeodaCZ streamuje — PC sestava, periferie, audio/video technika a software."
+>
+  <h1>Vybavení</h1>
+  <p>Na čem streamuju a co k tomu používám.</p>
+
+  {gear.categories.map((category) => (
+    <section>
+      <h2>{category.name}</h2>
+      <ul>
+        {category.items.map((item) => (
+          <li>
+            {item.label ? <><strong>{item.label}:</strong> {item.name}</> : item.name}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <p><a href="/">← Zpět na hlavní stránku</a></p>
+</Base>
