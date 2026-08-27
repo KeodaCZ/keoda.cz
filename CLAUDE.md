@@ -21,11 +21,10 @@ Decided. Do not propose changes without asking.
 Registrar, host, and mail are deliberately separate. Swapping any one is a DNS
 edit, not a migration.
 
-**Status (2026-08-27): owner is buying the keoda.cz domain now**, so the site
-targets `https://keoda.cz` directly from the start — no GitHub Pages subpath,
-no `base` in `astro.config.mjs`, ever. (A dotted `base` also breaks the Astro
-dev server, so never reintroduce one.) Once the purchase is confirmed: DNS
-records at the registrar + Pages custom domain setting — see Deployment.
+**Status: live.** Domain purchased and wired up 2026-08-27 — the site serves at
+`https://keoda.cz` (Pages custom domain, Enforce HTTPS on, DNS at Vedos done).
+No `base` in `astro.config.mjs`, ever — a dotted base also breaks the Astro
+dev server.
 
 ## Stack
 
@@ -347,8 +346,6 @@ memberships only, **not** donations. Streamer.bot is the right tool.
 
 ## Open questions
 
-- [ ] Buy the keoda.cz domain — purchase started 2026-08-27; confirm it is
-      done before wiring DNS + Pages custom domain
 - [ ] Do we want `kontakt@keoda.cz`? (needs Vedos mailhosting + MX records)
 - [ ] Move the data-fetching subsections to `.claude/rules/` once the pipeline
       works — see the maintenance note under Data layer
