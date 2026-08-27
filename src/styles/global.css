@@ -1,0 +1,133 @@
+/* ===== Design tokens ===============================================
+   Light: warm dark ink on sand.  Dark: sand on warm dark — the same
+   palette mirrored. Yellow is the shared accent in both modes.       */
+:root {
+  color-scheme: light dark;
+
+  --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Rubik', system-ui, sans-serif;
+
+  --bg-top: #f3edc9;
+  --bg-bottom: #e2d795;
+  --text: #131108;
+  --muted: #55503a;
+  --accent: #6f621a;
+  --card: rgba(255, 253, 240, 0.55);
+  --card-edge: rgba(19, 17, 8, 0.25);
+  --btn-bg: #f2dc5a;
+  --btn-text: #131108;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-top: #131108;
+    --bg-bottom: #131108;
+    --text: #ded7b4;
+    --muted: #8f8968;
+    --accent: #f2dc5a;
+    --card: #1d1a0e;
+    --card-edge: rgba(242, 220, 90, 0.18);
+  }
+}
+
+/* ===== Base ======================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-body);
+  line-height: 1.55;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+
+main {
+  flex: 1;
+  width: 100%;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  margin: 0 0 0.4em;
+}
+
+h1 {
+  font-size: 2.6rem;
+}
+
+h2 {
+  font-size: 1.45rem;
+  text-transform: uppercase;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #f2dc5a;
+  color: #131108;
+}
+
+/* ===== Utilities =================================================== */
+.container {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+.btn:hover {
+  filter: brightness(1.06);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.card :last-child {
+  margin-bottom: 0;
+}

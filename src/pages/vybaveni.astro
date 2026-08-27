@@ -6,21 +6,37 @@ import gear from '../data/gear.json';
   title="Vybavení"
   description="Na čem KeodaCZ streamuje — PC sestava, periferie, audio/video technika a software."
 >
-  <h1>Vybavení</h1>
-  <p>Na čem streamuju a co k tomu používám.</p>
+  <div class="container">
+    <h1>Vybavení</h1>
+    <p class="muted intro">Na čem streamuju a co k tomu používám.</p>
 
-  {gear.categories.map((category) => (
-    <section>
-      <h2>{category.name}</h2>
-      <ul>
-        {category.items.map((item) => (
-          <li>
-            {item.label ? <><strong>{item.label}:</strong> {item.name}</> : item.name}
-          </li>
-        ))}
-      </ul>
-    </section>
-  ))}
-
-  <p><a href="/">← Zpět na hlavní stránku</a></p>
+    {gear.categories.map((category) => (
+      <section class="card">
+        <h2>{category.name}</h2>
+        <ul>
+          {category.items.map((item) => (
+            <li>
+              {item.label ? <><strong>{item.label}:</strong> {item.name}</> : item.name}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
 </Base>
+
+<style>
+  h1 {
+    margin-top: 2rem;
+  }
+  .intro {
+    margin-bottom: 1.6rem;
+  }
+  ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+  li {
+    margin-bottom: 0.3rem;
+  }
+</style>

@@ -1,10 +1,36 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="KeodaCZ">
-  <h1>KeodaCZ</h1>
-  <p>Web se připravuje.</p>
-  <ul>
-    <li><a href="/vybaveni/">Vybavení</a></li>
-  </ul>
+<Base title="KeodaCZ" description="KeodaCZ — český streamer. Twitch, YouTube a spol.">
+  <section class="container hero">
+    <h1>KEODACZ</h1>
+    <p class="muted tagline">Český streamer — Twitch, YouTube a spol.</p>
+    <a class="btn" href="https://www.twitch.tv/keodacz">▶ Sledovat na Twitchi</a>
+  </section>
+
+  <section class="container">
+    <div class="card">
+      <h2>Vybavení</h2>
+      <p>Na čem streamuju — PC sestava, technika i software.</p>
+      <p><a href="/vybaveni/">Prohlédnout vybavení →</a></p>
+    </div>
+    <p class="muted note">Web se teprve staví — postupně přibude kalendář streamů, klipy a další.</p>
+  </section>
 </Base>
+
+<style>
+  .hero {
+    padding-block: 3rem 2rem;
+  }
+  .hero h1 {
+    font-size: 3.2rem;
+    margin-bottom: 0.1em;
+  }
+  .tagline {
+    font-size: 1.1rem;
+    margin-bottom: 1.4rem;
+  }
+  .note {
+    font-size: 0.85rem;
+  }
+</style>
