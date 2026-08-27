@@ -3,9 +3,12 @@
 <header>
   <div class="container inner">
     <a class="logo" href="/">KEODACZ</a>
-    <nav>
-      <a href="/vybaveni/">Vybavení</a>
-    </nav>
+    <div class="right">
+      <nav>
+        <a href="/vybaveni/">Vybavení</a>
+      </nav>
+      <button id="theme-toggle" type="button" title="Vzhled: automaticky">🌓</button>
+    </div>
   </div>
 </header>
 
@@ -27,6 +30,11 @@
     text-decoration: none;
     color: var(--text);
   }
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
   nav {
     display: flex;
     gap: 1.2rem;
@@ -38,4 +46,63 @@
   nav a:hover {
     text-decoration: underline;
   }
+  #theme-toggle {
+    background: none;
+    border: 1px solid var(--card-edge);
+    border-radius: 6px;
+    padding: 0.25rem 0.55rem;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text);
+  }
+  #theme-toggle:hover {
+    background: var(--card);
+  }
 </style>
+
+<script>
+  // Theme cycle: auto (follow system) -> light -> dark -> auto.
+  // Choice persists in localStorage; 'auto' means no entry.
+  const KEY = 'theme';
+  const btn = document.getElementById('theme-toggle')!;
+
+  const read = (): string | null => {
+    try {
+      return localStorage.getItem(KEY);
+    } catch {
+      return null;
+    }
+  };
+
+  const write = (mode: string | null) => {
+    try {
+      if (mode) localStorage.setItem(KEY, mode);
+      else localStorage.removeItem(KEY);
+    } catch {
+      /* private mode etc. — toggle still works for this page view */
+    }
+  };
+
+  const apply = (mode: string | null) => {
+    const root = document.documentElement;
+    if (mode) root.dataset.theme = mode;
+    else delete root.dataset.theme;
+    btn.textContent = mode === 'light' ? '☀️' : mode === 'dark' ? '🌙' : '🌓';
+    btn.title =
+      mode === 'light'
+        ? 'Vzhled: světlý (klikni pro tmavý)'
+        : mode === 'dark'
+          ? 'Vzhled: tmavý (klikni pro automatický)'
+          : 'Vzhled: automaticky podle systému (klikni pro světlý)';
+  };
+
+  apply(read());
+
+  btn.addEventListener('click', () => {
+    const next =
+      read() === null ? 'light' : read() === 'light' ? 'dark' : null;
+    write(next);
+    apply(next);
+  });
+</script>

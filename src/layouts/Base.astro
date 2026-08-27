@@ -19,6 +19,13 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3edc9" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131108" />
+    <script is:inline>
+      // Apply the visitor's stored theme choice before first paint.
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
     <title>{title === 'KeodaCZ' ? title : `${title} | KeodaCZ`}</title>
     {description && <meta name="description" content={description} />}
   </head>

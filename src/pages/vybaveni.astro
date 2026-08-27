@@ -10,6 +10,7 @@ import gear from '../data/gear.json';
     <h1>Vybavení</h1>
     <p class="muted intro">Na čem streamuju a co k tomu používám.</p>
 
+    <div class='grid'>
     {gear.categories.map((category) => (
       <section class="card">
         <h2>{category.name}</h2>
@@ -22,6 +23,7 @@ import gear from '../data/gear.json';
         </ul>
       </section>
     ))}
+    </div>
   </div>
 </Base>
 
@@ -31,6 +33,19 @@ import gear from '../data/gear.json';
   }
   .intro {
     margin-bottom: 1.6rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .grid .card {
+    margin-bottom: 0;
+  }
+  @media (min-width: 800px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
   }
   ul {
     margin: 0;

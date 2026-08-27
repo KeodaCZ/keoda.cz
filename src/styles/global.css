@@ -2,7 +2,7 @@
    Light: warm dark ink on sand.  Dark: sand on warm dark — the same
    palette mirrored. Yellow is the shared accent in both modes.       */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   --font-body: 'Rubik', system-ui, sans-serif;
@@ -18,16 +18,31 @@
   --btn-text: #131108;
 }
 
+/* Dark mode: automatic via system preference (unless the visitor forced
+   light), or forced via the header toggle (data-theme on <html>).
+   Keep both blocks identical. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg-top: #131108;
-    --bg-bottom: #131108;
-    --text: #ded7b4;
-    --muted: #8f8968;
-    --accent: #f2dc5a;
-    --card: #1d1a0e;
-    --card-edge: rgba(242, 220, 90, 0.18);
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+  --bg-top: #131108;
+  --bg-bottom: #131108;
+  --text: #ded7b4;
+  --muted: #8f8968;
+  --accent: #f2dc5a;
+  --card: #1d1a0e;
+  --card-edge: rgba(242, 220, 90, 0.18);
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-top: #131108;
+  --bg-bottom: #131108;
+  --text: #ded7b4;
+  --muted: #8f8968;
+  --accent: #f2dc5a;
+  --card: #1d1a0e;
+  --card-edge: rgba(242, 220, 90, 0.18);
 }
 
 /* ===== Base ======================================================== */
@@ -97,7 +112,7 @@ a:focus-visible,
 
 /* ===== Utilities =================================================== */
 .container {
-  max-width: 760px;
+  max-width: 1200px;
   margin-inline: auto;
   padding-inline: 1rem;
 }
