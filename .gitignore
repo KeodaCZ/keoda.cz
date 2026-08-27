@@ -1,0 +1,11 @@
+# dependencies & build output
+node_modules/
+dist/
+.astro/
+
+# owner's local brand/reference assets — never commit
+Twitch and Youtube assets/
+
+# OS noise
+Thumbs.db
+.DS_Store
