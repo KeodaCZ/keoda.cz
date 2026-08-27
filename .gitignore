@@ -9,3 +9,6 @@ Twitch and Youtube assets/
 # OS noise
 Thumbs.db
 .DS_Store
+
+# local-only design playground — never deploy
+src/pages/design-nahled.astro
