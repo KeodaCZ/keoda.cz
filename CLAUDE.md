@@ -294,6 +294,36 @@ Social links are plain links: Twitch, YouTube, Instagram, TikTok, Facebook
 (`/KeodaCCZPage`), Discord, Steam, and Rankone (`rankone.global/keodacz` — a
 client-rendered app with no embed API, so link only, no iframe).
 
+## Design
+
+Decided with the owner 2026-08-27. Change only with explicit approval.
+
+- Palette "wasteland": light mode = warm dark ink  on sand
+  (→); dark mode = the same palette mirrored (sand
+   on ). Yellow  is the shared accent; buttons
+  are yellow with dark text in both modes. Tokens: .
+- Fonts: Barlow Condensed 700 (headings, uppercase) + Rubik (body),
+  self-hosted via Fontsource packages. The owner's overlay font (Crafty
+  Font - Rough) has zero Czech glyphs — unusable on the web, don't propose it.
+- Light/dark follows the system, plus a manual toggle in the header
+  (localStorage , applied pre-paint in  to avoid flash).
+- Layout: 1200px container; gear cards two-column from 800px up.
+
+## Working style
+
+- **Visual/brand decisions (colors, fonts, imagery, favicon, logo) require
+  showing options and getting the owner's explicit OK before anything goes
+  live.** An early build was scrapped over an unapproved favicon. Build in
+  small confirmed steps: show locally, get approval, then push.
+- No Co-Authored-By trailers in commit messages.
+-  in the repo root is the owner's local
+  brand-reference folder — gitignored, never commit it. It only exists on
+  machines where the owner put it; the site build does not need it. Anything
+  from it that should appear on the site gets copied into the repo
+  deliberately, with approval.
+- Site progress so far: styled homepage + gear page (). Next up:
+  homepage socials row + Twitch embed (waiting on the owner's profile URLs).
+
 ## Deployment
 
 Push to `main` → Pages publishes. No FTP.
@@ -346,6 +376,8 @@ memberships only, **not** donations. Streamer.bot is the right tool.
 
 ## Open questions
 
+- [ ] Owner to supply social profile URLs (Instagram, TikTok, Discord invite,
+      Steam) for the homepage socials row
 - [ ] Do we want `kontakt@keoda.cz`? (needs Vedos mailhosting + MX records)
 - [ ] Move the data-fetching subsections to `.claude/rules/` once the pipeline
       works — see the maintenance note under Data layer
