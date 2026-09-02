@@ -35,8 +35,9 @@ collections:
         description: >-
           Pravidelný rozvrh (Po, St, Pá, So, Ne od 18:30) je natvrdo v repu a
           tady se needituje. Sem se píšou jen výjimky — zrušené, přesunuté nebo
-          bonusové streamy. Prázdný seznam je normální stav. Minulá data se
-          přestanou zobrazovat sama, takže se nic nemusí uklízet.
+          bonusové streamy. Bonusový stream ve volný den se přidá jako „Stream
+          se koná“ s vyplněným Začátkem. Prázdný seznam je normální stav.
+          Minulá data se přestanou zobrazovat sama, takže se nic neuklízí.
         fields:
           - name: exceptions
             label: Výjimky
@@ -62,10 +63,11 @@ collections:
                 required: false
                 default: ''
                 hint: >-
-                  Nech prázdné, když stream normálně běží a jen chceš doplnit
-                  hru nebo poznámku.
+                  „Stream se koná“ znamená dvě věci: buď je to běžný den z
+                  rozvrhu a ty jen doplňuješ hru nebo poznámku, nebo je to
+                  bonusový stream v jinak volný den — pak navíc vyplň Začátek.
                 options:
-                  - { label: 'Normální stream (jen doplňuju info)', value: '' }
+                  - { label: 'Stream se koná (běžný i bonusový)', value: '' }
                   - { label: 'Nestreamuju', value: 'off' }
                   - { label: 'Přesunutý stream', value: 'moved' }
 
@@ -74,8 +76,9 @@ collections:
                 widget: string
                 required: false
                 hint: >-
-                  Formát 20:00. Vyplň u přesunutého streamu nebo u streamu v
-                  jinak volný den — jinak se nechá pravidelný čas.
+                  Formát 20:00. Vyplň u přesunutého streamu a u bonusového
+                  streamu ve volný den. U běžného dne nech prázdné — použije se
+                  pravidelný čas 18:30.
                 pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Zadej čas ve formátu 20:00']
 
               - name: game
