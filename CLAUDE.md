@@ -241,8 +241,17 @@ Rules:
   only when there is more than one thing to show. It pauses on hover/focus (CSS,
   so it works without JS) and has a stop button (JS, hidden until wired up).
   `prefers-reduced-motion` drops the animation and falls back to the wrapping
-  list. Note: `animation-play-state` reports "paused" while the animation keeps
-  running, so the button drives `Animation.pause()/play()` instead.
+  list.
+- Ticker invariants, each of which broke something when missed: a copy must
+  never be narrower than the window (`min-width: 100vw`) or the track runs out
+  of text mid-cycle and visibly jumps; slack inside a copy is spread with
+  `justify-content: space-around` plus a matching `padding-right`, since `gap`
+  does not apply across the seam between copies; and the duration is retimed
+  from the measured distance so speed does not double on a wide screen.
+- Two gotchas worth remembering: `animation-play-state` reports "paused" while
+  the animation keeps running, so the stop button drives
+  `Animation.pause()/play()`; and an unreferenced `ResizeObserver` can be
+  garbage collected, so it is held in a variable.
 - **Two entries for the same date are merged, not dropped.** Later entries win
   field by field (an empty CMS value counts as unset, so it can't erase a real
   one), and `mergeExceptions` reports the duplicated dates. `schedule.ts` prints

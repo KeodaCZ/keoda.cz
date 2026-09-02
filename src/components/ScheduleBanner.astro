@@ -114,9 +114,20 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
     align-items: baseline;
     gap: 3rem;
     margin: 0;
+    /* `gap` does not apply across the seam between two copies, so the same
+       amount of padding stands in for it there. */
     padding: 0 3rem 0 0;
     list-style: none;
     white-space: nowrap;
+    /* The loop shifts the track by exactly one copy, so a copy narrower than
+       the window would run out of text before the cycle ends and visibly jump.
+       Never let a copy be narrower than the window it scrolls across. */
+    min-width: 100vw;
+    /* With short text that leaves slack inside the copy. Spreading it between
+       the items — rather than letting it pile up at the end — keeps the spacing
+       even, including across the seam into the next copy, so there is never a
+       long blank stretch. */
+    justify-content: space-around;
   }
   .run li {
     display: flex;
@@ -188,6 +199,7 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
       gap: 0.3rem 2rem;
       padding-right: 0;
       white-space: normal;
+      min-width: auto;
     }
     .run[aria-hidden='true'],
     .pause {
@@ -221,6 +233,31 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
         else animation.play();
       }
     };
+
+    // A copy is at least as wide as the window, so on a wide screen it travels
+    // further than the text alone would. Time it from the real distance to keep
+    // the reading speed the same everywhere. The build-time estimate in the
+    // markup stands in until this runs, and if JS never runs.
+    const PIXELS_PER_SECOND = 70;
+    const retime = () => {
+      const distance = track.scrollWidth / 2;
+      if (distance <= 0) return;
+      const seconds = Math.max(8, Math.round(distance / PIXELS_PER_SECOND));
+      track.style.setProperty('--duration', `${seconds}s`);
+    };
+    retime();
+    // Self-hosted fonts land after first paint and change how wide the text is.
+    document.fonts?.ready.then(retime);
+    // Both triggers on purpose: the observer catches box changes the window
+    // event misses, and the window event covers environments where the
+    // observer never delivers. Held in scope — an unreferenced observer can be
+    // garbage collected, which silently stops the retiming.
+    window.addEventListener('resize', retime);
+    let observer: ResizeObserver | undefined;
+    if ('ResizeObserver' in window) {
+      observer = new ResizeObserver(retime);
+      observer.observe(viewport);
+    }
 
     button.hidden = false;
     button.addEventListener('click', () => {
