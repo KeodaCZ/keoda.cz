@@ -9,7 +9,8 @@ import { TWITCH_URL } from '../lib/stream-event';
 
   <div class="container">
     <section class="hero">
-      <h1>Český streamer — Twitch, YouTube a spol.</h1>
+      <h1>KeodaCZ</h1>
+      <p class="muted tagline">Český streamer — Twitch, YouTube a spol.</p>
       <a class="btn" href={TWITCH_URL} target="_blank" rel="noopener">▶ Sledovat na Twitchi</a>
     </section>
 
@@ -32,9 +33,13 @@ import { TWITCH_URL } from '../lib/stream-event';
     padding-block: 2.6rem 2rem;
   }
   .hero h1 {
-    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
-    max-width: 24ch;
-    margin-bottom: 1.2rem;
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    text-transform: uppercase;
+    margin-bottom: 0.1em;
+  }
+  .tagline {
+    font-size: 1.05rem;
+    margin-bottom: 1.3rem;
   }
 
   .panels {
