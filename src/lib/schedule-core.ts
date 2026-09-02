@@ -10,7 +10,8 @@
  * which is DST-safe precisely because no timezone conversion ever happens.
  */
 
-export type ExceptionStatus = 'off' | 'moved';
+/** Only cancellation needs a status; a stream happening is the default. */
+export type ExceptionStatus = 'off';
 
 /** Weekday key -> start time ('18:30'). Missing key means no stream that day. */
 export type WeekPattern = Record<string, string | undefined>;
@@ -18,8 +19,12 @@ export type WeekPattern = Record<string, string | undefined>;
 export interface ScheduleException {
   date: string;
   status?: ExceptionStatus;
-  /** Overrides the weekly pattern's time — e.g. a moved stream at '21:00'. */
+  /** Overrides the weekly pattern's time for this date. */
   start?: string;
+  /** Stream happens, but the time isn't decided — render no time at all. */
+  timeUnknown?: boolean;
+  /** Force this entry into the homepage banner even if nothing else changed. */
+  highlight?: boolean;
   note?: string;
   game?: string;
 }
@@ -31,15 +36,18 @@ export interface ScheduleDay {
   isToday: boolean;
   isTomorrow: boolean;
   streaming: boolean;
-  /** Absent when cancelled, or when moved without an explicit new time. */
+  /** Absent when cancelled, or when the time is explicitly unknown. */
   start?: string;
   note?: string;
   game?: string;
   isException: boolean;
-  /** The exception's own status, so callers don't have to re-derive it. */
   status?: ExceptionStatus;
+  timeUnknown: boolean;
+  highlight: boolean;
   /** True when an exception put a stream on a normally free day. */
   added: boolean;
+  /** True when this day's time differs from the recurring pattern's. */
+  timeChanged: boolean;
 }
 
 export interface Banner {
@@ -107,7 +115,7 @@ export function getUpcomingDays(
     if (!patternStart && !exception) continue;
 
     const cancelled = exception?.status === 'off';
-    const moved = exception?.status === 'moved';
+    const timeUnknown = Boolean(exception?.timeUnknown) && !cancelled;
 
     days.push({
       date,
@@ -116,14 +124,17 @@ export function getUpcomingDays(
       isToday: date === today,
       isTomorrow: date === tomorrow,
       streaming: !cancelled,
-      // An explicit exception time always wins. A moved stream without one
-      // falls back to no time at all, since the pattern time is now wrong.
-      start: cancelled ? undefined : (exception?.start ?? (moved ? undefined : patternStart)),
+      // An explicit exception time always wins over the pattern.
+      start: cancelled || timeUnknown ? undefined : (exception?.start ?? patternStart),
       note: exception?.note,
       game: exception?.game,
       isException: Boolean(exception),
       status: exception?.status,
+      timeUnknown,
+      highlight: Boolean(exception?.highlight),
       added: Boolean(exception) && !cancelled && !patternStart,
+      timeChanged:
+        Boolean(exception?.start) && Boolean(patternStart) && exception?.start !== patternStart,
     });
   }
 
@@ -139,18 +150,20 @@ function dayReference(day: ScheduleDay): string {
 
 /**
  * Homepage banner, derived from the same data as the calendar — never authored
- * separately, so one exception entry drives both. Surfaces the soonest
- * cancelled or moved stream within a week.
+ * separately, so one exception entry drives both.
+ *
+ * Fires automatically only where a viewer would otherwise get it wrong: the
+ * stream is off, the time moved, or the time is undecided. Anything else
+ * (a bonus day, a programme swap, a note) is editorial and needs `highlight`,
+ * so ordinary "which game today" entries don't hijack the top of the page.
  */
 export function getBanner(
   pattern: WeekPattern,
   exceptions: ScheduleException[],
   today: string,
 ): Banner | null {
-  // Only actual changes to the plan are worth a banner. An exception that just
-  // names the game on a regular day is not news.
   const soon = getUpcomingDays(pattern, exceptions, today, 7).find(
-    (day) => day.status === 'off' || day.status === 'moved' || day.added,
+    (day) => day.status === 'off' || day.timeUnknown || day.timeChanged || day.highlight,
   );
   if (!soon) return null;
 
@@ -159,6 +172,8 @@ export function getBanner(
 
   if (soon.status === 'off') return { label: `${when} nestreamuju`, detail };
 
+  if (soon.timeUnknown) return { label: `${when} streamuju, čas ještě nevím`, detail };
+
   if (soon.added) {
     return {
       label: soon.start ? `${when} bonusový stream od ${soon.start}` : `${when} bonusový stream`,
@@ -166,8 +181,9 @@ export function getBanner(
     };
   }
 
-  return {
-    label: soon.start ? `${when} streamuju od ${soon.start}` : `${when} streamuju jinak`,
-    detail,
-  };
+  if (soon.timeChanged) return { label: `${when} streamuju od ${soon.start}`, detail };
+
+  // Highlighted with nothing else changed — the owner's own words carry it.
+  const message = soon.note ?? soon.game;
+  return { label: message ? `${when}: ${message}` : `${when} speciální stream` };
 }

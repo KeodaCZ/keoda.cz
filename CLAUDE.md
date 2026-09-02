@@ -38,8 +38,8 @@ dev server.
   part of this site. Publicly loadable by design: it holds no credentials, and
   authorization is GitHub's — no repo write access, no commits. The config is
   scoped to one `files` collection editing `data/exceptions.json`; a date
-  picker, a status dropdown, and a `HH:MM` pattern on `start` keep malformed
-  entries out. Commits go straight to `main`, which triggers the deploy.
+  picker, a two-option status, checkboxes for `timeUnknown` and `highlight`,
+  and a `HH:MM` pattern on `start` keep malformed entries out. Commits go straight to `main`, which triggers the deploy.
 
   Auth: **"Sign In with Token"** with a fine-grained GitHub PAT. No OAuth app,
   no auth server, no config change needed. PATs expire (90 days by default), so
@@ -199,16 +199,23 @@ normal state. The list is wrapped in an `{ "exceptions": [...] }` object because
 Sveltia CMS edits named fields, not a bare top-level array. Entry shape:
 
 ```json
-{ "date": "2026-09-04", "status": "off",   "note": "svatba" }
-{ "date": "2026-09-05", "status": "moved", "start": "21:00", "note": "pozdější start" }
+{ "date": "2026-09-04", "status": "off", "note": "svatba" }
+{ "date": "2026-09-05", "start": "21:00", "note": "pozdější start" }
 { "date": "2026-09-06", "game": "Dead by Daylight" }
-{ "date": "2026-09-08", "start": "20:00", "game": "bonus na jinak volný den" }
+{ "date": "2026-09-07", "timeUnknown": true, "note": "čas dám vědět" }
+{ "date": "2026-09-08", "start": "20:00", "game": "bonus", "highlight": true }
 ```
 
-`status` is one of `off` / `moved` / omitted (normal stream, maybe with a `game`).
-Optional `start` overrides the pattern time and is what a `moved` stream should
-carry; a `moved` entry without `start` renders no time at all, since the pattern
-time is then wrong. An exception on a normally free day adds a stream.
+`status` is `off` or omitted — cancellation is the only state worth naming, so
+there is deliberately no "moved" status. A time change is just `start`, which
+overrides the pattern time; that keeps one way to say one thing. `timeUnknown`
+means the stream happens but no time is promised (renders a dash, and no
+calendar export). `highlight` opts an entry into the banner. An exception on a
+normally free day adds a stream.
+
+Owner rejected a `moved` status on 2026-09-02: with `start` filled it behaved
+identically to a plain entry, and the Czech name wrongly suggested moving a
+stream to a different day.
 
 `endApprox` in `schedule.json` exists **only** so calendar exports have a
 duration; the site itself still never renders a hard end time.
@@ -222,10 +229,12 @@ Rules:
   store UTC — 18:30 must stay 18:30 across both DST switches.
 - **Times are approximate.** Render "od 18:30", never a hard end time. The owner
   said "cca"; the site must not promise 23:00 sharp.
-- **Homepage banner is derived from this data, not authored separately.** If an
-  exception falls within the next 7 days, surface it at the top automatically
-  (e.g. "V pátek nestreamuju"). One entry drives both the calendar and the
-  banner — no double bookkeeping.
+- **Homepage banner is derived from this data, not authored separately.** One
+  entry drives both the calendar and the banner — no double bookkeeping. It
+  fires automatically only where a viewer would otherwise turn up wrong:
+  `off`, a changed `start`, or `timeUnknown`. Anything else is editorial and
+  needs `highlight: true` — otherwise routine "which game today" entries would
+  hijack the top of the page. Only the soonest qualifying entry is shown.
 - Past exceptions stop rendering automatically. Never needs cleanup.
 
 This is why cancellations go here and **not** in news: a news post doesn't

@@ -34,10 +34,10 @@ collections:
         file: data/exceptions.json
         description: >-
           Pravidelný rozvrh (Po, St, Pá, So, Ne od 18:30) je natvrdo v repu a
-          tady se needituje. Sem se píšou jen výjimky — zrušené, přesunuté nebo
-          bonusové streamy. Bonusový stream ve volný den se přidá jako „Stream
-          se koná“ s vyplněným Začátkem. Prázdný seznam je normální stav.
-          Minulá data se přestanou zobrazovat sama, takže se nic neuklízí.
+          tady se needituje. Sem se píšou jen odchylky od něj: zrušený stream,
+          jiný čas, bonus ve volný den, nebo jen doplnění hry a poznámky.
+          Prázdný seznam je normální stav. Minulá data se přestanou zobrazovat
+          sama, takže se nic neuklízí.
         fields:
           - name: exceptions
             label: Výjimky
@@ -45,7 +45,7 @@ collections:
             widget: list
             required: false
             # Keeps the mobile list readable without opening each entry.
-            summary: '{{fields.date}} · {{fields.status}} {{fields.game}} {{fields.note}}'
+            summary: '{{fields.date}} {{fields.status}} {{fields.start}} {{fields.game}} {{fields.note}}'
             fields:
               - name: date
                 label: Datum
@@ -63,23 +63,29 @@ collections:
                 required: false
                 default: ''
                 hint: >-
-                  „Stream se koná“ znamená dvě věci: buď je to běžný den z
-                  rozvrhu a ty jen doplňuješ hru nebo poznámku, nebo je to
-                  bonusový stream v jinak volný den — pak navíc vyplň Začátek.
+                  „Stream se koná“ pokrývá všechno kromě zrušení — běžný den,
+                  jiný čas i bonus ve volný den.
                 options:
-                  - { label: 'Stream se koná (běžný i bonusový)', value: '' }
+                  - { label: 'Stream se koná', value: '' }
                   - { label: 'Nestreamuju', value: 'off' }
-                  - { label: 'Přesunutý stream', value: 'moved' }
 
               - name: start
                 label: Začátek
                 widget: string
                 required: false
                 hint: >-
-                  Formát 20:00. Vyplň u přesunutého streamu a u bonusového
-                  streamu ve volný den. U běžného dne nech prázdné — použije se
-                  pravidelný čas 18:30.
+                  Formát 20:00. Vyplň, když začínáš jinak než v 18:30, nebo když
+                  streamuješ v jinak volný den. Prázdné = pravidelný čas.
                 pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Zadej čas ve formátu 20:00']
+
+              - name: timeUnknown
+                label: Čas ještě nevím
+                widget: boolean
+                required: false
+                default: false
+                hint: >-
+                  Stream bude, ale čas není jistý. V kalendáři se místo času
+                  ukáže pomlčka — ať web netvrdí 18:30, když to není pravda.
 
               - name: game
                 label: Hra
@@ -92,5 +98,15 @@ collections:
                 widget: string
                 required: false
                 hint: >-
-                  Krátký důvod nebo detail, např. „svatba“ nebo „pozdější
-                  start“. Zobrazí se v kalendáři i v banneru na hlavní stránce.
+                  Krátký důvod nebo detail, např. „svatba“ nebo „program se
+                  přesouvá na pondělí“. Zobrazí se v kalendáři.
+
+              - name: highlight
+                label: Zmínit v banneru na hlavní stránce
+                widget: boolean
+                required: false
+                default: false
+                hint: >-
+                  Zrušený stream, jiný čas a nejistý čas se v banneru objeví
+                  samy. Tímhle si tam vytáhneš cokoli dalšího — speciální
+                  stream, přesun programu, bonusový den.
