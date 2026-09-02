@@ -55,6 +55,56 @@ export interface Banner {
   detail?: string;
 }
 
+/** A date that appeared more than once in the exception list. */
+export interface DuplicateDate {
+  date: string;
+  count: number;
+}
+
+/** Empty strings come from the CMS's "no choice" option — treat as unset. */
+function isSet(value: unknown): boolean {
+  return value !== undefined && value !== null && value !== '';
+}
+
+/**
+ * Collapses several entries for the same date into one, later entries winning
+ * field by field, and reports which dates were duplicated.
+ *
+ * Silently keeping only the first entry — the previous behaviour — could drop a
+ * cancellation on the floor, so nothing is discarded without being counted.
+ */
+export function mergeExceptions(exceptions: ScheduleException[]): {
+  merged: ScheduleException[];
+  duplicates: DuplicateDate[];
+} {
+  const byDate = new Map<string, ScheduleException>();
+  const counts = new Map<string, number>();
+
+  for (const entry of exceptions) {
+    counts.set(entry.date, (counts.get(entry.date) ?? 0) + 1);
+    const existing = byDate.get(entry.date);
+
+    if (!existing) {
+      byDate.set(entry.date, { ...entry });
+      continue;
+    }
+
+    const combined: ScheduleException = { ...existing };
+    for (const [key, value] of Object.entries(entry)) {
+      if (isSet(value)) (combined as Record<string, unknown>)[key] = value;
+    }
+    byDate.set(entry.date, combined);
+  }
+
+  return {
+    merged: [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date)),
+    duplicates: [...counts.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date)),
+  };
+}
+
 /** Index 0 = Sunday, matching Date#getUTCDay(). */
 const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const DAY_NAMES = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
@@ -104,13 +154,15 @@ export function getUpcomingDays(
 ): ScheduleDay[] {
   const days: ScheduleDay[] = [];
   const tomorrow = addDays(today, 1);
+  // Merge here rather than at the call site so no caller can forget to.
+  const { merged } = mergeExceptions(exceptions);
 
   for (let offset = 0; offset < dayCount; offset += 1) {
     const date = addDays(today, offset);
     const asDate = toDate(date);
     const weekdayIndex = asDate.getUTCDay();
     const patternStart = pattern[DAY_KEYS[weekdayIndex]];
-    const exception = exceptions.find((entry) => entry.date === date);
+    const exception = merged.find((entry) => entry.date === date);
 
     if (!patternStart && !exception) continue;
 
@@ -149,41 +201,44 @@ function dayReference(day: ScheduleDay): string {
 }
 
 /**
- * Homepage banner, derived from the same data as the calendar — never authored
+ * Homepage banners, derived from the same data as the calendar — never authored
  * separately, so one exception entry drives both.
  *
  * Fires automatically only where a viewer would otherwise get it wrong: the
  * stream is off, the time moved, or the time is undecided. Anything else
  * (a bonus day, a programme swap, a note) is editorial and needs `highlight`,
  * so ordinary "which game today" entries don't hijack the top of the page.
+ *
+ * Returns every qualifying day in the next week, soonest first. They are
+ * stacked rather than rotated: a carousel needs JavaScript and can be missed
+ * entirely by anyone who looks away or reads slowly.
  */
-export function getBanner(
+export function getBanners(
   pattern: WeekPattern,
   exceptions: ScheduleException[],
   today: string,
-): Banner | null {
-  const soon = getUpcomingDays(pattern, exceptions, today, 7).find(
-    (day) => day.status === 'off' || day.timeUnknown || day.timeChanged || day.highlight,
-  );
-  if (!soon) return null;
+): Banner[] {
+  return getUpcomingDays(pattern, exceptions, today, 7)
+    .filter((day) => day.status === 'off' || day.timeUnknown || day.timeChanged || day.highlight)
+    .map((day) => {
+      const when = dayReference(day);
+      const detail = day.note;
 
-  const when = dayReference(soon);
-  const detail = soon.note;
+      if (day.status === 'off') return { label: `${when} nestreamuju`, detail };
 
-  if (soon.status === 'off') return { label: `${when} nestreamuju`, detail };
+      if (day.timeUnknown) return { label: `${when} streamuju, čas ještě nevím`, detail };
 
-  if (soon.timeUnknown) return { label: `${when} streamuju, čas ještě nevím`, detail };
+      if (day.added) {
+        return {
+          label: day.start ? `${when} bonusový stream od ${day.start}` : `${when} bonusový stream`,
+          detail,
+        };
+      }
 
-  if (soon.added) {
-    return {
-      label: soon.start ? `${when} bonusový stream od ${soon.start}` : `${when} bonusový stream`,
-      detail,
-    };
-  }
+      if (day.timeChanged) return { label: `${when} streamuju od ${day.start}`, detail };
 
-  if (soon.timeChanged) return { label: `${when} streamuju od ${soon.start}`, detail };
-
-  // Highlighted with nothing else changed — the owner's own words carry it.
-  const message = soon.note ?? soon.game;
-  return { label: message ? `${when}: ${message}` : `${when} speciální stream` };
+      // Highlighted with nothing else changed — the owner's own words carry it.
+      const message = day.note ?? day.game;
+      return { label: message ? `${when}: ${message}` : `${when} speciální stream` };
+    });
 }

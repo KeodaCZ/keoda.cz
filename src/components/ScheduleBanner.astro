@@ -1,15 +1,35 @@
 ---
-import { getBanner } from '../lib/schedule';
+import { getBanners } from '../lib/schedule';
 
 // Derived from exceptions.json — never authored separately, so one entry
 // drives both this banner and the calendar. Absent is the normal state.
-const banner = getBanner();
+const banners = getBanners();
+
+// Stacked, not rotated: everything stays readable without JavaScript and
+// nothing scrolls away before it has been read. Beyond three it would dominate
+// the page, so the rest are left to the calendar — and counted, not hidden.
+const SHOWN = 3;
+const visible = banners.slice(0, SHOWN);
+const hidden = banners.length - visible.length;
 ---
-{banner && (
-  <aside class="banner">
+{banners.length > 0 && (
+  <aside class="banner" aria-label="Změny v rozvrhu">
     <div class="container inner">
-      <strong>{banner.label}</strong>
-      {banner.detail && <span class="detail">· {banner.detail}</span>}
+      <ul>
+        {visible.map((banner) => (
+          <li>
+            <strong>{banner.label}</strong>
+            {banner.detail && <span class="detail">· {banner.detail}</span>}
+          </li>
+        ))}
+      </ul>
+      {hidden > 0 && (
+        <p class="rest">
+          <a href="/kalendar/">
+            {hidden === 1 ? '+ještě 1 změna v kalendáři' : `+ještě ${hidden} změny v kalendáři`}
+          </a>
+        </p>
+      )}
     </div>
   </aside>
 )}
@@ -21,12 +41,33 @@ const banner = getBanner();
   }
   .inner {
     padding-block: 0.7rem;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.3rem;
+  }
+  li {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
     align-items: baseline;
   }
+  li + li {
+    padding-top: 0.3rem;
+    border-top: 1px solid rgba(19, 17, 8, 0.18);
+  }
   .detail {
     opacity: 0.75;
+  }
+  .rest {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+  }
+  .rest a {
+    color: inherit;
+    opacity: 0.8;
   }
 </style>

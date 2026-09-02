@@ -10,7 +10,7 @@ const days = getUpcomingDays(14).slice(0, limit);
 
 interface Part {
   text: string;
-  kind: 'time' | 'note' | 'game' | 'cancelled';
+  kind: 'time' | 'unknown' | 'note' | 'game' | 'cancelled';
 }
 
 /** Separate parts so the "·" only ever lands between things that exist. */
@@ -23,6 +23,8 @@ function detailParts(day: ScheduleDay): Part[] {
 
   const parts: Part[] = [];
   if (day.start) parts.push({ text: `od ${day.start}`, kind: 'time' });
+  // Say so outright, rather than leaving a row that just looks unfinished.
+  else parts.push({ text: 'čas ještě nevím', kind: 'unknown' });
   if (day.note) parts.push({ text: day.note, kind: 'note' });
   if (day.game) parts.push({ text: day.game, kind: 'game' });
   return parts;
@@ -97,6 +99,9 @@ function detailParts(day: ScheduleDay): Part[] {
   }
   .time {
     font-weight: 600;
+  }
+  .unknown {
+    color: var(--muted);
   }
   .cancelled {
     text-decoration: line-through;

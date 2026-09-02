@@ -2,8 +2,9 @@
 import scheduleData from '../../data/schedule.json';
 import exceptionsData from '../../data/exceptions.json';
 import {
-  getBanner as getBannerCore,
+  getBanners as getBannersCore,
   getUpcomingDays as getUpcomingDaysCore,
+  mergeExceptions,
   todayIn,
   type Banner,
   type ScheduleDay,
@@ -24,6 +25,19 @@ const exceptions = (exceptionsData.exceptions ?? []) as ScheduleException[];
 
 export const scheduleNote: string | undefined = scheduleData.note;
 
+// Two entries for one date are almost always a slip in the CMS. They get
+// merged rather than dropped, but say so loudly in the build log — the deploy
+// must not fail over this, or a last-minute cancellation would never publish.
+const { duplicates } = mergeExceptions(exceptions);
+if (duplicates.length > 0) {
+  const detail = duplicates.map((d) => `${d.date} (${d.count}×)`).join(', ');
+  console.warn(
+    `\n⚠  data/exceptions.json: více záznamů pro stejné datum — ${detail}.\n` +
+      `   Sloučeno do jednoho, pozdější údaje přebily dřívější.\n` +
+      `   Zkontroluj to v /admin a nech u každého dne jen jeden záznam.\n`,
+  );
+}
+
 export function todayInPrague(): string {
   return todayIn(timezone);
 }
@@ -32,6 +46,6 @@ export function getUpcomingDays(dayCount = 14): ScheduleDay[] {
   return getUpcomingDaysCore(pattern, exceptions, todayInPrague(), dayCount);
 }
 
-export function getBanner(): Banner | null {
-  return getBannerCore(pattern, exceptions, todayInPrague());
+export function getBanners(): Banner[] {
+  return getBannersCore(pattern, exceptions, todayInPrague());
 }

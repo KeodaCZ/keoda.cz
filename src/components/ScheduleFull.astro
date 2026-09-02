@@ -59,7 +59,12 @@ function calendarLinks(day: ScheduleDay) {
               {day.start ? (
                 <span class="time-value">{day.start}</span>
               ) : (
-                <span class="time-value dash" aria-hidden="true">—</span>
+                <>
+                  <span class="time-value dash" aria-hidden="true">—</span>
+                  <span class="sr-only">
+                    {day.streaming ? 'čas ještě není známý' : 'nestreamuje se'}
+                  </span>
+                </>
               )}
               {day.isToday && <span class="time-label">DNES</span>}
             </span>

@@ -6,7 +6,16 @@
  *   2026-09-02 Wed · 09-04 Fri · 09-05 Sat · 09-06 Sun · 09-07 Mon · 09-08 Tue
  * Pattern streams Mon/Wed/Fri/Sat/Sun, so Tue and Thu are free days.
  */
-import { getUpcomingDays, getBanner, todayIn } from '../src/lib/schedule-core.ts';
+import {
+  getUpcomingDays,
+  getBanners,
+  mergeExceptions,
+  todayIn,
+} from '../src/lib/schedule-core.ts';
+
+/** Banners are a list now; most checks care about the first (soonest) one. */
+const firstBanner = (pattern, exceptions, today) =>
+  getBanners(pattern, exceptions, today)[0] ?? null;
 
 const PATTERN = { mon: '18:30', wed: '18:30', fri: '18:30', sat: '18:30', sun: '18:30' };
 const NONE = [];
@@ -134,73 +143,136 @@ check('plain pattern day is not "added"', plain.added, false);
 check('plain pattern day is not highlighted', plain.highlight, false);
 
 // --- banner: automatic cases -----------------------------------------------
-check('no exceptions, no banner', getBanner(PATTERN, NONE, '2026-09-02'), null);
-check('cancelled banners with weekday', getBanner(PATTERN, off, '2026-09-02'), {
+check('no exceptions, no banner', firstBanner(PATTERN, NONE, '2026-09-02'), null);
+check('cancelled banners with weekday', firstBanner(PATTERN, off, '2026-09-02'), {
   label: 'V pátek nestreamuju', detail: 'svatba',
 });
-check('cancelled today reads Dnes', getBanner(PATTERN, [{ date: '2026-09-02', status: 'off' }], '2026-09-02'), {
+check('cancelled today reads Dnes', firstBanner(PATTERN, [{ date: '2026-09-02', status: 'off' }], '2026-09-02'), {
   label: 'Dnes nestreamuju', detail: undefined,
 });
-check('cancelled tomorrow reads Zítra', getBanner(PATTERN, [{ date: '2026-09-05', status: 'off' }], '2026-09-04'), {
+check('cancelled tomorrow reads Zítra', firstBanner(PATTERN, [{ date: '2026-09-05', status: 'off' }], '2026-09-04'), {
   label: 'Zítra nestreamuju', detail: undefined,
 });
-check('wednesday uses "Ve"', getBanner(PATTERN, [{ date: '2026-09-09', status: 'off' }], '2026-09-05'), {
+check('wednesday uses "Ve"', firstBanner(PATTERN, [{ date: '2026-09-09', status: 'off' }], '2026-09-05'), {
   label: 'Ve středu nestreamuju', detail: undefined,
 });
-check('changed time banners the new time', getBanner(PATTERN, later, '2026-09-02'), {
+check('changed time banners the new time', firstBanner(PATTERN, later, '2026-09-02'), {
   label: 'V pátek streamuju od 20:00', detail: 'pozdější start',
 });
-check('undecided time banners', getBanner(PATTERN, unsure, '2026-09-02'), {
+check('undecided time banners', firstBanner(PATTERN, unsure, '2026-09-02'), {
   label: 'V pátek streamuju, čas ještě nevím', detail: 'čas dám vědět na Discordu',
 });
 
 // --- banner: what must stay quiet ------------------------------------------
-check('game on a pattern day is silent', getBanner(PATTERN, game, '2026-09-02'), null);
-check('same-as-pattern time is silent', getBanner(PATTERN, [{ date: '2026-09-04', start: '18:30' }], '2026-09-02'), null);
-check('note alone is silent', getBanner(PATTERN, [{ date: '2026-09-04', note: 'hrajeme dál' }], '2026-09-02'), null);
-check('bonus day alone is silent', getBanner(PATTERN, bonus, '2026-09-02'), null);
-check('beyond 7 days is silent', getBanner(PATTERN, [{ date: '2026-09-20', status: 'off' }], '2026-09-02'), null);
-check('past exception is silent', getBanner(PATTERN, off, '2026-09-05'), null);
+check('game on a pattern day is silent', firstBanner(PATTERN, game, '2026-09-02'), null);
+check('same-as-pattern time is silent', firstBanner(PATTERN, [{ date: '2026-09-04', start: '18:30' }], '2026-09-02'), null);
+check('note alone is silent', firstBanner(PATTERN, [{ date: '2026-09-04', note: 'hrajeme dál' }], '2026-09-02'), null);
+check('bonus day alone is silent', firstBanner(PATTERN, bonus, '2026-09-02'), null);
+check('beyond 7 days is silent', firstBanner(PATTERN, [{ date: '2026-09-20', status: 'off' }], '2026-09-02'), null);
+check('past exception is silent', firstBanner(PATTERN, off, '2026-09-05'), null);
 
 // --- banner: highlight opt-in ----------------------------------------------
-check('highlighted bonus day banners', getBanner(PATTERN, [{ ...bonus[0], highlight: true }], '2026-09-02'), {
+check('highlighted bonus day banners', firstBanner(PATTERN, [{ ...bonus[0], highlight: true }], '2026-09-02'), {
   label: 'V úterý bonusový stream od 20:00', detail: undefined,
 });
 check(
   'highlighted bonus day without a time',
-  getBanner(PATTERN, [{ date: '2026-09-08', highlight: true }], '2026-09-02'),
+  firstBanner(PATTERN, [{ date: '2026-09-08', highlight: true }], '2026-09-02'),
   { label: 'V úterý bonusový stream', detail: undefined },
 );
 // A programme swap between two normal stream days: nothing else changed, so
 // the note itself is the message.
 check(
   'highlighted note carries itself',
-  getBanner(PATTERN, [{ date: '2026-09-05', highlight: true, note: 'program se přesouvá na pondělí' }], '2026-09-02'),
+  firstBanner(PATTERN, [{ date: '2026-09-05', highlight: true, note: 'program se přesouvá na pondělí' }], '2026-09-02'),
   { label: 'V sobotu: program se přesouvá na pondělí' },
 );
 check(
   'highlighted game with no note',
-  getBanner(PATTERN, [{ date: '2026-09-05', highlight: true, game: 'Silent Hill 2' }], '2026-09-02'),
+  firstBanner(PATTERN, [{ date: '2026-09-05', highlight: true, game: 'Silent Hill 2' }], '2026-09-02'),
   { label: 'V sobotu: Silent Hill 2' },
 );
 check(
   'highlighted with nothing to say',
-  getBanner(PATTERN, [{ date: '2026-09-05', highlight: true }], '2026-09-02'),
+  firstBanner(PATTERN, [{ date: '2026-09-05', highlight: true }], '2026-09-02'),
   { label: 'V sobotu speciální stream' },
 );
 
 // --- banner: picking between several ---------------------------------------
-check('banner picks the soonest', getBanner(PATTERN, [
+check('banner picks the soonest', firstBanner(PATTERN, [
   { date: '2026-09-07', status: 'off', note: 'pozdější' },
   { date: '2026-09-04', status: 'off', note: 'dřívější' },
 ], '2026-09-02'), { label: 'V pátek nestreamuju', detail: 'dřívější' });
-check('banner skips silent entries to find a real one', getBanner(PATTERN, [
+check('banner skips silent entries to find a real one', firstBanner(PATTERN, [
   { date: '2026-09-04', game: 'jen hra' },
   { date: '2026-09-06', status: 'off', note: 'volno' },
 ], '2026-09-02'), { label: 'V neděli nestreamuju', detail: 'volno' });
 
 // --- timezone --------------------------------------------------------------
 check('todayIn returns ISO date', /^\d{4}-\d{2}-\d{2}$/.test(todayIn('Europe/Prague')), true);
+
+
+// --- several banners at once -----------------------------------------------
+const busyWeek = [
+  { date: '2026-09-04', status: 'off', note: 'svatba' },
+  { date: '2026-09-05', start: '21:00' },
+  { date: '2026-09-07', timeUnknown: true },
+];
+check('all changes become banners, soonest first', getBanners(PATTERN, busyWeek, '2026-09-02').map((b) => b.label), [
+  'V pátek nestreamuju',
+  'V sobotu streamuju od 21:00',
+  'V pondělí streamuju, čas ještě nevím',
+]);
+check('quiet entries never become banners', getBanners(PATTERN, [
+  { date: '2026-09-04', game: 'hra' },
+  { date: '2026-09-05', note: 'poznámka' },
+], '2026-09-02'), []);
+check('banner list is empty without exceptions', getBanners(PATTERN, NONE, '2026-09-02'), []);
+
+// --- duplicate dates -------------------------------------------------------
+const dupes = [
+  { date: '2026-09-04', status: 'off' },
+  { date: '2026-09-04', note: 'svatba' },
+];
+const dupResult = mergeExceptions(dupes);
+check('duplicates collapse to one entry', dupResult.merged.length, 1);
+check('duplicates are reported', dupResult.duplicates, [{ date: '2026-09-04', count: 2 }]);
+check('merged entry keeps both fields', dupResult.merged[0], {
+  date: '2026-09-04', status: 'off', note: 'svatba',
+});
+check('unique dates report nothing', mergeExceptions([
+  { date: '2026-09-04' }, { date: '2026-09-05' },
+]).duplicates, []);
+check('three of the same date are counted', mergeExceptions([
+  { date: '2026-09-04' }, { date: '2026-09-04' }, { date: '2026-09-04' },
+]).duplicates, [{ date: '2026-09-04', count: 3 }]);
+check('merged output is date-sorted', mergeExceptions([
+  { date: '2026-09-08' }, { date: '2026-09-04' }, { date: '2026-09-06' },
+]).merged.map((e) => e.date), ['2026-09-04', '2026-09-06', '2026-09-08']);
+
+// Later entries win field by field, so a correction still lands...
+check('later time wins', mergeExceptions([
+  { date: '2026-09-04', start: '19:00' },
+  { date: '2026-09-04', start: '21:00' },
+]).merged[0].start, '21:00');
+// ...but the CMS's empty "no choice" value must not erase a real one.
+check('empty status does not erase off', mergeExceptions([
+  { date: '2026-09-04', status: 'off' },
+  { date: '2026-09-04', status: '' },
+]).merged[0].status, 'off');
+
+// A duplicated date must still produce exactly one calendar row and one banner.
+check('duplicate date yields one row', dates('2026-09-02', 7, dupes), [
+  '2026-09-02', '2026-09-04', '2026-09-05', '2026-09-06', '2026-09-07',
+]);
+check('duplicate date yields one banner', getBanners(PATTERN, dupes, '2026-09-02'), [
+  { label: 'V pátek nestreamuju', detail: 'svatba' },
+]);
+// The old behaviour kept only the first entry, which could drop a cancellation.
+check('cancellation survives being second', getBanners(PATTERN, [
+  { date: '2026-09-04', game: 'hra' },
+  { date: '2026-09-04', status: 'off' },
+], '2026-09-02').map((b) => b.label), ['V pátek nestreamuju']);
 
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));

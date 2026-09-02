@@ -234,7 +234,16 @@ Rules:
   fires automatically only where a viewer would otherwise turn up wrong:
   `off`, a changed `start`, or `timeUnknown`. Anything else is editorial and
   needs `highlight: true` — otherwise routine "which game today" entries would
-  hijack the top of the page. Only the soonest qualifying entry is shown.
+  hijack the top of the page.
+- **Several changes stack, they do not rotate.** All qualifying days in the next
+  week render as a list, soonest first; past three, the rest become a counted
+  "+ještě N" link to `/kalendar`. A carousel would need JavaScript and can
+  scroll away before it is read.
+- **Two entries for the same date are merged, not dropped.** Later entries win
+  field by field (an empty CMS value counts as unset, so it can't erase a real
+  one), and `mergeExceptions` reports the duplicated dates. `schedule.ts` prints
+  a build warning; it deliberately does **not** fail the build, because a
+  blocked deploy would mean a last-minute cancellation never reaches the site.
 - Past exceptions stop rendering automatically. Never needs cleanup.
 
 This is why cancellations go here and **not** in news: a news post doesn't
