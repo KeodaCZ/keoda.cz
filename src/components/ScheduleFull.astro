@@ -23,7 +23,7 @@ const WEEKDAY_SHORT: Record<string, string> = {
 
 function rowTitle(day: ScheduleDay): string {
   if (!day.streaming) return 'Nestreamuju';
-  return day.game ?? 'Stream';
+  return day.game || 'Stream';
 }
 
 /** Only a real, timed stream can go into someone's calendar. */

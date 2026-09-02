@@ -274,6 +274,39 @@ check('cancellation survives being second', getBanners(PATTERN, [
   { date: '2026-09-04', status: 'off' },
 ], '2026-09-02').map((b) => b.label), ['V pátek nestreamuju']);
 
+
+// --- empty strings from the CMS --------------------------------------------
+// Sveltia writes every field it knows about, so untouched ones arrive as ''
+// rather than being absent. Real data from /admin looks like this.
+const fromCms = [
+  { date: '2026-09-02', status: '', start: '20:00', timeUnknown: false, game: 'Skyrim', note: '', highlight: false },
+  { date: '2026-09-03', status: '', start: '18:30', timeUnknown: false, game: '', note: 'Bonusový testovací stream', highlight: true },
+  { date: '2026-09-04', status: 'off', start: '', timeUnknown: false, game: '', note: 'Jedu k rodičům', highlight: false },
+];
+const cmsDay = (date) => getUpcomingDays(PATTERN, fromCms, '2026-09-02', 7).find((d) => d.date === date);
+
+check('empty game becomes unset', cmsDay('2026-09-03').game, undefined);
+check('empty note becomes unset', cmsDay('2026-09-02').note, undefined);
+check('empty status is not a cancellation', cmsDay('2026-09-02').streaming, true);
+check('real status still cancels', cmsDay('2026-09-04').streaming, false);
+// An empty start must fall back to the pattern, not render as no time at all.
+check(
+  'empty start falls back to the pattern',
+  getUpcomingDays(PATTERN, [{ date: '2026-09-04', status: '', start: '', game: '' }], '2026-09-02', 7)
+    .find((d) => d.date === '2026-09-04').start,
+  '18:30',
+);
+check('explicit start is kept', cmsDay('2026-09-02').start, '20:00');
+check('false booleans stay false', cmsDay('2026-09-02').timeUnknown, false);
+check('true booleans stay true', cmsDay('2026-09-03').highlight, true);
+
+// The whole week as it renders from that real data.
+check('real CMS data banners', getBanners(PATTERN, fromCms, '2026-09-02').map((b) => b.label), [
+  'Dnes streamuju od 20:00',
+  'Zítra bonusový stream od 18:30',
+  'V pátek nestreamuju',
+]);
+
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));
   process.exit(1);

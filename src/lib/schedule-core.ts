@@ -61,9 +61,22 @@ export interface DuplicateDate {
   count: number;
 }
 
-/** Empty strings come from the CMS's "no choice" option — treat as unset. */
+/**
+ * The CMS writes every field it knows about, so untouched ones arrive as empty
+ * strings rather than being absent. Treating '' as unset keeps the rest of this
+ * module from having to care about the difference.
+ */
 function isSet(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
+}
+
+/** Drops unset fields so `??` and `?.` behave as intended downstream. */
+function clean(entry: ScheduleException): ScheduleException {
+  const out: ScheduleException = { date: entry.date };
+  for (const [key, value] of Object.entries(entry)) {
+    if (key !== 'date' && isSet(value)) (out as Record<string, unknown>)[key] = value;
+  }
+  return out;
 }
 
 /**
@@ -85,15 +98,13 @@ export function mergeExceptions(exceptions: ScheduleException[]): {
     const existing = byDate.get(entry.date);
 
     if (!existing) {
-      byDate.set(entry.date, { ...entry });
+      byDate.set(entry.date, clean(entry));
       continue;
     }
 
-    const combined: ScheduleException = { ...existing };
-    for (const [key, value] of Object.entries(entry)) {
-      if (isSet(value)) (combined as Record<string, unknown>)[key] = value;
-    }
-    byDate.set(entry.date, combined);
+    // Later entries win field by field, but an unset value never erases a real
+    // one — otherwise a CMS entry left blank could wipe out a cancellation.
+    byDate.set(entry.date, { ...existing, ...clean(entry) });
   }
 
   return {
