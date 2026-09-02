@@ -1,12 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
+import Schedule from '../components/Schedule.astro';
+import ScheduleBanner from '../components/ScheduleBanner.astro';
 ---
 <Base title="KeodaCZ" description="KeodaCZ — český streamer. Twitch, YouTube a spol.">
+  <ScheduleBanner />
+
   <section class="container hero">
     <h1>KEODACZ</h1>
     <p class="muted tagline">Český streamer — Twitch, YouTube a spol.</p>
     <a class="btn" href="https://www.twitch.tv/keodacz">▶ Sledovat na Twitchi</a>
   </section>
+
+  <div class="container">
+    <Schedule />
+  </div>
 
   <section class="container">
     <div class="card">
@@ -14,7 +22,7 @@ import Base from '../layouts/Base.astro';
       <p>Na čem streamuju — PC sestava, technika i software.</p>
       <p><a href="/vybaveni/">Prohlédnout vybavení →</a></p>
     </div>
-    <p class="muted note">Web se teprve staví — postupně přibude kalendář streamů, klipy a další.</p>
+    <p class="muted note">Web se teprve staví — postupně přibudou klipy, videa a návody.</p>
   </section>
 </Base>
 

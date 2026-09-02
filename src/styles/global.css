@@ -16,21 +16,24 @@
   --card-edge: rgba(19, 17, 8, 0.25);
   --btn-bg: #f2dc5a;
   --btn-text: #131108;
+  /* Stroke color for outlined display headings. */
+  --heading-outline: #131108;
 }
 
 /* Dark mode: automatic via system preference (unless the visitor forced
    light), or forced via the header toggle (data-theme on <html>).
-   Keep both blocks identical. */
+   Keep the two token lists identical. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-  --bg-top: #131108;
-  --bg-bottom: #131108;
-  --text: #ded7b4;
-  --muted: #8f8968;
-  --accent: #f2dc5a;
-  --card: #1d1a0e;
-  --card-edge: rgba(242, 220, 90, 0.18);
+    --bg-top: #131108;
+    --bg-bottom: #131108;
+    --text: #ded7b4;
+    --muted: #8f8968;
+    --accent: #f2dc5a;
+    --card: #1d1a0e;
+    --card-edge: rgba(242, 220, 90, 0.18);
+    --heading-outline: #f2dc5a;
   }
 }
 
@@ -43,6 +46,7 @@
   --accent: #f2dc5a;
   --card: #1d1a0e;
   --card-edge: rgba(242, 220, 90, 0.18);
+  --heading-outline: #f2dc5a;
 }
 
 /* ===== Base ======================================================== */

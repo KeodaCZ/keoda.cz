@@ -195,12 +195,19 @@ Mon, Wed, Fri, Sat, Sun, from ~18:30 to ~23:00. The site generates the next
 normal state. Shape:
 
 ```json
-{ "date": "2026-09-04", "status": "off",    "note": "svatba" }
-{ "date": "2026-09-05", "status": "moved",  "note": "start ~21:00" }
+{ "date": "2026-09-04", "status": "off",   "note": "svatba" }
+{ "date": "2026-09-05", "status": "moved", "start": "21:00", "note": "pozdější start" }
 { "date": "2026-09-06", "game": "Dead by Daylight" }
+{ "date": "2026-09-08", "start": "20:00", "game": "bonus na jinak volný den" }
 ```
 
 `status` is one of `off` / `moved` / omitted (normal stream, maybe with a `game`).
+Optional `start` overrides the pattern time and is what a `moved` stream should
+carry; a `moved` entry without `start` renders no time at all, since the pattern
+time is then wrong. An exception on a normally free day adds a stream.
+
+Logic lives in `src/lib/schedule-core.ts` (pure, unit-tested — `npm test`, run in
+CI before deploy) with `src/lib/schedule.ts` binding it to the JSON files.
 
 Rules:
 
@@ -276,8 +283,14 @@ which is out of scope. That would be Cloudflare Workers + D1, a different projec
 
 ## Pages
 
-Layout inspiration: `arcadebulls.cz` — **structure and section rhythm only, not
-its visual design, and not its community features.** Keoda's own visual identity.
+Layout inspiration: `arcadebulls.cz` — structure and section rhythm, and **not**
+its community features. Keoda's own palette and fonts throughout.
+
+Exception, approved by the owner 2026-09-02: the **schedule rows** deliberately
+follow arcadebulls' calendar layout (date badge left, title middle, big accent
+time right, outlined two-tone display heading, dotted card texture), rendered in
+Keoda's own colors. Owner asked for this directly after seeing both. Do not
+extend that borrowing to other pages without asking.
 
 **Gear / used software** — styled like arcadebulls' gear page. Confirmed in scope
 and the easiest page here; build it early. Plain markdown, no CMS.
@@ -308,6 +321,9 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
 - Light/dark follows the system, plus a manual toggle in the header
   (localStorage key `theme`, applied pre-paint in `Base.astro` to avoid flash).
 - Layout: 1200px container; gear cards two-column from 800px up.
+- Outlined display headings use `--heading-outline` (ink in light mode, yellow in
+  dark) via `-webkit-text-stroke`, guarded by `@supports` so the word never
+  vanishes where the stroke is unsupported.
 
 ## Working style
 
@@ -321,12 +337,20 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- Site progress so far: styled homepage + gear page (`/vybaveni`). Next up:
-  homepage socials row + Twitch embed (waiting on the owner's profile URLs).
+- Site progress so far: styled homepage with schedule calendar + banner, and
+  gear page (`/vybaveni`). Next up: homepage socials row + Twitch embed
+  (waiting on the owner's profile URLs).
 
 ## Deployment
 
-Push to `main` → Pages publishes. No FTP.
+Push to `main` → Pages publishes. No FTP. Tests run first; a failure blocks
+the deploy.
+
+The schedule is rendered at build time, so the deploy workflow also runs on cron
+at 22:20 and 23:20 UTC — one of the two lands just after midnight in Prague in
+either DST regime, so "Dnes" rolls over in weeks with no commits. Watch the
+60-day auto-disable rule (see Workflow schedule); a keepalive lands with the
+data pipeline.
 
 **Only `dist/` is deployed.** The Pages workflow uploads that one directory as the
 artifact, so repo-root files — this file included — are never served. There is no

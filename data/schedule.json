@@ -1,0 +1,11 @@
+{
+  "timezone": "Europe/Prague",
+  "note": "Časy jsou přibližné. Stream většinou končí kolem 23:00.",
+  "days": {
+    "mon": "18:30",
+    "wed": "18:30",
+    "fri": "18:30",
+    "sat": "18:30",
+    "sun": "18:30"
+  }
+}

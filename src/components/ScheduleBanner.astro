@@ -1,0 +1,32 @@
+---
+import { getBanner } from '../lib/schedule';
+
+// Derived from exceptions.json — never authored separately, so one entry
+// drives both this banner and the calendar. Absent is the normal state.
+const banner = getBanner();
+---
+{banner && (
+  <aside class="banner">
+    <div class="container inner">
+      <strong>{banner.label}</strong>
+      {banner.detail && <span class="detail">· {banner.detail}</span>}
+    </div>
+  </aside>
+)}
+
+<style>
+  .banner {
+    background: var(--btn-bg);
+    color: var(--btn-text);
+  }
+  .inner {
+    padding-block: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+  }
+  .detail {
+    opacity: 0.75;
+  }
+</style>
