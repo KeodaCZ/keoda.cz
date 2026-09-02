@@ -36,6 +36,10 @@ export interface ScheduleDay {
   note?: string;
   game?: string;
   isException: boolean;
+  /** The exception's own status, so callers don't have to re-derive it. */
+  status?: ExceptionStatus;
+  /** True when an exception put a stream on a normally free day. */
+  added: boolean;
 }
 
 export interface Banner {
@@ -118,6 +122,8 @@ export function getUpcomingDays(
       note: exception?.note,
       game: exception?.game,
       isException: Boolean(exception),
+      status: exception?.status,
+      added: Boolean(exception) && !cancelled && !patternStart,
     });
   }
 
@@ -141,15 +147,27 @@ export function getBanner(
   exceptions: ScheduleException[],
   today: string,
 ): Banner | null {
+  // Only actual changes to the plan are worth a banner. An exception that just
+  // names the game on a regular day is not news.
   const soon = getUpcomingDays(pattern, exceptions, today, 7).find(
-    (day) => day.isException && (!day.streaming || !day.start),
+    (day) => day.status === 'off' || day.status === 'moved' || day.added,
   );
   if (!soon) return null;
 
+  const when = dayReference(soon);
+  const detail = soon.note;
+
+  if (soon.status === 'off') return { label: `${when} nestreamuju`, detail };
+
+  if (soon.added) {
+    return {
+      label: soon.start ? `${when} bonusový stream od ${soon.start}` : `${when} bonusový stream`,
+      detail,
+    };
+  }
+
   return {
-    label: soon.streaming
-      ? `${dayReference(soon)} streamuju jinak`
-      : `${dayReference(soon)} nestreamuju`,
-    detail: soon.note,
+    label: soon.start ? `${when} streamuju od ${soon.start}` : `${when} streamuju jinak`,
+    detail,
   };
 }

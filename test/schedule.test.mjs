@@ -137,6 +137,43 @@ check(
   undefined,
 );
 
+
+// --- banner covers every kind of change ------------------------------------
+// A moved stream that carries a real time must still reach the banner, and
+// should name that time.
+check('moved with time banners the new time', getBanner(PATTERN, movedWithTime, '2026-09-02'), {
+  label: 'V sobotu streamuju od 21:00', detail: 'pozdější start',
+});
+check('moved today reads Dnes', getBanner(PATTERN, [{ date: '2026-09-02', status: 'moved', start: '20:00' }], '2026-09-02'), {
+  label: 'Dnes streamuju od 20:00', detail: undefined,
+});
+
+// A bonus stream on a normally free day is news too.
+check('bonus stream banners with time', getBanner(PATTERN, bonusTimed, '2026-09-02'), {
+  label: 'V úterý bonusový stream od 20:00', detail: undefined,
+});
+check('bonus stream without time', getBanner(PATTERN, [{ date: '2026-09-08', game: 'bonus' }], '2026-09-02'), {
+  label: 'V úterý bonusový stream', detail: undefined,
+});
+
+// But an exception on a regular day that only names the game is not.
+check('game on a pattern day is silent', getBanner(PATTERN, game, '2026-09-02'), null);
+check('explicit time on a pattern day is silent', getBanner(PATTERN, overridden, '2026-09-02'), null);
+
+// --- status and added flags ------------------------------------------------
+const flagged = getUpcomingDays(PATTERN, [
+  { date: '2026-09-04', status: 'off' },
+  { date: '2026-09-06', game: 'hra' },
+  { date: '2026-09-08', start: '20:00' },
+], '2026-09-02', 7);
+const flagOf = (date) => flagged.find((d) => d.date === date);
+check('cancelled carries status', flagOf('2026-09-04').status, 'off');
+check('cancelled is not "added"', flagOf('2026-09-04').added, false);
+check('pattern day with game is not "added"', flagOf('2026-09-06').added, false);
+check('free-day stream is "added"', flagOf('2026-09-08').added, true);
+check('plain pattern day has no status', flagOf('2026-09-02').status, undefined);
+check('plain pattern day is not "added"', flagOf('2026-09-02').added, false);
+
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));
   process.exit(1);
