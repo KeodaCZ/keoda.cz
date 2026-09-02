@@ -18,7 +18,9 @@ export const timezone: string = scheduleData.timezone || 'Europe/Prague';
  *  never renders a hard end time. */
 export const endApprox: string = scheduleData.endApprox || '23:00';
 const pattern = scheduleData.days as WeekPattern;
-const exceptions = exceptionsData as ScheduleException[];
+// The list is wrapped in an object because Sveltia CMS edits named fields,
+// not a bare top-level array.
+const exceptions = (exceptionsData.exceptions ?? []) as ScheduleException[];
 
 export const scheduleNote: string | undefined = scheduleData.note;
 

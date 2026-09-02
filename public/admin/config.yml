@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+#
+# Sveltia CMS — deliberately scoped to schedule exceptions only.
+# Everything else on this site (gear, guides) is plain files edited in the repo.
+#
+# Auth is "Sign In with Token" with a GitHub personal access token. No OAuth app
+# and no auth server: the CMS runs entirely in the browser and talks to the
+# GitHub API as you. Do NOT switch this to PKCE — GitHub has that on hold and
+# Sveltia cannot support it yet.
+
+backend:
+  name: github
+  repo: KeodaCZ/keoda.cz
+  branch: main
+  # Commits land straight on main, which triggers the deploy workflow.
+  commit_messages:
+    update: 'Kalendář: úprava výjimek'
+    delete: 'Kalendář: smazání výjimky'
+
+# The CMS never uploads images, but Sveltia wants these defined.
+media_folder: public/uploads
+public_folder: /uploads
+
+# Single-user CMS — no editorial review workflow.
+publish_mode: simple
+
+collections:
+  - name: kalendar
+    label: Kalendář streamů
+    format: json
+    files:
+      - name: vyjimky
+        label: Výjimky v rozvrhu
+        file: data/exceptions.json
+        description: >-
+          Pravidelný rozvrh (Po, St, Pá, So, Ne od 18:30) je natvrdo v repu a
+          tady se needituje. Sem se píšou jen výjimky — zrušené, přesunuté nebo
+          bonusové streamy. Prázdný seznam je normální stav. Minulá data se
+          přestanou zobrazovat sama, takže se nic nemusí uklízet.
+        fields:
+          - name: exceptions
+            label: Výjimky
+            label_singular: Výjimka
+            widget: list
+            required: false
+            # Keeps the mobile list readable without opening each entry.
+            summary: '{{fields.date}} · {{fields.status}} {{fields.game}} {{fields.note}}'
+            fields:
+              - name: date
+                label: Datum
+                widget: datetime
+                time_format: false
+                # Stored as a plain date; shown Czech-style in the picker.
+                format: 'YYYY-MM-DD'
+                date_format: 'DD.MM.YYYY'
+                # Date-only fields must not shift with the visitor's timezone.
+                picker_utc: true
+
+              - name: status
+                label: Co se děje
+                widget: select
+                required: false
+                default: ''
+                hint: >-
+                  Nech prázdné, když stream normálně běží a jen chceš doplnit
+                  hru nebo poznámku.
+                options:
+                  - { label: 'Normální stream (jen doplňuju info)', value: '' }
+                  - { label: 'Nestreamuju', value: 'off' }
+                  - { label: 'Přesunutý stream', value: 'moved' }
+
+              - name: start
+                label: Začátek
+                widget: string
+                required: false
+                hint: >-
+                  Formát 20:00. Vyplň u přesunutého streamu nebo u streamu v
+                  jinak volný den — jinak se nechá pravidelný čas.
+                pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Zadej čas ve formátu 20:00']
+
+              - name: game
+                label: Hra
+                widget: string
+                required: false
+                hint: Volitelné — ukáže se v kalendáři místo slova „Stream“.
+
+              - name: note
+                label: Poznámka
+                widget: string
+                required: false
+                hint: >-
+                  Krátký důvod nebo detail, např. „svatba“ nebo „pozdější
+                  start“. Zobrazí se v kalendáři i v banneru na hlavní stránce.

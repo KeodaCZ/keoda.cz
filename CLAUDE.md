@@ -34,9 +34,12 @@ dev server.
   Everything else (gear, guides) is plain markdown edited with Claude Code —
   a CMS for content that changes twice a year is pure overhead.
 
-  Admin UI lives at `keoda.cz/admin`, built and deployed as part of this site.
-  Publicly loadable by design: it holds no credentials, and authorization is
-  GitHub's — no repo write access, no commits.
+  Admin UI lives at `keoda.cz/admin` (`public/admin/`), built and deployed as
+  part of this site. Publicly loadable by design: it holds no credentials, and
+  authorization is GitHub's — no repo write access, no commits. The config is
+  scoped to one `files` collection editing `data/exceptions.json`; a date
+  picker, a status dropdown, and a `HH:MM` pattern on `start` keep malformed
+  entries out. Commits go straight to `main`, which triggers the deploy.
 
   Auth: **"Sign In with Token"** with a fine-grained GitHub PAT. No OAuth app,
   no auth server, no config change needed. PATs expire (90 days by default), so
@@ -192,7 +195,8 @@ Mon, Wed, Fri, Sat, Sun, from ~18:30 to ~23:00. The site generates the next
 2–3 weeks from this pattern.
 
 **`exceptions.json`** — sparse dated overrides applied on top. Empty is the
-normal state. Shape:
+normal state. The list is wrapped in an `{ "exceptions": [...] }` object because
+Sveltia CMS edits named fields, not a bare top-level array. Entry shape:
 
 ```json
 { "date": "2026-09-04", "status": "off",   "note": "svatba" }
@@ -347,8 +351,8 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
 - Site progress so far: homepage (compact schedule + gear teaser),
-  `/kalendar`, `/vybaveni`. Next up: homepage socials row + Twitch embed
-  (waiting on the owner's profile URLs).
+  `/kalendar`, `/vybaveni`, and the CMS at `/admin`. Next up: homepage socials
+  row + Twitch embed (waiting on the owner's profile URLs).
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
   is 16:30Z in summer but 17:30Z in winter. Covered by tests.
