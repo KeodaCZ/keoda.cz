@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import ScheduleBanner from '../components/ScheduleBanner.astro';
+import ScheduleFull from '../components/ScheduleFull.astro';
+---
+<Base
+  title="Kalendář streamů"
+  description="Kdy KeodaCZ streamuje — pravidelný rozvrh, změny a zrušené streamy na nejbližší dva týdny."
+>
+  <ScheduleBanner />
+
+  <div class="container">
+    <h1>Kdy se <span class="accent">streamuje</span></h1>
+    <p class="muted lead">
+      Časy jsou v českém čase a jsou přibližné. Změny a zrušené streamy najdeš níž.
+    </p>
+
+    <ScheduleFull />
+  </div>
+</Base>
+
+<style>
+  h1 {
+    margin-top: 2rem;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    text-transform: uppercase;
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .lead {
+    max-width: 46ch;
+    margin-bottom: 1.8rem;
+  }
+</style>

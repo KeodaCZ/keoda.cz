@@ -13,7 +13,10 @@ import {
 
 export type { Banner, ScheduleDay };
 
-const timezone = scheduleData.timezone || 'Europe/Prague';
+export const timezone: string = scheduleData.timezone || 'Europe/Prague';
+/** Approximate end time, used only for calendar exports — the site itself
+ *  never renders a hard end time. */
+export const endApprox: string = scheduleData.endApprox || '23:00';
 const pattern = scheduleData.days as WeekPattern;
 const exceptions = exceptionsData as ScheduleException[];
 

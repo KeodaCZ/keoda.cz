@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --experimental-strip-types --no-warnings test/schedule.test.mjs"
+    "test": "node --experimental-strip-types --no-warnings test/schedule.test.mjs && node --experimental-strip-types --no-warnings test/calendar-links.test.mjs"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.3.0",

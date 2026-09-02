@@ -1,0 +1,120 @@
+---
+/** Small homepage version of the calendar. The full one lives on /kalendar. */
+import { getUpcomingDays, type ScheduleDay } from '../lib/schedule';
+
+interface Props {
+  limit?: number;
+}
+const { limit = 5 } = Astro.props;
+const days = getUpcomingDays(14).slice(0, limit);
+
+interface Part {
+  text: string;
+  kind: 'time' | 'note' | 'game' | 'cancelled';
+}
+
+/** Separate parts so the "·" only ever lands between things that exist. */
+function detailParts(day: ScheduleDay): Part[] {
+  if (!day.streaming) {
+    const parts: Part[] = [{ text: 'nestreamuju', kind: 'cancelled' }];
+    if (day.note) parts.push({ text: day.note, kind: 'note' });
+    return parts;
+  }
+
+  const parts: Part[] = [];
+  if (day.start) parts.push({ text: `od ${day.start}`, kind: 'time' });
+  if (day.note) parts.push({ text: day.note, kind: 'note' });
+  if (day.game) parts.push({ text: day.game, kind: 'game' });
+  return parts;
+}
+---
+<section class="card">
+  <h2>Příští streamy</h2>
+
+  {days.length === 0 ? (
+    <p class="muted">Zatím tu nic nesvítí — rozvrh se doplní.</p>
+  ) : (
+    <ul>
+      {days.map((day) => (
+        <li class:list={['day', { off: !day.streaming, today: day.isToday }]}>
+          <span class="when">
+            <span class="weekday">{day.isToday ? 'Dnes' : day.weekday}</span>
+            <span class="date muted">{day.dayMonth}</span>
+          </span>
+          <span class="what">
+            {detailParts(day).map((part, index) => (
+              <>
+                {index > 0 && <span class="sep muted" aria-hidden="true">·</span>}
+                <span class:list={[part.kind]}>{part.text}</span>
+              </>
+            ))}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  <p class="more"><a href="/kalendar/">Celý kalendář →</a></p>
+</section>
+
+<style>
+  ul {
+    list-style: none;
+    margin: 0 0 0.9rem;
+    padding: 0;
+  }
+  .day {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.8rem;
+    padding-block: 0.5rem;
+    border-bottom: 1px solid var(--card-edge);
+  }
+  .day:last-child {
+    border-bottom: 0;
+  }
+  .when {
+    display: flex;
+    gap: 0.5rem;
+    min-width: 9.5rem;
+  }
+  .weekday {
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+  .today .weekday {
+    color: var(--accent);
+  }
+  .what {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+  }
+  .off .when,
+  .off .what {
+    opacity: 0.65;
+  }
+  .time {
+    font-weight: 600;
+  }
+  .cancelled {
+    text-decoration: line-through;
+  }
+  .note {
+    font-style: italic;
+  }
+  .game {
+    color: var(--muted);
+  }
+  .more {
+    margin-bottom: 0;
+    font-weight: 600;
+  }
+  .more a {
+    text-decoration: none;
+  }
+  .more a:hover {
+    text-decoration: underline;
+  }
+</style>

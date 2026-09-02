@@ -206,6 +206,9 @@ Optional `start` overrides the pattern time and is what a `moved` stream should
 carry; a `moved` entry without `start` renders no time at all, since the pattern
 time is then wrong. An exception on a normally free day adds a stream.
 
+`endApprox` in `schedule.json` exists **only** so calendar exports have a
+duration; the site itself still never renders a hard end time.
+
 Logic lives in `src/lib/schedule-core.ts` (pure, unit-tested — `npm test`, run in
 CI before deploy) with `src/lib/schedule.ts` binding it to the JSON files.
 
@@ -286,11 +289,18 @@ which is out of scope. That would be Cloudflare Workers + D1, a different projec
 Layout inspiration: `arcadebulls.cz` — structure and section rhythm, and **not**
 its community features. Keoda's own palette and fonts throughout.
 
-Exception, approved by the owner 2026-09-02: the **schedule rows** deliberately
-follow arcadebulls' calendar layout (date badge left, title middle, big accent
-time right, outlined two-tone display heading, dotted card texture), rendered in
-Keoda's own colors. Owner asked for this directly after seeing both. Do not
-extend that borrowing to other pages without asking.
+Exception, approved by the owner 2026-09-02: the **schedule rows** on
+`/kalendar` deliberately follow arcadebulls' calendar layout (date badge left,
+title middle, big accent time right, dotted card texture, bell menu for
+add-to-calendar), rendered in Keoda's own colors. Owner asked for this directly.
+Do not extend that borrowing to other pages without asking.
+
+**Kalendář** (`/kalendar`) — the full schedule, arcadebulls-style rows with an
+add-to-calendar menu per stream (Google Calendar link + a real `.ics` file built
+at `/ics/<date>.ics`). The homepage carries only a **compact** version
+(`ScheduleCompact.astro`) plus a link through; the full rows live on their own
+page. Deliberately no per-row "notify me" — notifications would need accounts,
+and a button that just links to Twitch was rejected as useless.
 
 **Gear / used software** — styled like arcadebulls' gear page. Confirmed in scope
 and the easiest page here; build it early. Plain markdown, no CMS.
@@ -321,9 +331,8 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
 - Light/dark follows the system, plus a manual toggle in the header
   (localStorage key `theme`, applied pre-paint in `Base.astro` to avoid flash).
 - Layout: 1200px container; gear cards two-column from 800px up.
-- Outlined display headings use `--heading-outline` (ink in light mode, yellow in
-  dark) via `-webkit-text-stroke`, guarded by `@supports` so the word never
-  vanishes where the stroke is unsupported.
+- Two-tone display headings: first word in `--text`, second in `--accent`,
+  both solid. An outline-only variant was tried and rejected by the owner.
 
 ## Working style
 
@@ -337,9 +346,12 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- Site progress so far: styled homepage with schedule calendar + banner, and
-  gear page (`/vybaveni`). Next up: homepage socials row + Twitch embed
+- Site progress so far: homepage (compact schedule + gear teaser),
+  `/kalendar`, `/vybaveni`. Next up: homepage socials row + Twitch embed
   (waiting on the owner's profile URLs).
+- Times converted to UTC for calendar exports only, in
+  `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
+  is 16:30Z in summer but 17:30Z in winter. Covered by tests.
 
 ## Deployment
 

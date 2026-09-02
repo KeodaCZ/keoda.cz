@@ -1,44 +1,69 @@
 ---
 import Base from '../layouts/Base.astro';
-import Schedule from '../components/Schedule.astro';
 import ScheduleBanner from '../components/ScheduleBanner.astro';
+import ScheduleCompact from '../components/ScheduleCompact.astro';
+import { TWITCH_URL } from '../lib/stream-event';
 ---
 <Base title="KeodaCZ" description="KeodaCZ — český streamer. Twitch, YouTube a spol.">
   <ScheduleBanner />
 
-  <section class="container hero">
-    <h1>KEODACZ</h1>
-    <p class="muted tagline">Český streamer — Twitch, YouTube a spol.</p>
-    <a class="btn" href="https://www.twitch.tv/keodacz">▶ Sledovat na Twitchi</a>
-  </section>
-
   <div class="container">
-    <Schedule />
-  </div>
+    <section class="hero">
+      <h1>Český streamer — Twitch, YouTube a spol.</h1>
+      <a class="btn" href={TWITCH_URL} target="_blank" rel="noopener">▶ Sledovat na Twitchi</a>
+    </section>
 
-  <section class="container">
-    <div class="card">
-      <h2>Vybavení</h2>
-      <p>Na čem streamuju — PC sestava, technika i software.</p>
-      <p><a href="/vybaveni/">Prohlédnout vybavení →</a></p>
+    <div class="panels">
+      <ScheduleCompact />
+
+      <section class="card">
+        <h2>Vybavení</h2>
+        <p>Na čem streamuju — PC sestava, technika i software.</p>
+        <p class="more"><a href="/vybaveni/">Prohlédnout vybavení →</a></p>
+      </section>
     </div>
+
     <p class="muted note">Web se teprve staví — postupně přibudou klipy, videa a návody.</p>
-  </section>
+  </div>
 </Base>
 
 <style>
   .hero {
-    padding-block: 3rem 2rem;
+    padding-block: 2.6rem 2rem;
   }
   .hero h1 {
-    font-size: 3.2rem;
-    margin-bottom: 0.1em;
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    max-width: 24ch;
+    margin-bottom: 1.2rem;
   }
-  .tagline {
-    font-size: 1.1rem;
-    margin-bottom: 1.4rem;
+
+  .panels {
+    display: grid;
+    gap: 1.2rem;
+    align-items: start;
   }
+  .panels :global(.card) {
+    margin-bottom: 0;
+  }
+  @media (min-width: 800px) {
+    .panels {
+      grid-template-columns: 3fr 2fr;
+    }
+  }
+
+  .more {
+    margin-bottom: 0;
+    font-weight: 600;
+  }
+  .more a {
+    text-decoration: none;
+  }
+  .more a:hover {
+    text-decoration: underline;
+  }
+
   .note {
+    margin-top: 1.6rem;
     font-size: 0.85rem;
   }
 </style>

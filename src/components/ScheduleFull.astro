@@ -1,0 +1,302 @@
+---
+import {
+  endApprox,
+  getUpcomingDays,
+  scheduleNote,
+  timezone,
+  type ScheduleDay,
+} from '../lib/schedule';
+import { googleCalendarUrl } from '../lib/calendar-links';
+import { streamEvent } from '../lib/stream-event';
+
+const days = getUpcomingDays(14);
+
+const WEEKDAY_SHORT: Record<string, string> = {
+  pondělí: 'PO',
+  úterý: 'ÚT',
+  středa: 'ST',
+  čtvrtek: 'ČT',
+  pátek: 'PÁ',
+  sobota: 'SO',
+  neděle: 'NE',
+};
+
+function rowTitle(day: ScheduleDay): string {
+  if (!day.streaming) return 'Nestreamuju';
+  return day.game ?? 'Stream';
+}
+
+/** Only a real, timed stream can go into someone's calendar. */
+function calendarLinks(day: ScheduleDay) {
+  if (!day.streaming || !day.start) return null;
+  const event = streamEvent(day, endApprox);
+  return {
+    google: googleCalendarUrl(event, timezone),
+    ics: `/ics/${day.date}.ics`,
+  };
+}
+---
+<div class="list">
+  {days.length === 0 ? (
+    <p class="muted">Zatím tu nic nesvítí — rozvrh se doplní.</p>
+  ) : (
+    <ul>
+      {days.map((day) => {
+        const links = calendarLinks(day);
+        return (
+          <li class:list={['row', { off: !day.streaming, today: day.isToday }]}>
+            <span class="badge">
+              <span class="badge-day">{day.dayMonth}</span>
+              <span class="badge-weekday">{WEEKDAY_SHORT[day.weekday]}</span>
+            </span>
+
+            <span class="body">
+              <span class="row-title">{rowTitle(day)}</span>
+              {day.note && <span class="row-note muted">{day.note}</span>}
+            </span>
+
+            <span class="time">
+              {day.start ? (
+                <span class="time-value">{day.start}</span>
+              ) : (
+                <span class="time-value dash" aria-hidden="true">—</span>
+              )}
+              {day.isToday && <span class="time-label">DNES</span>}
+            </span>
+
+            {links ? (
+              <details class="add">
+                <summary title="Přidat do kalendáře">
+                  <span aria-hidden="true">🔔</span>
+                  <span class="sr-only">Přidat do kalendáře</span>
+                </summary>
+                <div class="menu">
+                  <a href={links.google} target="_blank" rel="noopener">Google Kalendář</a>
+                  <a href={links.ics} download>Apple / Outlook (.ics)</a>
+                </div>
+              </details>
+            ) : (
+              <span class="add-empty" aria-hidden="true"></span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )}
+
+  {scheduleNote && <p class="muted footnote">{scheduleNote}</p>}
+</div>
+
+<style>
+  /* Rows are deliberately narrower than the page container. */
+  .list {
+    max-width: 52rem;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0 0 1.1rem;
+    padding: 0;
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 10px;
+    background:
+      radial-gradient(circle at 1px 1px, var(--card-edge) 1px, transparent 0) 0 0 / 14px 14px,
+      var(--card);
+  }
+  .row.today {
+    border-color: var(--accent);
+  }
+  .row.off {
+    opacity: 0.55;
+  }
+
+  /* Date badge */
+  .badge {
+    display: grid;
+    justify-items: center;
+    gap: 0.1rem;
+    min-width: 4.1rem;
+    padding: 0.45rem 0.5rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+  }
+  .today .badge {
+    border-color: var(--accent);
+    box-shadow: 0 0 14px -4px var(--accent);
+  }
+  .badge-day {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .today .badge-day {
+    color: var(--accent);
+  }
+  .badge-weekday {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  /* Middle */
+  .body {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .row-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .off .row-title {
+    text-decoration: line-through;
+  }
+  .row-note {
+    font-size: 0.85rem;
+  }
+
+  /* Time */
+  .time {
+    display: grid;
+    justify-items: end;
+    gap: 0.05rem;
+    text-align: right;
+  }
+  .time-value {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .time-value.dash {
+    color: var(--muted);
+  }
+  .time-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+  }
+
+  /* Add-to-calendar menu. <details> so it works without JavaScript. */
+  .add {
+    position: relative;
+  }
+  .add-empty {
+    width: 2.1rem;
+  }
+  .add summary {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 999px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+  .add summary::-webkit-details-marker {
+    display: none;
+  }
+  .add summary:hover,
+  .add[open] summary {
+    border-color: var(--accent);
+  }
+  .menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.4rem);
+    z-index: 5;
+    display: grid;
+    min-width: 12.5rem;
+    padding: 0.3rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+    background: var(--bg-top);
+    box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.7);
+  }
+  .menu a {
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .menu a:hover {
+    background: var(--card);
+    color: var(--accent);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .footnote {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 34rem) {
+    .row {
+      gap: 0.6rem;
+      padding: 0.7rem 0.75rem;
+    }
+    .badge {
+      min-width: 3.5rem;
+    }
+    .row-title {
+      font-size: 1rem;
+    }
+    .time-value {
+      font-size: 1.25rem;
+    }
+  }
+</style>
+
+<script>
+  // Keep at most one menu open, and close on outside click or Escape.
+  const menus = document.querySelectorAll<HTMLDetailsElement>('details.add');
+
+  menus.forEach((menu) => {
+    menu.addEventListener('toggle', () => {
+      if (!menu.open) return;
+      menus.forEach((other) => {
+        if (other !== menu) other.open = false;
+      });
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    menus.forEach((menu) => {
+      if (menu.open && !menu.contains(event.target as Node)) menu.open = false;
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    menus.forEach((menu) => {
+      menu.open = false;
+    });
+  });
+</script>
