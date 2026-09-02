@@ -235,10 +235,14 @@ Rules:
   `off`, a changed `start`, or `timeUnknown`. Anything else is editorial and
   needs `highlight: true` — otherwise routine "which game today" entries would
   hijack the top of the page.
-- **Several changes stack, they do not rotate.** All qualifying days in the next
-  week render as a list, soonest first; past three, the rest become a counted
-  "+ještě N" link to `/kalendar`. A carousel would need JavaScript and can
-  scroll away before it is read.
+- **Several changes scroll as a one-line ticker** (owner's call 2026-09-02,
+  stacking them felt too tall): a CSS marquee, duration derived from the text
+  length so reading speed stays constant. A single change stays still — motion
+  only when there is more than one thing to show. It pauses on hover/focus (CSS,
+  so it works without JS) and has a stop button (JS, hidden until wired up).
+  `prefers-reduced-motion` drops the animation and falls back to the wrapping
+  list. Note: `animation-play-state` reports "paused" while the animation keeps
+  running, so the button drives `Animation.pause()/play()` instead.
 - **Two entries for the same date are merged, not dropped.** Later entries win
   field by field (an empty CMS value counts as unset, so it can't erase a real
   one), and `mergeExceptions` reports the duplicated dates. `schedule.ts` prints

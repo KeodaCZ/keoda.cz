@@ -5,32 +5,57 @@ import { getBanners } from '../lib/schedule';
 // drives both this banner and the calendar. Absent is the normal state.
 const banners = getBanners();
 
-// Stacked, not rotated: everything stays readable without JavaScript and
-// nothing scrolls away before it has been read. Beyond three it would dominate
-// the page, so the rest are left to the calendar — and counted, not hidden.
-const SHOWN = 3;
-const visible = banners.slice(0, SHOWN);
-const hidden = banners.length - visible.length;
+// One change is the common case: keep it still. Motion only earns its place
+// when there is genuinely more than one thing to show.
+const scrolling = banners.length > 1;
+
+// The track is the item list twice over, animated by -50%, which loops
+// seamlessly. Duration is derived from the text length so the reading speed
+// stays constant no matter how many changes there are (~70px/s).
+const characters = banners.reduce(
+  (total, banner) => total + banner.label.length + (banner.detail?.length ?? 0),
+  0,
+);
+const seconds = Math.max(12, Math.round(characters * 0.12));
 ---
 {banners.length > 0 && (
   <aside class="banner" aria-label="Změny v rozvrhu">
-    <div class="container inner">
-      <ul>
-        {visible.map((banner) => (
-          <li>
-            <strong>{banner.label}</strong>
-            {banner.detail && <span class="detail">· {banner.detail}</span>}
-          </li>
-        ))}
-      </ul>
-      {hidden > 0 && (
-        <p class="rest">
-          <a href="/kalendar/">
-            {hidden === 1 ? '+ještě 1 změna v kalendáři' : `+ještě ${hidden} změny v kalendáři`}
-          </a>
-        </p>
-      )}
-    </div>
+    {scrolling ? (
+      <div class="viewport">
+        <div class="rail">
+          <div class="track" style={`--duration: ${seconds}s`}>
+            <ul class="run">
+              {banners.map((banner) => (
+                <li>
+                  <strong>{banner.label}</strong>
+                  {banner.detail && <span class="detail">· {banner.detail}</span>}
+                </li>
+              ))}
+            </ul>
+            {/* Second copy exists only to make the loop seamless. */}
+            <ul class="run" aria-hidden="true">
+              {banners.map((banner) => (
+                <li>
+                  <strong>{banner.label}</strong>
+                  {banner.detail && <span class="detail">· {banner.detail}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        {/* Hidden until the script wires it up — a button that cannot work
+            has no business being on the page. */}
+        <button type="button" class="pause" aria-pressed="false" hidden>
+          <span class="icon" aria-hidden="true">⏸</span>
+          <span class="sr-only">Zastavit posun textu</span>
+        </button>
+      </div>
+    ) : (
+      <div class="container single">
+        <strong>{banners[0].label}</strong>
+        {banners[0].detail && <span class="detail">· {banners[0].detail}</span>}
+      </div>
+    )}
   </aside>
 )}
 
@@ -38,36 +63,182 @@ const hidden = banners.length - visible.length;
   .banner {
     background: var(--btn-bg);
     color: var(--btn-text);
+    font-size: 0.95rem;
   }
-  .inner {
-    padding-block: 0.7rem;
-  }
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.3rem;
-  }
-  li {
+
+  /* Single change: an ordinary line, aligned with the rest of the page. */
+  .single {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
     align-items: baseline;
+    padding-block: 0.7rem;
   }
-  li + li {
-    padding-top: 0.3rem;
-    border-top: 1px solid rgba(19, 17, 8, 0.18);
+
+  /* Several changes: a one-line ticker. */
+  .viewport {
+    display: flex;
+    align-items: center;
+  }
+  /* The clipping lives here, and min-width:0 is what stops the wide track
+     from stretching the flex row — and with it the whole page. */
+  .rail {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    /* Soften both ends so text fades out instead of hitting the page edge
+       and the pause button. */
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #000 1.1rem,
+      #000 calc(100% - 1.1rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #000 1.1rem,
+      #000 calc(100% - 1.1rem),
+      transparent 100%
+    );
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    padding-block: 0.7rem;
+    animation: marquee var(--duration) linear infinite;
+  }
+  .run {
+    display: flex;
+    align-items: baseline;
+    gap: 3rem;
+    margin: 0;
+    padding: 0 3rem 0 0;
+    list-style: none;
+    white-space: nowrap;
+  }
+  .run li {
+    display: flex;
+    gap: 0.4rem;
+    align-items: baseline;
   }
   .detail {
     opacity: 0.75;
   }
-  .rest {
-    margin: 0.4rem 0 0;
-    font-size: 0.85rem;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
   }
-  .rest a {
+
+  /* Hover and focus pause here so it still works with no JavaScript. The
+     script does the same on those events, so the two never disagree; the
+     button's explicit stop is JavaScript-only. */
+  .viewport:hover .track,
+  .viewport:focus-within .track {
+    animation-play-state: paused;
+  }
+  .pause:focus-visible {
+    outline: 2px solid var(--btn-text);
+    outline-offset: 2px;
+  }
+
+  .pause {
+    flex: none;
+    margin-inline: 0.4rem 0.6rem;
+    padding: 0.2rem 0.35rem;
+    border: 1px solid rgba(19, 17, 8, 0.3);
+    border-radius: 5px;
+    background: none;
     color: inherit;
-    opacity: 0.8;
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .pause:hover {
+    border-color: currentColor;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Anyone who has asked for less motion gets the plain wrapping list, and
+     can still reach everything without a scrollbar. */
+  @media (prefers-reduced-motion: reduce) {
+    .rail {
+      overflow: visible;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+    .track {
+      animation: none;
+      width: auto;
+      flex-wrap: wrap;
+    }
+    .run {
+      flex-wrap: wrap;
+      gap: 0.3rem 2rem;
+      padding-right: 0;
+      white-space: normal;
+    }
+    .run[aria-hidden='true'],
+    .pause {
+      display: none;
+    }
+    .viewport {
+      padding-inline: 1rem;
+    }
   }
 </style>
+
+<script>
+  // Moving text needs a way to stop it — hovering is not enough for touch or
+  // keyboard users. Driven through the Web Animations API rather than
+  // animation-play-state, which reported "paused" while still running.
+  const viewport = document.querySelector<HTMLElement>('.banner .viewport');
+  const track = viewport?.querySelector<HTMLElement>('.track');
+  const button = viewport?.querySelector<HTMLButtonElement>('.pause');
+
+  if (viewport && track && button) {
+    const icon = button.querySelector<HTMLElement>('.icon');
+    const label = button.querySelector<HTMLElement>('.sr-only');
+
+    let stopped = false;
+    let hovering = false;
+
+    const sync = () => {
+      const shouldPause = stopped || hovering;
+      for (const animation of track.getAnimations()) {
+        if (shouldPause) animation.pause();
+        else animation.play();
+      }
+    };
+
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      stopped = !stopped;
+      button.setAttribute('aria-pressed', String(stopped));
+      if (icon) icon.textContent = stopped ? '▶' : '⏸';
+      if (label) label.textContent = stopped ? 'Spustit posun textu' : 'Zastavit posun textu';
+      sync();
+    });
+
+    // Reading a specific entry is easier when it holds still.
+    const setHovering = (value: boolean) => {
+      hovering = value;
+      sync();
+    };
+    viewport.addEventListener('pointerenter', () => setHovering(true));
+    viewport.addEventListener('pointerleave', () => setHovering(false));
+    viewport.addEventListener('focusin', () => setHovering(true));
+    viewport.addEventListener('focusout', () => setHovering(false));
+  }
+</script>
