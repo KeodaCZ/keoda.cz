@@ -1,0 +1,143 @@
+---
+/**
+ * Twitch player for the channel.
+ *
+ * Loaded on click rather than on page view. Two reasons: the embed sets
+ * third-party cookies, and not shipping them unasked is what lets this site
+ * stay free of a consent banner; and the player is a heavy thing to hand to
+ * everyone who only came to check when the next stream is.
+ *
+ * Until then it is an ordinary link to Twitch, so it still works with no
+ * JavaScript — the script upgrades that link into an in-place player.
+ *
+ * No live/offline detection here: the player reports its own offline state,
+ * which is why CLAUDE.md defers a LIVE badge (that would need a Worker).
+ */
+import { TWITCH_URL } from '../lib/stream-event';
+
+const CHANNEL = 'keodacz';
+
+// Twitch requires one `parent` key per hostname that frames the player, with
+// subdomains counted separately, and fails as a silent black box if any are
+// missing. Derived from `site` so it cannot drift if the domain changes.
+const host = new URL(Astro.site ?? 'https://keoda.cz').hostname;
+const parents = [...new Set([host, host.startsWith('www.') ? host.slice(4) : `www.${host}`, 'localhost'])];
+const parentQuery = parents.map((parent) => `parent=${encodeURIComponent(parent)}`).join('&');
+
+// autoplay defaults to true and muted to false, which would start a stream out
+// loud on page load. The click supplies the intent, so sound is fine then.
+const playerSrc = `https://player.twitch.tv/?channel=${CHANNEL}&${parentQuery}&autoplay=true&muted=false`;
+---
+<section class="stream" aria-labelledby="stream-heading">
+  <h2 id="stream-heading">Stream</h2>
+
+  <div class="frame" data-player-src={playerSrc}>
+    <a class="facade" href={TWITCH_URL} target="_blank" rel="noopener">
+      <span class="play" aria-hidden="true">▶</span>
+      <span class="facade-text">
+        <strong>Přehrát stream</strong>
+        <small>Když nevysílám, přehrávač to sám napíše.</small>
+      </span>
+    </a>
+  </div>
+
+  <p class="muted note">
+    Přehrávač se načítá až po kliknutí — jinak by Twitch ukládal cookies
+    každému, kdo se sem jen přišel podívat na rozvrh.
+  </p>
+</section>
+
+<style>
+  .stream {
+    margin-bottom: 1.6rem;
+  }
+
+  .frame {
+    position: relative;
+    /* Keeps the box the player's shape before it exists, so nothing jumps. */
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--card-edge);
+    border-radius: 10px;
+    background: var(--card);
+  }
+  .frame :global(iframe) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .facade {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .facade:hover .play {
+    background: var(--accent);
+    color: var(--btn-text);
+  }
+
+  .play {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 1.1rem;
+    padding-left: 0.15rem;
+  }
+
+  .facade-text {
+    display: grid;
+    gap: 0.15rem;
+  }
+  .facade-text strong {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .facade-text small {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .note {
+    margin: 0.6rem 0 0;
+    font-size: 0.8rem;
+  }
+</style>
+
+<script>
+  const frame = document.querySelector<HTMLElement>('.frame[data-player-src]');
+  const facade = frame?.querySelector<HTMLAnchorElement>('.facade');
+
+  if (frame && facade) {
+    facade.addEventListener('click', (event) => {
+      const src = frame.dataset.playerSrc;
+      if (!src) return;
+
+      // Only take over the link when the player can actually replace it —
+      // a middle click or ctrl+click still means "open Twitch in a new tab".
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+      event.preventDefault();
+
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.title = 'Twitch přehrávač — KeodaCZ';
+      iframe.allow = 'autoplay; fullscreen';
+      iframe.setAttribute('allowfullscreen', '');
+      frame.replaceChildren(iframe);
+    });
+  }
+</script>

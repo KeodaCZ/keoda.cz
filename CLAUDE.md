@@ -103,8 +103,22 @@ Dropped on purpose — do not build, do not suggest:
 Twitch login, user accounts, points/leaderboards, polls, predictions, giveaways.
 All need auth + a database.
 
-**Live status**: deferred. Embed the Twitch player, which reports its own offline
-state. A real `LIVE` badge needs a Worker (Actions cron can't do it — see below).
+**Live status**: deferred, and the embed makes it unnecessary. The Twitch player
+reports its own offline state — in Czech, with a link to the last broadcast and
+the upcoming schedule (verified 2026-09-03). A real `LIVE` badge outside the
+player would need a Worker (Actions cron can't do it — see below).
+
+The player lives in `TwitchEmbed.astro` on the homepage and is **loaded on
+click**, not on page view: the embed sets third-party cookies, and not shipping
+those unasked is what keeps this site free of a consent banner. Until clicked it
+is a plain link to Twitch, so it works without JavaScript.
+
+Two traps, both verified rather than assumed: `parent` needs one key per
+hostname that frames the player (`keoda.cz`, `www.keoda.cz`, `localhost`) with
+subdomains counted separately, and it fails as a silent black box if any is
+missing — the list is derived from `site` so it cannot drift. And `autoplay`
+defaults to **true** with `muted` **false**, so a plain embed would start a
+stream out loud on page load; both are set explicitly.
 
 ## Data layer
 
@@ -414,7 +428,8 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
 - Site progress so far: homepage (socials row, compact schedule, gear teaser),
-  `/kalendar`, `/vybaveni`, and the CMS at `/admin`. Next up: Twitch embed.
+  `/kalendar`, `/vybaveni`, the Twitch player, and the CMS at `/admin`.
+  Next up: guides, then the data pipeline (YouTube + clips).
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
   is 16:30Z in summer but 17:30Z in winter. Covered by tests.
