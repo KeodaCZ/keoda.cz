@@ -34,27 +34,51 @@
     return Boolean(color) && color !== 'transparent' && !/,\s*0\s*\)$/.test(color);
   }
 
+  /** First opaque background found walking up from `node`, or ''. */
+  function surfaceOf(node) {
+    while (node) {
+      var candidate = getComputedStyle(node).backgroundColor;
+      if (isOpaque(candidate)) return candidate;
+      node = node.parentElement;
+    }
+    return '';
+  }
+
   /**
-   * The admin's background and text colour, so the preview blends in instead of
-   * introducing its own scheme. Walks up from the body because the colour is
-   * often set higher than the element itself.
+   * The colours of the pane the preview sits in, so it blends into the admin
+   * instead of introducing its own scheme.
+   *
+   * Starting at <body> did not work: Sveltia paints its backgrounds on nested
+   * app elements, so the walk found nothing opaque and always fell back to a
+   * grey — which is why this looked grey on a light admin and grey against
+   * blue on a dark one. Starting at the preview's own iframe and walking out
+   * lands on the actual surrounding surface.
    */
   function adminTheme() {
     try {
-      var node = document.body || document.documentElement;
-      var fg = getComputedStyle(node).color || FALLBACK.fg;
-      var bg = '';
-      while (node && !bg) {
-        var candidate = getComputedStyle(node).backgroundColor;
-        if (isOpaque(candidate)) bg = candidate;
-        node = node.parentElement;
+      var frame = document.querySelector('iframe');
+      var host = frame ? frame.parentElement : null;
+      var bg = surfaceOf(host) || surfaceOf(document.body || document.documentElement);
+      var fg = getComputedStyle(host || document.body || document.documentElement).color;
+
+      // With no usable background, fall back on whether the admin's text is
+      // light — that still tells us which way round the theme is.
+      if (!bg) {
+        var darkByText = !isDark(fg || FALLBACK.fg);
+        return {
+          bg: darkByText ? '#1e1e1e' : '#fafafa',
+          fg: fg || (darkByText ? FALLBACK.fg : '#1e1e1e'),
+          accent: darkByText ? '#f2dc5a' : '#6f621a',
+          card: darkByText ? 'rgba(255,255,255,.045)' : 'rgba(0,0,0,.035)',
+        };
       }
-      if (!bg) return FALLBACK;
+
       var dark = isDark(bg);
       return {
         bg: bg,
-        fg: fg,
-        // Keoda's yellow on dark; the light-mode accent from the site on light.
+        fg: fg || (dark ? FALLBACK.fg : '#1e1e1e'),
+        // Keoda's yellow on dark; the site's light-mode gold where yellow
+        // would be unreadable.
         accent: dark ? '#f2dc5a' : '#6f621a',
         card: dark ? 'rgba(255,255,255,.045)' : 'rgba(0,0,0,.035)',
       };
