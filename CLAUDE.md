@@ -453,6 +453,18 @@ DNS at Vedos: four A records to GitHub Pages (185.199.108–111.153), CNAME for
 `www`. If Vedos webhosting or WebSite is ever ordered it will overwrite these with
 their own — simplest not to order it.
 
+### Dev server caveat
+
+`astro dev` serves no CSS in the HTML at all — Vite injects it from
+JavaScript. A long-running dev server can therefore keep a **stale copy of a
+component style** while the markup is current: the scope hash
+(`data-astro-cid-*`) does not change when a file is edited, so nothing looks
+wrong, but the rules are the previous version. Symptom: layout differs between
+localhost and the deployed site, with the deployed one correct.
+
+Restart the dev server before believing a local-only layout bug. `npm run build`
+is the honest check — it produces the same CSS the site ships.
+
 ## Two-machine workflow
 
 - `git pull` before starting, `git push` before finishing. Always.
