@@ -375,6 +375,12 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
 - Layout: 1200px container; gear cards two-column from 800px up.
 - Two-tone display headings: first word in `--text`, second in `--accent`,
   both solid. An outline-only variant was tried and rejected by the owner.
+- A site-wide "Ve výstavbě" strip sits under the header, outline only so it
+  does not compete with the yellow schedule banner below it.
+- Gotcha: on an element that also carries `.container`, never write
+  `margin: 0` — it wipes out `margin-inline: auto`, so the 1200px box sticks
+  to the left edge and centred text inside it drifts with window width and
+  browser zoom. Use `margin-block: 0`.
 
 ## Working style
 
