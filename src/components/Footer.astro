@@ -2,12 +2,8 @@
 const year = new Date().getFullYear();
 ---
 <footer>
-  <div class="container inner">
-    <p class="wip">
-      <span class="tag">Ve výstavbě</span>
-      Web se teprve staví — postupně přibudou klipy, videa a návody.
-    </p>
-    <p class="copy muted">© {year} KeodaCZ</p>
+  <div class="container inner muted">
+    © {year} KeodaCZ
   </div>
 </footer>
 
@@ -19,28 +15,5 @@ const year = new Date().getFullYear();
   .inner {
     padding-block: 1.2rem;
     font-size: 0.85rem;
-  }
-  .wip {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: baseline;
-    margin-bottom: 0.5rem;
-    color: var(--muted);
-  }
-  .tag {
-    flex: none;
-    padding: 0.1rem 0.45rem;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    font-family: var(--font-heading);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .copy {
-    margin-bottom: 0;
   }
 </style>

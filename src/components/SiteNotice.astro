@@ -1,0 +1,42 @@
+---
+/**
+ * Site-wide "under construction" strip, directly under the header.
+ * Deliberately not filled yellow — that is the schedule banner's job, and two
+ * loud strips stacked would fight each other.
+ */
+---
+<div class="notice">
+  <p class="container inner">
+    <span class="tag">Ve výstavbě</span>
+    <span>Web se teprve staví — postupně přibudou klipy, videa a návody.</span>
+  </p>
+</div>
+
+<style>
+  .notice {
+    background: var(--card);
+    border-bottom: 1px solid var(--card-edge);
+  }
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+    margin: 0;
+    padding-block: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .tag {
+    flex: none;
+    padding: 0.12rem 0.5rem;
+    border-radius: 4px;
+    background: var(--accent);
+    color: var(--bg-top);
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+</style>
