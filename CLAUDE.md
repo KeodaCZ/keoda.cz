@@ -238,8 +238,11 @@ Rules:
   store UTC — 18:30 must stay 18:30 across both DST switches.
 - **Times are approximate.** Render "od 18:30", never a hard end time. The owner
   said "cca"; the site must not promise 23:00 sharp.
-- **Homepage banner is derived from this data, not authored separately.** One
-  entry drives both the calendar and the banner — no double bookkeeping. It
+- **The banner is derived from this data, not authored separately.** One entry
+  drives both the calendar and the banner — no double bookkeeping. It renders
+  from `Base.astro`, so it is on every page: a cancellation is time-critical
+  and someone arriving on `/vybaveni` from a social bio needs it too. Per-page
+  includes drifted (gear never got one), which is why it lives in the layout. It
   fires automatically only where a viewer would otherwise turn up wrong:
   `off`, a changed `start`, or `timeUnknown`. Anything else is editorial and
   needs `highlight: true` — otherwise routine "which game today" entries would
