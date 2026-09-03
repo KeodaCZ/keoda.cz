@@ -1,26 +1,28 @@
 /**
  * Custom preview pane for the schedule exceptions.
  *
- * The built-in preview lists every field one per line, which is both taller
- * than the screen and less informative than the editor beside it. This shows
- * one compact row per exception instead, so the whole list — including the two
- * toggles, which the collapsed summary cannot show — is readable at a glance.
+ * Styled after the site's own calendar rows, so what you see here is roughly
+ * what visitors get: date badge, title, accent time on the right. The built-in
+ * preview listed every field one per line on a white background, which matched
+ * neither the site nor the dark admin around it.
  *
  * `createClass` and `h` are globals provided by the CMS, so no React script is
- * needed. Everything here is presentation only: no scheduling rules are
- * reimplemented, because a second copy of them would drift from
- * src/lib/schedule-core.ts.
+ * needed. Presentation only — no scheduling rules are reimplemented here,
+ * because a second copy would drift from src/lib/schedule-core.ts.
  */
 (function () {
-  var WEEKDAYS = ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'];
+  var WEEKDAYS = ['NE', 'PO', 'ÚT', 'ST', 'ČT', 'PÁ', 'SO'];
 
-  // The preview iframe brings its own defaults, including a serif face, so
-  // every visible style has to be stated here.
+  // The site's palette. The preview iframe supplies its own defaults —
+  // including a white page and a serif face — so everything is stated here.
+  var INK = '#131108';
+  var CARD = '#1d1a0e';
+  var TEXT = '#ded7b4';
+  var MUTED = '#8f8968';
+  var ACCENT = '#f2dc5a';
+  var EDGE = 'rgba(242, 220, 90, 0.18)';
   var FONT =
     'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-  var MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-  var LINE = '1px solid rgba(128, 128, 128, 0.22)';
-  var DIM = 'rgba(128, 128, 128, 0.9)';
 
   /** Czech counts split three ways: 1, 2-4, and 5+. */
   function plural(count, one, few, many) {
@@ -58,122 +60,129 @@
   /** 'YYYY-MM-DD' -> '4. 9.', matching how the site writes dates. */
   function shortDate(iso) {
     var parts = String(iso || '').split('-');
-    if (parts.length !== 3) return iso || '—';
+    if (parts.length !== 3) return iso ? String(iso) : '?';
     return Number(parts[2]) + '. ' + Number(parts[1]) + '.';
   }
 
-  function styled(tag, style, children) {
+  function el(tag, style, children) {
     return h(tag, { style: style }, children);
   }
 
-  function headCell(label, align) {
-    return h(
-      'th',
+  function badge(date, weekday, cancelled) {
+    return el(
+      'div',
       {
-        style: {
-          padding: '0 10px 6px 0',
-          borderBottom: LINE,
-          textAlign: align || 'left',
-          fontSize: '10px',
-          fontWeight: '600',
-          letterSpacing: '0.09em',
-          textTransform: 'uppercase',
-          color: DIM,
-          whiteSpace: 'nowrap',
-        },
+        flex: 'none',
+        minWidth: '54px',
+        padding: '5px 6px',
+        border: '1px solid ' + EDGE,
+        borderRadius: '7px',
+        textAlign: 'center',
+        opacity: cancelled ? '0.6' : '1',
       },
-      label
+      [
+        el(
+          'div',
+          { fontSize: '15px', fontWeight: '700', lineHeight: '1.1', letterSpacing: '0.02em' },
+          shortDate(date)
+        ),
+        el(
+          'div',
+          { fontSize: '9px', letterSpacing: '0.14em', color: MUTED, marginTop: '1px' },
+          weekday || '—'
+        ),
+      ]
     );
-  }
-
-  function bodyCell(children, extra) {
-    var style = {
-      padding: '7px 10px 7px 0',
-      borderBottom: LINE,
-      verticalAlign: 'baseline',
-      textAlign: 'left',
-    };
-    for (var key in extra || {}) style[key] = extra[key];
-    return h('td', { style: style }, children);
   }
 
   function row(entry, index, duplicated, isPast) {
-    var date = entry.date || '';
-    var weekday = weekdayOf(date);
-    var fade = isPast ? '0.4' : '1';
+    var cancelled = entry.status === 'off';
+    var title = cancelled ? 'Nestreamuju' : entry.game || 'Stream';
+    var timeIsPattern = !cancelled && !entry.timeUnknown && !entry.start;
+    // Never restate the recurring time here: it lives in data/schedule.json,
+    // and a copy in the admin would go stale without anyone noticing.
+    var time = cancelled || entry.timeUnknown ? '—' : timeIsPattern ? 'pravidelný' : entry.start;
 
-    var dateCell = bodyCell(
-      [
-        styled('span', { fontFamily: MONO, fontWeight: '600', fontSize: '13px' }, shortDate(date)),
-        weekday
-          ? styled('span', { marginLeft: '6px', color: DIM, fontSize: '11px' }, weekday)
-          : null,
-      ],
-      { whiteSpace: 'nowrap', opacity: fade }
-    );
-
-    var what = entry.status === 'off' ? 'Nestreamuju' : entry.game || 'Stream';
-    var whatCell = bodyCell(
-      styled(
-        'span',
+    var right = [
+      el(
+        'div',
         {
-          fontWeight: '600',
-          textDecoration: entry.status === 'off' ? 'line-through' : 'none',
-          color: entry.status === 'off' ? DIM : 'inherit',
-        },
-        what
-      ),
-      { opacity: fade }
-    );
-
-    var time = entry.status === 'off' ? '—' : entry.timeUnknown ? 'čas nevím' : entry.start || 'pravidelný';
-    var timeIsDefault = !entry.start && !entry.timeUnknown && entry.status !== 'off';
-    var timeCell = bodyCell(
-      styled(
-        'span',
-        {
-          fontFamily: entry.timeUnknown || entry.status === 'off' ? FONT : MONO,
-          fontSize: '13px',
-          fontStyle: entry.timeUnknown ? 'italic' : 'normal',
-          color: timeIsDefault || entry.status === 'off' ? DIM : 'inherit',
+          fontSize: timeIsPattern ? '12px' : '17px',
+          fontWeight: '700',
+          lineHeight: '1',
+          color: cancelled || entry.timeUnknown || timeIsPattern ? MUTED : ACCENT,
         },
         time
       ),
-      { whiteSpace: 'nowrap', textAlign: 'right', opacity: fade }
-    );
+    ];
+    if (entry.timeUnknown) {
+      right.push(
+        el('div', { fontSize: '9px', letterSpacing: '0.1em', color: MUTED, marginTop: '2px' }, 'ČAS NEVÍM')
+      );
+    }
 
-    var noteCell = bodyCell(
-      entry.note ? styled('span', { color: DIM }, entry.note) : '',
-      { opacity: fade }
-    );
-
-    var bannerCell = bodyCell(
-      entry.highlight
-        ? styled(
+    var middle = [
+      el(
+        'div',
+        {
+          fontSize: '13px',
+          fontWeight: '700',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+          textDecoration: cancelled ? 'line-through' : 'none',
+          color: cancelled ? MUTED : TEXT,
+        },
+        title
+      ),
+    ];
+    if (entry.note) {
+      middle.push(el('div', { fontSize: '12px', color: MUTED, marginTop: '2px' }, entry.note));
+    }
+    if (entry.highlight) {
+      middle.push(
+        el(
+          'div',
+          { marginTop: '4px' },
+          el(
             'span',
             {
               display: 'inline-block',
-              padding: '1px 7px',
+              padding: '1px 6px',
               borderRadius: '999px',
-              border: '1px solid currentColor',
-              fontSize: '10px',
+              border: '1px solid ' + ACCENT,
+              color: ACCENT,
+              fontSize: '9px',
               fontWeight: '700',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.1em',
             },
             'V BANNERU'
           )
-        : styled('span', { color: DIM }, '—'),
-      { whiteSpace: 'nowrap', textAlign: 'right', opacity: fade }
-    );
+        )
+      );
+    }
 
     return h(
-      'tr',
+      'div',
       {
         // Stable key: a random one would remount the row on every keystroke.
-        key: index + ':' + date,
-        style: duplicated ? { background: 'rgba(230, 90, 90, 0.14)' } : {},
+        key: index + ':' + (entry.date || index),
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '8px 10px',
+          marginBottom: '7px',
+          border: '1px solid ' + (duplicated ? '#e8735f' : EDGE),
+          borderRadius: '9px',
+          background: CARD,
+          opacity: isPast ? '0.45' : '1',
+        },
       },
-      [dateCell, whatCell, timeCell, noteCell, bannerCell]
+      [
+        badge(entry.date, weekdayOf(entry.date), cancelled),
+        el('div', { flex: '1 1 auto', minWidth: '0' }, middle),
+        el('div', { flex: 'none', textAlign: 'right' }, right),
+      ]
     );
   }
 
@@ -184,16 +193,13 @@
         style: {
           display: 'flex',
           gap: '6px',
-          margin: '10px 0 0',
-          fontSize: '12px',
+          margin: '9px 0 0',
+          fontSize: '11.5px',
           lineHeight: '1.5',
-          color: tone === 'warn' ? '#e8735f' : DIM,
+          color: tone === 'warn' ? '#e8735f' : MUTED,
         },
       },
-      [
-        styled('span', { flex: 'none' }, tone === 'warn' ? '⚠' : '·'),
-        styled('span', {}, text),
-      ]
+      [el('span', { flex: 'none' }, tone === 'warn' ? '⚠' : '·'), el('span', {}, text)]
     );
   }
 
@@ -207,18 +213,32 @@
       }
 
       var wrap = function (children) {
-        return h('div', { style: { padding: '16px 18px', fontFamily: FONT, fontSize: '13px' } }, children);
+        return h(
+          'div',
+          {
+            style: {
+              minHeight: '100vh',
+              margin: '0',
+              padding: '16px 18px',
+              background: INK,
+              color: TEXT,
+              fontFamily: FONT,
+              fontSize: '13px',
+            },
+          },
+          children
+        );
       };
 
       if (entries === null) {
-        return wrap(styled('p', { margin: '0', color: DIM }, 'Náhled se nepodařilo načíst.'));
+        return wrap(el('p', { margin: '0', color: MUTED }, 'Náhled se nepodařilo načíst.'));
       }
 
       if (entries.length === 0) {
         return wrap(
-          styled(
+          el(
             'p',
-            { margin: '0', color: DIM, lineHeight: '1.5' },
+            { margin: '0', color: MUTED, lineHeight: '1.5' },
             'Žádné výjimky — platí pravidelný rozvrh. To je normální stav.'
           )
         );
@@ -236,47 +256,33 @@
         return entry && entry.date && entry.date < today;
       }).length;
 
-      var heading = styled(
-        'p',
-        {
-          margin: '0 0 12px',
-          fontSize: '11px',
-          fontWeight: '600',
-          letterSpacing: '0.09em',
-          textTransform: 'uppercase',
-          color: DIM,
-        },
-        entries.length + ' ' + plural(entries.length, 'výjimka', 'výjimky', 'výjimek')
-      );
-
-      var table = h(
-        'table',
-        { style: { width: '100%', borderCollapse: 'collapse', fontSize: '13px', lineHeight: '1.4' } },
-        [
-          h('thead', { key: 'head' }, h('tr', null, [
-            headCell('Datum'),
-            headCell('Co'),
-            headCell('Čas', 'right'),
-            headCell('Poznámka'),
-            headCell('Banner', 'right'),
-          ])),
-          h(
-            'tbody',
-            { key: 'body' },
-            entries.map(function (entry, index) {
-              var safe = entry || {};
-              return row(
-                safe,
-                index,
-                Boolean(safe.date && counts[safe.date] > 1),
-                Boolean(safe.date && safe.date < today)
-              );
-            })
-          ),
-        ]
-      );
-
-      var children = [heading, table];
+      var children = [
+        el(
+          'p',
+          {
+            margin: '0 0 11px',
+            fontSize: '10px',
+            fontWeight: '700',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: MUTED,
+          },
+          entries.length + ' ' + plural(entries.length, 'výjimka', 'výjimky', 'výjimek')
+        ),
+        h(
+          'div',
+          { key: 'rows' },
+          entries.map(function (entry, index) {
+            var safe = entry || {};
+            return row(
+              safe,
+              index,
+              Boolean(safe.date && counts[safe.date] > 1),
+              Boolean(safe.date && safe.date < today)
+            );
+          })
+        ),
+      ];
 
       if (duplicates.length > 0) {
         children.push(
@@ -302,7 +308,7 @@
         );
       }
       children.push(
-        note('Sloupec Banner je jen ruční zaškrtnutí — zrušený stream, jiný čas a nejistý čas se v banneru objeví i bez něj.')
+        note('„V banneru“ je jen ruční zaškrtnutí — zrušený stream, jiný čas a nejistý čas se v banneru objeví i bez něj.')
       );
 
       return wrap(children);

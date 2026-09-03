@@ -20,7 +20,10 @@
      than its content, so on a narrow window (or at browser zoom) the sentence
      spilled past the page's content column and sat left of the header. */
   .inner {
-    margin: 0;
+    /* margin-block only — a plain `margin: 0` would wipe out the container's
+       `margin-inline: auto`, leaving this 1200px box against the left edge
+       with the text centred inside it rather than on the page. */
+    margin-block: 0;
     padding-block: 0.6rem;
     text-align: center;
     text-wrap: balance;
