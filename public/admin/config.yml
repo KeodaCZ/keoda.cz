@@ -28,6 +28,12 @@ collections:
   - name: kalendar
     label: Kalendář streamů
     format: json
+    # The default preview pane just lists the same fields again, one per line,
+    # and eats half the screen. Turning it off gives the editor full width, so
+    # more of the list is visible at once. Sveltia has no way to lay the
+    # default preview out in columns.
+    editor:
+      preview: false
     files:
       - name: vyjimky
         label: Výjimky v rozvrhu
