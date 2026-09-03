@@ -1,6 +1,7 @@
 ---
 /**
- * Row of social profile links.
+ * Row of social profile links, in two shapes: labelled pills for the homepage
+ * hero, and bare icons for the footer.
  *
  * Icons are inlined as SVG paths at build time, so there is no icon font and
  * no runtime request. Rendered in Keoda's palette rather than each brand's
@@ -10,6 +11,12 @@
 import * as simpleIcons from 'simple-icons';
 import { rankone } from '../icons/rankone';
 import data from '../../data/socials.json';
+
+interface Props {
+  /** 'icons' drops the visible names but keeps them for screen readers. */
+  variant?: 'labels' | 'icons';
+}
+const { variant = 'labels' } = Astro.props;
 
 interface Social {
   name: string;
@@ -46,11 +53,11 @@ if (missing.length > 0) {
   console.warn(`\n⚠  SocialLinks: chybí ikona pro ${missing.join(', ')}.\n`);
 }
 ---
-<nav class="socials" aria-label="Sociální sítě">
+<nav class:list={['socials', variant]} aria-label="Sociální sítě">
   <ul>
     {socials.map((social) => (
       <li>
-        <a href={social.url} target="_blank" rel="noopener">
+        <a href={social.url} target="_blank" rel="noopener" title={social.name}>
           {social.glyph && (
             <svg viewBox={social.glyph.viewBox} aria-hidden="true" focusable="false">
               {social.glyph.paths.map((path) => (
@@ -58,7 +65,7 @@ if (missing.length > 0) {
               ))}
             </svg>
           )}
-          <span>{social.name}</span>
+          <span class:list={[{ 'sr-only': variant === 'icons' }]}>{social.name}</span>
         </a>
       </li>
     ))}
@@ -79,19 +86,8 @@ if (missing.length > 0) {
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    /* Roomy enough to hit with a thumb — most traffic arrives on a phone. */
-    padding: 0.5rem 0.85rem;
-    border: 1px solid var(--card-edge);
-    border-radius: 999px;
-    background: var(--card);
-    font-size: 0.85rem;
-    font-weight: 600;
     text-decoration: none;
     color: var(--text);
-  }
-  a:hover {
-    border-color: var(--accent);
-    color: var(--accent);
   }
 
   svg {
@@ -100,5 +96,43 @@ if (missing.length > 0) {
     flex: none;
     /* currentColor so the icon follows the link, including on hover. */
     fill: currentColor;
+  }
+
+  /* Labelled pills — homepage hero. */
+  .labels a {
+    /* Roomy enough to hit with a thumb — most traffic arrives on a phone. */
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 999px;
+    background: var(--card);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .labels a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Bare icons — footer. Padding rather than margin, so the tap target stays
+     finger-sized while the icons themselves sit close together. */
+  .icons ul {
+    gap: 0.1rem;
+  }
+  .icons a {
+    /* Explicit box rather than padding alone, so the tap target stays a
+       usable size without spreading the icons apart. */
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border-radius: 6px;
+    color: var(--muted);
+  }
+  .icons a:hover {
+    color: var(--accent);
+    background: var(--card);
+  }
+  .icons svg {
+    width: 1.15rem;
+    height: 1.15rem;
   }
 </style>

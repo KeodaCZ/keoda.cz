@@ -1,9 +1,12 @@
 ---
+import SocialLinks from './SocialLinks.astro';
+
 const year = new Date().getFullYear();
 ---
 <footer>
-  <div class="container inner muted">
-    © {year} KeodaCZ
+  <div class="container inner">
+    <SocialLinks variant="icons" />
+    <p class="copy muted">© {year} KeodaCZ</p>
   </div>
 </footer>
 
@@ -13,7 +16,15 @@ const year = new Date().getFullYear();
     margin-top: 3rem;
   }
   .inner {
-    padding-block: 1.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1rem;
     font-size: 0.85rem;
+  }
+  .copy {
+    margin: 0;
   }
 </style>

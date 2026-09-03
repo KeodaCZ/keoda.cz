@@ -360,8 +360,10 @@ section makes a site look abandoned worse than having none. Cancellations belong
 in `exceptions.json` instead. Adding news later is an afternoon's work; don't
 pre-build it.
 
-Social links live in `data/socials.json` and render as a pill row in the
-homepage hero (`SocialLinks.astro`). All eight verified live 2026-09-03:
+Social links live in `data/socials.json` and render through one component,
+`SocialLinks.astro`, in two shapes: labelled pills in the homepage hero, and
+bare icons in the footer (`variant="icons"`, which hides the names visually
+but keeps them for screen readers and as tooltips). All eight verified live 2026-09-03:
 Twitch `/keodacz`, YouTube `@KeodaCZ`, Instagram `/keodacz`, TikTok
 `@keodacz`, Facebook `/KeodaCZPage` (one C — an earlier note here said two),
 Discord invite `qYSsFMCAQv` (server "Keodova výprava"), Steam
