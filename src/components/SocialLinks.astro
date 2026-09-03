@@ -1,0 +1,101 @@
+---
+/**
+ * Row of social profile links.
+ *
+ * Icons come from simple-icons at build time, so only the path data each brand
+ * needs ends up in the HTML — no icon font, no runtime request, nothing to
+ * load. Rendered in Keoda's palette rather than each brand's colours: eight
+ * different brand colours in one row would fight the site's own identity.
+ */
+import * as icons from 'simple-icons';
+import data from '../../data/socials.json';
+
+interface Social {
+  name: string;
+  url: string;
+  icon: string | null;
+  initials?: string;
+}
+
+function pathFor(slug: string | null): string | null {
+  if (!slug) return null;
+  const key = 'si' + slug.charAt(0).toUpperCase() + slug.slice(1);
+  const icon = (icons as Record<string, { path: string } | undefined>)[key];
+  return icon ? icon.path : null;
+}
+
+const socials = (data.socials as Social[]).map((social) => ({
+  ...social,
+  path: pathFor(social.icon),
+}));
+---
+<nav class="socials" aria-label="Sociální sítě">
+  <ul>
+    {socials.map((social) => (
+      <li>
+        <a href={social.url} target="_blank" rel="noopener">
+          {social.path ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d={social.path} />
+            </svg>
+          ) : (
+            <span class="mark" aria-hidden="true">{social.initials ?? social.name.charAt(0)}</span>
+          )}
+          <span>{social.name}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    /* Roomy enough to hit with a thumb — most traffic arrives on a phone. */
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 999px;
+    background: var(--card);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--text);
+  }
+  a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    /* currentColor so the icon follows the link, including on hover. */
+    fill: currentColor;
+  }
+
+  /* Stand-in for a brand with no icon of its own. */
+  .mark {
+    display: grid;
+    place-items: center;
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    line-height: 1;
+  }
+</style>

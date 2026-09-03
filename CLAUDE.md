@@ -360,9 +360,19 @@ section makes a site look abandoned worse than having none. Cancellations belong
 in `exceptions.json` instead. Adding news later is an afternoon's work; don't
 pre-build it.
 
-Social links are plain links: Twitch, YouTube, Instagram, TikTok, Facebook
-(`/KeodaCCZPage`), Discord, Steam, and Rankone (`rankone.global/keodacz` — a
-client-rendered app with no embed API, so link only, no iframe).
+Social links live in `data/socials.json` and render as a pill row in the
+homepage hero (`SocialLinks.astro`). All eight verified live 2026-09-03:
+Twitch `/keodacz`, YouTube `@KeodaCZ`, Instagram `/keodacz`, TikTok
+`@keodacz`, Facebook `/KeodaCZPage` (one C — an earlier note here said two),
+Discord invite `qYSsFMCAQv` (server "Keodova výprava"), Steam
+`/id/KeodaCZ`, Rankone `rankone.global/keodacz` (client-rendered app with no
+embed API, so link only, no iframe).
+
+Icons come from the `simple-icons` devDependency, inlined as SVG paths at
+build time — no icon font, no runtime request, ~5.7 kB of path data. Rankone
+has no icon in that set and falls back to an "R1" text mark. Rendered in
+Keoda's palette, not each brand's colours: eight brand colours in one row
+would drown out the site's own identity.
 
 ## Design
 
@@ -399,9 +409,8 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- Site progress so far: homepage (compact schedule + gear teaser),
-  `/kalendar`, `/vybaveni`, and the CMS at `/admin`. Next up: homepage socials
-  row + Twitch embed (waiting on the owner's profile URLs).
+- Site progress so far: homepage (socials row, compact schedule, gear teaser),
+  `/kalendar`, `/vybaveni`, and the CMS at `/admin`. Next up: Twitch embed.
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
   is 16:30Z in summer but 17:30Z in winter. Covered by tests.
@@ -465,8 +474,6 @@ memberships only, **not** donations. Streamer.bot is the right tool.
 
 ## Open questions
 
-- [ ] Owner to supply social profile URLs (Instagram, TikTok, Discord invite,
-      Steam) for the homepage socials row
 - [ ] Do we want `kontakt@keoda.cz`? (needs Vedos mailhosting + MX records)
 - [ ] Move the data-fetching subsections to `.claude/rules/` once the pipeline
       works — see the maintenance note under Data layer

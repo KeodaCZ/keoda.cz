@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import ScheduleCompact from '../components/ScheduleCompact.astro';
+import SocialLinks from '../components/SocialLinks.astro';
 import { TWITCH_URL } from '../lib/stream-event';
 ---
 <Base title="KeodaCZ" description="KeodaCZ — český streamer. Twitch, YouTube a spol.">
@@ -9,6 +10,7 @@ import { TWITCH_URL } from '../lib/stream-event';
       <h1>KeodaCZ</h1>
       <p class="muted tagline">Český streamer — Twitch, YouTube a spol.</p>
       <a class="btn" href={TWITCH_URL} target="_blank" rel="noopener">▶ Sledovat na Twitchi</a>
+      <SocialLinks />
     </section>
 
     <div class="panels">
@@ -35,6 +37,9 @@ import { TWITCH_URL } from '../lib/stream-event';
   }
   .tagline {
     font-size: 1.05rem;
+    margin-bottom: 1.3rem;
+  }
+  .hero :global(.btn) {
     margin-bottom: 1.3rem;
   }
 
