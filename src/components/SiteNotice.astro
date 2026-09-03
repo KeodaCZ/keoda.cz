@@ -1,8 +1,8 @@
 ---
 /**
  * Site-wide "under construction" strip, directly under the header.
- * Deliberately not filled yellow — that is the schedule banner's job, and two
- * loud strips stacked would fight each other.
+ * Outline only, no fill — the schedule banner right below is the loud one,
+ * and two solid strips stacked fought each other.
  */
 ---
 <div class="notice">
@@ -14,7 +14,6 @@
 
 <style>
   .notice {
-    background: var(--card);
     border-bottom: 1px solid var(--card-edge);
   }
   .inner {
@@ -22,21 +21,23 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: baseline;
+    justify-content: center;
+    text-align: center;
     margin: 0;
     padding-block: 0.6rem;
     font-size: 0.9rem;
-    color: var(--text);
+    color: var(--muted);
   }
   .tag {
     flex: none;
-    padding: 0.12rem 0.5rem;
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--accent);
     border-radius: 4px;
-    background: var(--accent);
-    color: var(--bg-top);
     font-family: var(--font-heading);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    color: var(--accent);
   }
 </style>

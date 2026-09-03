@@ -28,12 +28,8 @@ collections:
   - name: kalendar
     label: Kalendář streamů
     format: json
-    # The default preview pane just lists the same fields again, one per line,
-    # and eats half the screen. Turning it off gives the editor full width, so
-    # more of the list is visible at once. Sveltia has no way to lay the
-    # default preview out in columns.
-    editor:
-      preview: false
+    # The preview pane is rendered by public/admin/preview.js — the default
+    # one relisted the same fields one per line and ate half the screen.
     files:
       - name: vyjimky
         label: Výjimky v rozvrhu
@@ -52,7 +48,7 @@ collections:
             required: false
             # Start collapsed: three short rows beat one form taller than the
             # screen. `summary` only interpolates values — no conditionals — so
-            # the two toggles cannot be shown here without printing true/false.
+            # the toggles are shown in the custom preview instead (preview.js).
             collapsed: true
             summary: '{{fields.date}} · {{fields.status}} {{fields.start}} {{fields.game}} {{fields.note}}'
             fields:
@@ -75,12 +71,12 @@ collections:
                   - { label: 'Stream se koná', value: '' }
                   - { label: 'Nestreamuju', value: 'off' }
 
-              - name: highlight
-                label: Zmínit v banneru na hlavní stránce
-                widget: boolean
+              - name: start
+                label: Začátek
+                widget: string
                 required: false
-                default: false
-                hint: Zrušení, jiný čas a nejistý čas se v banneru objeví samy.
+                hint: 'Formát 20:00. Prázdné = pravidelný čas 18:30.'
+                pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Zadej čas ve formátu 20:00']
 
               - name: timeUnknown
                 label: Čas ještě nevím
@@ -88,13 +84,6 @@ collections:
                 required: false
                 default: false
                 hint: V kalendáři bude místo času pomlčka.
-
-              - name: start
-                label: Začátek
-                widget: string
-                required: false
-                hint: 'Formát 20:00. Prázdné = pravidelný čas 18:30.'
-                pattern: ['^([01][0-9]|2[0-3]):[0-5][0-9]$', 'Zadej čas ve formátu 20:00']
 
               - name: game
                 label: Hra
@@ -107,3 +96,10 @@ collections:
                 widget: string
                 required: false
                 hint: Krátký důvod, např. „svatba“. Zobrazí se v kalendáři.
+
+              - name: highlight
+                label: Zmínit v banneru na hlavní stránce
+                widget: boolean
+                required: false
+                default: false
+                hint: Zrušení, jiný čas a nejistý čas se v banneru objeví samy.

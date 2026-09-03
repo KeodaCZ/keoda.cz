@@ -39,7 +39,14 @@ dev server.
   authorization is GitHub's — no repo write access, no commits. The config is
   scoped to one `files` collection editing `data/exceptions.json`; a date
   picker, a two-option status, checkboxes for `timeUnknown` and `highlight`,
-  and a `HH:MM` pattern on `start` keep malformed entries out. Commits go straight to `main`, which triggers the deploy.
+  and a `HH:MM` pattern on `start` keep malformed entries out. Entries start
+  collapsed, and `public/admin/preview.js` replaces the default preview pane
+  with one compact row per exception — the built-in one relisted every field
+  one per line, and `summary` cannot show the toggles because it interpolates
+  values with no conditionals. That file uses the `createClass`/`h` globals the
+  CMS provides, so no React script is needed, and it defers touching them until
+  the CMS has loaded. It stays presentation-only: duplicating any scheduling
+  rule there would drift from `schedule-core.ts`. Commits go straight to `main`, which triggers the deploy.
 
   Auth: **"Sign In with Token"** with a fine-grained GitHub PAT. No OAuth app,
   no auth server, no config change needed. PATs expire (90 days by default), so
