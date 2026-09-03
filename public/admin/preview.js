@@ -217,8 +217,13 @@
           'div',
           {
             style: {
-              minHeight: '100vh',
-              margin: '0',
+              // Fixed to the iframe's own viewport, so the dark ground covers
+              // it edge to edge whatever margin or background the preview
+              // document itself carries. Relying on styling that body left a
+              // pale frame showing through.
+              position: 'fixed',
+              inset: '0',
+              overflow: 'auto',
               padding: '16px 18px',
               background: INK,
               color: TEXT,
