@@ -315,9 +315,22 @@
     },
   };
 
+  // The preview runs in its own iframe, whose <body> keeps the browser's white
+  // background and 8px margin — visible as a pale frame around the dark panel.
+  // A component cannot reach that body, so it has to be styled from here.
+  var IFRAME_CSS =
+    'html, body { margin: 0; padding: 0; background: ' +
+    INK +
+    '; color: ' +
+    TEXT +
+    '; }';
+
   function register() {
     if (typeof window.CMS === 'undefined') return false;
     if (typeof createClass === 'undefined' || typeof h === 'undefined') return false;
+    if (typeof window.CMS.registerPreviewStyle === 'function') {
+      window.CMS.registerPreviewStyle(IFRAME_CSS, { raw: true });
+    }
     var template = createClass(previewSpec);
     // The docs say the name is the collection or file-collection name; register
     // both so it takes effect either way.

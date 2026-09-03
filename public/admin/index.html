@@ -11,7 +11,10 @@
   <body>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
     <!-- Compact preview pane for the schedule. Uses the createClass/h globals
-         the CMS provides, so no React script is needed. -->
-    <script src="/admin/preview.js"></script>
+         the CMS provides, so no React script is needed.
+         Bump ?v= whenever preview.js changes: files under public/ are served
+         unhashed, so without it the browser keeps a cached copy after a deploy
+         and the change appears to have done nothing. -->
+    <script src="/admin/preview.js?v=3"></script>
   </body>
 </html>
