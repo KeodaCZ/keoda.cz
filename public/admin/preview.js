@@ -14,6 +14,21 @@
 (function () {
   var WEEKDAYS = ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'];
 
+  // The preview iframe brings its own defaults, including a serif face, so
+  // every visible style has to be stated here.
+  var FONT =
+    'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+  var MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+  var LINE = '1px solid rgba(128, 128, 128, 0.22)';
+  var DIM = 'rgba(128, 128, 128, 0.9)';
+
+  /** Czech counts split three ways: 1, 2-4, and 5+. */
+  function plural(count, one, few, many) {
+    if (count === 1) return one;
+    if (count >= 2 && count <= 4) return few;
+    return many;
+  }
+
   function weekdayOf(iso) {
     var parts = String(iso || '').split('-');
     if (parts.length !== 3) return '';
@@ -40,46 +55,125 @@
     return Array.isArray(value) ? value : [];
   }
 
-  var CELL = {
-    padding: '4px 8px',
-    borderBottom: '1px solid rgba(128,128,128,.25)',
-    verticalAlign: 'top',
-    textAlign: 'left',
-  };
-  var HEAD = Object.assign({}, CELL, {
-    fontWeight: '700',
-    fontSize: '11px',
-    letterSpacing: '.06em',
-    textTransform: 'uppercase',
-    opacity: '.7',
-    whiteSpace: 'nowrap',
-  });
-
-  function cell(text, extra) {
-    return h('td', { style: Object.assign({}, CELL, extra || {}) }, text);
+  /** 'YYYY-MM-DD' -> '4. 9.', matching how the site writes dates. */
+  function shortDate(iso) {
+    var parts = String(iso || '').split('-');
+    if (parts.length !== 3) return iso || '—';
+    return Number(parts[2]) + '. ' + Number(parts[1]) + '.';
   }
 
-  function timeLabel(entry) {
-    if (entry.status === 'off') return '—';
-    if (entry.timeUnknown) return 'nevím';
-    return entry.start ? entry.start : 'pravidelný';
+  function styled(tag, style, children) {
+    return h(tag, { style: style }, children);
+  }
+
+  function headCell(label, align) {
+    return h(
+      'th',
+      {
+        style: {
+          padding: '0 10px 6px 0',
+          borderBottom: LINE,
+          textAlign: align || 'left',
+          fontSize: '10px',
+          fontWeight: '600',
+          letterSpacing: '0.09em',
+          textTransform: 'uppercase',
+          color: DIM,
+          whiteSpace: 'nowrap',
+        },
+      },
+      label
+    );
+  }
+
+  function bodyCell(children, extra) {
+    var style = {
+      padding: '7px 10px 7px 0',
+      borderBottom: LINE,
+      verticalAlign: 'baseline',
+      textAlign: 'left',
+    };
+    for (var key in extra || {}) style[key] = extra[key];
+    return h('td', { style: style }, children);
   }
 
   function row(entry, index, duplicated, isPast) {
-    var dimmed = isPast ? { opacity: '.45' } : {};
-    var date = entry.date || '—';
-    var weekday = weekdayOf(entry.date);
+    var date = entry.date || '';
+    var weekday = weekdayOf(date);
+    var fade = isPast ? '0.4' : '1';
+
+    var dateCell = bodyCell(
+      [
+        styled('span', { fontFamily: MONO, fontWeight: '600', fontSize: '13px' }, shortDate(date)),
+        weekday
+          ? styled('span', { marginLeft: '6px', color: DIM, fontSize: '11px' }, weekday)
+          : null,
+      ],
+      { whiteSpace: 'nowrap', opacity: fade }
+    );
+
+    var what = entry.status === 'off' ? 'Nestreamuju' : entry.game || 'Stream';
+    var whatCell = bodyCell(
+      styled(
+        'span',
+        {
+          fontWeight: '600',
+          textDecoration: entry.status === 'off' ? 'line-through' : 'none',
+          color: entry.status === 'off' ? DIM : 'inherit',
+        },
+        what
+      ),
+      { opacity: fade }
+    );
+
+    var time = entry.status === 'off' ? '—' : entry.timeUnknown ? 'čas nevím' : entry.start || 'pravidelný';
+    var timeIsDefault = !entry.start && !entry.timeUnknown && entry.status !== 'off';
+    var timeCell = bodyCell(
+      styled(
+        'span',
+        {
+          fontFamily: entry.timeUnknown || entry.status === 'off' ? FONT : MONO,
+          fontSize: '13px',
+          fontStyle: entry.timeUnknown ? 'italic' : 'normal',
+          color: timeIsDefault || entry.status === 'off' ? DIM : 'inherit',
+        },
+        time
+      ),
+      { whiteSpace: 'nowrap', textAlign: 'right', opacity: fade }
+    );
+
+    var noteCell = bodyCell(
+      entry.note ? styled('span', { color: DIM }, entry.note) : '',
+      { opacity: fade }
+    );
+
+    var bannerCell = bodyCell(
+      entry.highlight
+        ? styled(
+            'span',
+            {
+              display: 'inline-block',
+              padding: '1px 7px',
+              borderRadius: '999px',
+              border: '1px solid currentColor',
+              fontSize: '10px',
+              fontWeight: '700',
+              letterSpacing: '0.08em',
+            },
+            'V BANNERU'
+          )
+        : styled('span', { color: DIM }, '—'),
+      { whiteSpace: 'nowrap', textAlign: 'right', opacity: fade }
+    );
 
     return h(
       'tr',
-      // Stable key: a random one would remount the row on every keystroke.
-      { key: index + ':' + date, style: duplicated ? { background: 'rgba(220,80,80,.12)' } : {} },
-      cell(weekday ? date + ' (' + weekday + ')' : date, Object.assign({ whiteSpace: 'nowrap' }, dimmed)),
-      cell(entry.status === 'off' ? 'Nestreamuju' : 'Stream', Object.assign({ whiteSpace: 'nowrap' }, dimmed)),
-      cell(timeLabel(entry), Object.assign({ whiteSpace: 'nowrap' }, dimmed)),
-      cell(entry.game || '', dimmed),
-      cell(entry.note || '', dimmed),
-      cell(entry.highlight ? 'ANO' : '—', Object.assign({ whiteSpace: 'nowrap', fontWeight: entry.highlight ? '700' : '400' }, dimmed))
+      {
+        // Stable key: a random one would remount the row on every keystroke.
+        key: index + ':' + date,
+        style: duplicated ? { background: 'rgba(230, 90, 90, 0.14)' } : {},
+      },
+      [dateCell, whatCell, timeCell, noteCell, bannerCell]
     );
   }
 
@@ -88,34 +182,45 @@
       'p',
       {
         style: {
-          margin: '8px 0 0',
+          display: 'flex',
+          gap: '6px',
+          margin: '10px 0 0',
           fontSize: '12px',
-          lineHeight: '1.45',
-          color: tone === 'warn' ? '#d46' : 'inherit',
-          opacity: tone === 'warn' ? '1' : '.7',
+          lineHeight: '1.5',
+          color: tone === 'warn' ? '#e8735f' : DIM,
         },
       },
-      text
+      [
+        styled('span', { flex: 'none' }, tone === 'warn' ? '⚠' : '·'),
+        styled('span', {}, text),
+      ]
     );
   }
 
-  // Kept as a plain spec, not passed to createClass yet: touching that global
-  // before the CMS defines it would throw and kill this whole script, including
-  // the retry below.
   var previewSpec = {
     render: function () {
       var entries;
       try {
         entries = toArray(this.props.entry.getIn(['data', 'exceptions']));
       } catch (error) {
-        return h('div', { style: { padding: '16px', fontSize: '13px' } }, 'Náhled se nepodařilo načíst.');
+        entries = null;
+      }
+
+      var wrap = function (children) {
+        return h('div', { style: { padding: '16px 18px', fontFamily: FONT, fontSize: '13px' } }, children);
+      };
+
+      if (entries === null) {
+        return wrap(styled('p', { margin: '0', color: DIM }, 'Náhled se nepodařilo načíst.'));
       }
 
       if (entries.length === 0) {
-        return h(
-          'div',
-          { style: { padding: '16px', fontSize: '13px', opacity: '.7' } },
-          'Žádné výjimky — pravidelný rozvrh platí bez změn. To je normální stav.'
+        return wrap(
+          styled(
+            'p',
+            { margin: '0', color: DIM, lineHeight: '1.5' },
+            'Žádné výjimky — platí pravidelný rozvrh. To je normální stav.'
+          )
         );
       }
 
@@ -131,32 +236,33 @@
         return entry && entry.date && entry.date < today;
       }).length;
 
-      var children = [
-        h(
-          'p',
-          { style: { margin: '0 0 10px', fontSize: '12px', opacity: '.7' } },
-          entries.length === 1 ? '1 výjimka' : entries.length + ' výjimky'
-        ),
-        h(
-          'table',
-          { style: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' } },
-          h(
-            'thead',
-            null,
-            h(
-              'tr',
-              null,
-              h('th', { style: HEAD }, 'Datum'),
-              h('th', { style: HEAD }, 'Co'),
-              h('th', { style: HEAD }, 'Čas'),
-              h('th', { style: HEAD }, 'Hra'),
-              h('th', { style: HEAD }, 'Poznámka'),
-              h('th', { style: HEAD }, 'Banner')
-            )
-          ),
+      var heading = styled(
+        'p',
+        {
+          margin: '0 0 12px',
+          fontSize: '11px',
+          fontWeight: '600',
+          letterSpacing: '0.09em',
+          textTransform: 'uppercase',
+          color: DIM,
+        },
+        entries.length + ' ' + plural(entries.length, 'výjimka', 'výjimky', 'výjimek')
+      );
+
+      var table = h(
+        'table',
+        { style: { width: '100%', borderCollapse: 'collapse', fontSize: '13px', lineHeight: '1.4' } },
+        [
+          h('thead', { key: 'head' }, h('tr', null, [
+            headCell('Datum'),
+            headCell('Co'),
+            headCell('Čas', 'right'),
+            headCell('Poznámka'),
+            headCell('Banner', 'right'),
+          ])),
           h(
             'tbody',
-            null,
+            { key: 'body' },
             entries.map(function (entry, index) {
               var safe = entry || {};
               return row(
@@ -166,14 +272,16 @@
                 Boolean(safe.date && safe.date < today)
               );
             })
-          )
-        ),
-      ];
+          ),
+        ]
+      );
+
+      var children = [heading, table];
 
       if (duplicates.length > 0) {
         children.push(
           note(
-            'Pozor: dvě výjimky na stejné datum (' +
+            'Dvě výjimky na stejné datum (' +
               duplicates.join(', ') +
               '). Web je sloučí do jedné, pozdější údaje přebijí dřívější — nech u každého dne jen jeden záznam.',
             'warn'
@@ -183,17 +291,21 @@
       if (pastCount > 0) {
         children.push(
           note(
-            pastCount === 1
-              ? '1 výjimka je v minulosti a na webu se už nezobrazuje. Můžeš ji smazat.'
-              : pastCount + ' výjimky jsou v minulosti a na webu se už nezobrazují. Můžeš je smazat.'
+            pastCount +
+              ' ' +
+              plural(pastCount, 'výjimka je', 'výjimky jsou', 'výjimek je') +
+              ' v minulosti, na webu ' +
+              plural(pastCount, 'se už nezobrazuje', 'se už nezobrazují', 'se už nezobrazuje') +
+              '. ' +
+              plural(pastCount, 'Můžeš ji smazat.', 'Můžeš je smazat.', 'Můžeš je smazat.')
           )
         );
       }
       children.push(
-        note('„Banner“ je jen ruční zaškrtnutí. Zrušený stream, jiný čas a nejistý čas se v banneru objeví i bez něj.')
+        note('Sloupec Banner je jen ruční zaškrtnutí — zrušený stream, jiný čas a nejistý čas se v banneru objeví i bez něj.')
       );
 
-      return h('div', { style: { padding: '12px 14px' } }, children);
+      return wrap(children);
     },
   };
 
@@ -208,8 +320,8 @@
     return true;
   }
 
-  // The CMS script above defines these synchronously in practice, but poll
-  // briefly rather than silently doing nothing if it ever loads later.
+  // The CMS defines these synchronously in practice, but poll briefly rather
+  // than silently doing nothing if it ever loads later.
   if (!register()) {
     var tries = 0;
     var timer = setInterval(function () {

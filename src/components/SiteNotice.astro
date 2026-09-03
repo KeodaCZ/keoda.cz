@@ -16,20 +16,20 @@
   .notice {
     border-bottom: 1px solid var(--card-edge);
   }
+  /* Plain centred text rather than a flex row: a flex item cannot be narrower
+     than its content, so on a narrow window (or at browser zoom) the sentence
+     spilled past the page's content column and sat left of the header. */
   .inner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: baseline;
-    justify-content: center;
-    text-align: center;
     margin: 0;
     padding-block: 0.6rem;
+    text-align: center;
+    text-wrap: balance;
     font-size: 0.9rem;
     color: var(--muted);
   }
   .tag {
-    flex: none;
+    display: inline-block;
+    margin-right: 0.45rem;
     padding: 0.1rem 0.45rem;
     border: 1px solid var(--accent);
     border-radius: 4px;
@@ -38,6 +38,7 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    white-space: nowrap;
     color: var(--accent);
   }
 </style>
