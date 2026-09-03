@@ -1,12 +1,44 @@
 {
   "socials": [
-    { "name": "Twitch",    "url": "https://twitch.tv/keodacz",              "icon": "twitch"    },
-    { "name": "YouTube",   "url": "https://youtube.com/@KeodaCZ",           "icon": "youtube"   },
-    { "name": "Instagram", "url": "https://instagram.com/keodacz/",         "icon": "instagram" },
-    { "name": "TikTok",    "url": "https://tiktok.com/@keodacz",            "icon": "tiktok"    },
-    { "name": "Facebook",  "url": "https://facebook.com/KeodaCZPage/",      "icon": "facebook"  },
-    { "name": "Discord",   "url": "https://discord.gg/qYSsFMCAQv",          "icon": "discord"   },
-    { "name": "Steam",     "url": "https://steamcommunity.com/id/KeodaCZ/", "icon": "steam"     },
-    { "name": "Rankone",   "url": "https://rankone.global/keodacz",         "icon": null, "initials": "R1" }
+    {
+      "name": "Twitch",
+      "url": "https://twitch.tv/keodacz",
+      "icon": "twitch"
+    },
+    {
+      "name": "YouTube",
+      "url": "https://youtube.com/@KeodaCZ",
+      "icon": "youtube"
+    },
+    {
+      "name": "Instagram",
+      "url": "https://instagram.com/keodacz/",
+      "icon": "instagram"
+    },
+    {
+      "name": "TikTok",
+      "url": "https://tiktok.com/@keodacz",
+      "icon": "tiktok"
+    },
+    {
+      "name": "Facebook",
+      "url": "https://facebook.com/KeodaCZPage/",
+      "icon": "facebook"
+    },
+    {
+      "name": "Discord",
+      "url": "https://discord.gg/qYSsFMCAQv",
+      "icon": "discord"
+    },
+    {
+      "name": "Steam",
+      "url": "https://steamcommunity.com/id/KeodaCZ/",
+      "icon": "steam"
+    },
+    {
+      "name": "Rankone",
+      "url": "https://rankone.global/keodacz",
+      "icon": "rankone"
+    }
   ]
 }

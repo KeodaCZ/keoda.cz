@@ -369,10 +369,12 @@ Discord invite `qYSsFMCAQv` (server "Keodova výprava"), Steam
 embed API, so link only, no iframe).
 
 Icons come from the `simple-icons` devDependency, inlined as SVG paths at
-build time — no icon font, no runtime request, ~5.7 kB of path data. Rankone
-has no icon in that set and falls back to an "R1" text mark. Rendered in
-Keoda's palette, not each brand's colours: eight brand colours in one row
-would drown out the site's own identity.
+build time — no icon font, no runtime request. Rankone is not in that set, so
+its brandmark lives in `src/icons/rankone.ts`, taken from their official press
+kit; the kit itself was deliberately not committed. Rendered in Keoda's
+palette, not each brand's colours: eight brand colours in one row would drown
+out the site's own identity. The component warns at build time if an icon
+fails to resolve, rather than shipping a gap in the row.
 
 ## Design
 

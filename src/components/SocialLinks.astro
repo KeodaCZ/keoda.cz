@@ -2,44 +2,61 @@
 /**
  * Row of social profile links.
  *
- * Icons come from simple-icons at build time, so only the path data each brand
- * needs ends up in the HTML — no icon font, no runtime request, nothing to
- * load. Rendered in Keoda's palette rather than each brand's colours: eight
- * different brand colours in one row would fight the site's own identity.
+ * Icons are inlined as SVG paths at build time, so there is no icon font and
+ * no runtime request. Rendered in Keoda's palette rather than each brand's
+ * colours: eight different brand colours in one row would fight the site's
+ * own identity.
  */
-import * as icons from 'simple-icons';
+import * as simpleIcons from 'simple-icons';
+import { rankone } from '../icons/rankone';
 import data from '../../data/socials.json';
 
 interface Social {
   name: string;
   url: string;
   icon: string | null;
-  initials?: string;
 }
 
-function pathFor(slug: string | null): string | null {
+interface Glyph {
+  viewBox: string;
+  paths: string[];
+}
+
+/** Icons that simple-icons does not carry. */
+const EXTRA: Record<string, Glyph> = { rankone };
+
+function glyphFor(slug: string | null): Glyph | null {
   if (!slug) return null;
+  if (EXTRA[slug]) return EXTRA[slug];
+
   const key = 'si' + slug.charAt(0).toUpperCase() + slug.slice(1);
-  const icon = (icons as Record<string, { path: string } | undefined>)[key];
-  return icon ? icon.path : null;
+  const icon = (simpleIcons as Record<string, { path: string } | undefined>)[key];
+  return icon ? { viewBox: '0 0 24 24', paths: [icon.path] } : null;
 }
 
 const socials = (data.socials as Social[]).map((social) => ({
   ...social,
-  path: pathFor(social.icon),
+  glyph: glyphFor(social.icon),
 }));
+
+// A missing icon would be a typo in the data or a renamed brand — say so at
+// build time instead of quietly shipping a row with a hole in it.
+const missing = socials.filter((social) => !social.glyph).map((social) => social.name);
+if (missing.length > 0) {
+  console.warn(`\n⚠  SocialLinks: chybí ikona pro ${missing.join(', ')}.\n`);
+}
 ---
 <nav class="socials" aria-label="Sociální sítě">
   <ul>
     {socials.map((social) => (
       <li>
         <a href={social.url} target="_blank" rel="noopener">
-          {social.path ? (
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d={social.path} />
+          {social.glyph && (
+            <svg viewBox={social.glyph.viewBox} aria-hidden="true" focusable="false">
+              {social.glyph.paths.map((path) => (
+                <path d={path} />
+              ))}
             </svg>
-          ) : (
-            <span class="mark" aria-hidden="true">{social.initials ?? social.name.charAt(0)}</span>
           )}
           <span>{social.name}</span>
         </a>
@@ -83,19 +100,5 @@ const socials = (data.socials as Social[]).map((social) => ({
     flex: none;
     /* currentColor so the icon follows the link, including on hover. */
     fill: currentColor;
-  }
-
-  /* Stand-in for a brand with no icon of its own. */
-  .mark {
-    display: grid;
-    place-items: center;
-    width: 1.05rem;
-    height: 1.05rem;
-    flex: none;
-    border: 1px solid currentColor;
-    border-radius: 4px;
-    font-family: var(--font-heading);
-    font-size: 0.6rem;
-    line-height: 1;
   }
 </style>
