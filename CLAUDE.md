@@ -41,7 +41,9 @@ dev server.
   picker, a two-option status, checkboxes for `timeUnknown` and `highlight`,
   and a `HH:MM` pattern on `start` keep malformed entries out. Entries start
   collapsed, and `public/admin/preview.js` replaces the default preview pane
-  with one compact row per exception — the built-in one relisted every field
+  with one compact row per exception, in the admin's own colours (read
+  from its computed styles, so both CMS themes work) — the built-in one
+  relisted every field
   one per line, and `summary` cannot show the toggles because it interpolates
   values with no conditionals. That file uses the `createClass`/`h` globals the
   CMS provides, so no React script is needed, and it defers touching them until

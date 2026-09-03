@@ -1,10 +1,10 @@
 /**
  * Custom preview pane for the schedule exceptions.
  *
- * Styled after the site's own calendar rows, so what you see here is roughly
- * what visitors get: date badge, title, accent time on the right. The built-in
- * preview listed every field one per line on a white background, which matched
- * neither the site nor the dark admin around it.
+ * Row layout follows the site's calendar (date badge, title, time on the
+ * right), but the colours are taken from the admin around it rather than from
+ * the site: a second colour scheme mid-panel just looked like a seam. The
+ * built-in preview listed every field one per line on a white page.
  *
  * `createClass` and `h` are globals provided by the CMS, so no React script is
  * needed. Presentation only — no scheduling rules are reimplemented here,
@@ -13,16 +13,58 @@
 (function () {
   var WEEKDAYS = ['NE', 'PO', 'ÚT', 'ST', 'ČT', 'PÁ', 'SO'];
 
-  // The site's palette. The preview iframe supplies its own defaults —
-  // including a white page and a serif face — so everything is stated here.
-  var INK = '#131108';
-  var CARD = '#1d1a0e';
-  var TEXT = '#ded7b4';
-  var MUTED = '#8f8968';
-  var ACCENT = '#f2dc5a';
-  var EDGE = 'rgba(242, 220, 90, 0.18)';
+  // This file runs in the admin window, so the admin's own computed styles are
+  // readable. Borders and muted text stay neutral greys, which sit correctly on
+  // either a light or a dark ground.
+  var EDGE = 'rgba(128, 128, 128, 0.28)';
   var FONT =
     'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+  var FALLBACK = { bg: '#1e1e1e', fg: '#e8e8e8', accent: '#f2dc5a', card: 'rgba(255,255,255,.04)' };
+
+  /** Rough luminance test, so the accent stays readable on either theme. */
+  function isDark(color) {
+    var parts = String(color).match(/\d+(\.\d+)?/g);
+    if (!parts || parts.length < 3) return true;
+    var luminance =
+      (0.2126 * Number(parts[0]) + 0.7152 * Number(parts[1]) + 0.0722 * Number(parts[2])) / 255;
+    return luminance < 0.5;
+  }
+
+  function isOpaque(color) {
+    return Boolean(color) && color !== 'transparent' && !/,\s*0\s*\)$/.test(color);
+  }
+
+  /**
+   * The admin's background and text colour, so the preview blends in instead of
+   * introducing its own scheme. Walks up from the body because the colour is
+   * often set higher than the element itself.
+   */
+  function adminTheme() {
+    try {
+      var node = document.body || document.documentElement;
+      var fg = getComputedStyle(node).color || FALLBACK.fg;
+      var bg = '';
+      while (node && !bg) {
+        var candidate = getComputedStyle(node).backgroundColor;
+        if (isOpaque(candidate)) bg = candidate;
+        node = node.parentElement;
+      }
+      if (!bg) return FALLBACK;
+      var dark = isDark(bg);
+      return {
+        bg: bg,
+        fg: fg,
+        // Keoda's yellow on dark; the light-mode accent from the site on light.
+        accent: dark ? '#f2dc5a' : '#6f621a',
+        card: dark ? 'rgba(255,255,255,.045)' : 'rgba(0,0,0,.035)',
+      };
+    } catch (error) {
+      return FALLBACK;
+    }
+  }
+
+  // Set once per render so the row helpers can reach it.
+  var C = FALLBACK;
 
   /** Czech counts split three ways: 1, 2-4, and 5+. */
   function plural(count, one, few, many) {
@@ -88,7 +130,7 @@
         ),
         el(
           'div',
-          { fontSize: '9px', letterSpacing: '0.14em', color: MUTED, marginTop: '1px' },
+          { fontSize: '9px', letterSpacing: '0.14em', color: C.fg, opacity: '0.6', marginTop: '1px' },
           weekday || '—'
         ),
       ]
@@ -110,14 +152,15 @@
           fontSize: timeIsPattern ? '12px' : '17px',
           fontWeight: '700',
           lineHeight: '1',
-          color: cancelled || entry.timeUnknown || timeIsPattern ? MUTED : ACCENT,
+          color: cancelled || entry.timeUnknown || timeIsPattern ? C.fg : C.accent,
+          opacity: cancelled || entry.timeUnknown || timeIsPattern ? '0.6' : '1',
         },
         time
       ),
     ];
     if (entry.timeUnknown) {
       right.push(
-        el('div', { fontSize: '9px', letterSpacing: '0.1em', color: MUTED, marginTop: '2px' }, 'ČAS NEVÍM')
+        el('div', { fontSize: '9px', letterSpacing: '0.1em', color: C.fg, opacity: '0.6', marginTop: '2px' }, 'ČAS NEVÍM')
       );
     }
 
@@ -130,13 +173,14 @@
           letterSpacing: '0.04em',
           textTransform: 'uppercase',
           textDecoration: cancelled ? 'line-through' : 'none',
-          color: cancelled ? MUTED : TEXT,
+          color: C.fg,
+          opacity: cancelled ? '0.6' : '1',
         },
         title
       ),
     ];
     if (entry.note) {
-      middle.push(el('div', { fontSize: '12px', color: MUTED, marginTop: '2px' }, entry.note));
+      middle.push(el('div', { fontSize: '12px', color: C.fg, opacity: '0.6', marginTop: '2px' }, entry.note));
     }
     if (entry.highlight) {
       middle.push(
@@ -149,8 +193,8 @@
               display: 'inline-block',
               padding: '1px 6px',
               borderRadius: '999px',
-              border: '1px solid ' + ACCENT,
-              color: ACCENT,
+              border: '1px solid ' + C.accent,
+              color: C.accent,
               fontSize: '9px',
               fontWeight: '700',
               letterSpacing: '0.1em',
@@ -174,7 +218,7 @@
           marginBottom: '7px',
           border: '1px solid ' + (duplicated ? '#e8735f' : EDGE),
           borderRadius: '9px',
-          background: CARD,
+          background: C.card,
           opacity: isPast ? '0.45' : '1',
         },
       },
@@ -196,7 +240,7 @@
           margin: '9px 0 0',
           fontSize: '11.5px',
           lineHeight: '1.5',
-          color: tone === 'warn' ? '#e8735f' : MUTED,
+          color: tone === 'warn' ? '#e8735f' : C.fg,
         },
       },
       [el('span', { flex: 'none' }, tone === 'warn' ? '⚠' : '·'), el('span', {}, text)]
@@ -205,6 +249,9 @@
 
   var previewSpec = {
     render: function () {
+      // Re-read each render so switching the admin theme is picked up.
+      C = adminTheme();
+
       var entries;
       try {
         entries = toArray(this.props.entry.getIn(['data', 'exceptions']));
@@ -217,16 +264,15 @@
           'div',
           {
             style: {
-              // Fixed to the iframe's own viewport, so the dark ground covers
-              // it edge to edge whatever margin or background the preview
-              // document itself carries. Relying on styling that body left a
-              // pale frame showing through.
+              // Fixed to the iframe's own viewport so the ground covers it
+              // edge to edge, whatever margin or background the preview
+              // document carries. Styling that body alone left a pale frame.
               position: 'fixed',
               inset: '0',
               overflow: 'auto',
               padding: '16px 18px',
-              background: INK,
-              color: TEXT,
+              background: C.bg,
+              color: C.fg,
               fontFamily: FONT,
               fontSize: '13px',
             },
@@ -236,14 +282,14 @@
       };
 
       if (entries === null) {
-        return wrap(el('p', { margin: '0', color: MUTED }, 'Náhled se nepodařilo načíst.'));
+        return wrap(el('p', { margin: '0', color: C.fg, opacity: '0.6' }, 'Náhled se nepodařilo načíst.'));
       }
 
       if (entries.length === 0) {
         return wrap(
           el(
             'p',
-            { margin: '0', color: MUTED, lineHeight: '1.5' },
+            { margin: '0', color: C.fg, opacity: '0.6', lineHeight: '1.5' },
             'Žádné výjimky — platí pravidelný rozvrh. To je normální stav.'
           )
         );
@@ -270,7 +316,7 @@
             fontWeight: '700',
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: MUTED,
+            color: C.fg, opacity: '0.6',
           },
           entries.length + ' ' + plural(entries.length, 'výjimka', 'výjimky', 'výjimek')
         ),
@@ -321,20 +367,18 @@
   };
 
   // The preview runs in its own iframe, whose <body> keeps the browser's white
-  // background and 8px margin — visible as a pale frame around the dark panel.
-  // A component cannot reach that body, so it has to be styled from here.
-  var IFRAME_CSS =
-    'html, body { margin: 0; padding: 0; background: ' +
-    INK +
-    '; color: ' +
-    TEXT +
-    '; }';
+  // background and 8px margin. A component cannot reach that body, so it is
+  // styled from here; the fixed wrapper covers it regardless.
+  function iframeCss() {
+    var theme = adminTheme();
+    return 'html, body { margin: 0; padding: 0; background: ' + theme.bg + '; color: ' + theme.fg + '; }';
+  }
 
   function register() {
     if (typeof window.CMS === 'undefined') return false;
     if (typeof createClass === 'undefined' || typeof h === 'undefined') return false;
     if (typeof window.CMS.registerPreviewStyle === 'function') {
-      window.CMS.registerPreviewStyle(IFRAME_CSS, { raw: true });
+      window.CMS.registerPreviewStyle(iframeCss(), { raw: true });
     }
     var template = createClass(previewSpec);
     // The docs say the name is the collection or file-collection name; register
