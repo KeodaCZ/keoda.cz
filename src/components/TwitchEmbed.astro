@@ -1,17 +1,19 @@
 ---
 /**
- * Twitch player for the channel.
+ * Twitch player for the channel, shown only while the channel is actually live.
  *
- * Loaded on click rather than on page view. Two reasons: the embed sets
- * third-party cookies, and not shipping them unasked is what lets this site
- * stay free of a consent banner; and the player is a heavy thing to hand to
- * everyone who only came to check when the next stream is.
+ * Live status comes from decapi.me at page load, because a static build cannot
+ * know it — an explicit, owner-approved exception to "all external data is
+ * fetched at build time" (see CLAUDE.md). It needs no credentials, so nothing
+ * secret reaches the browser.
  *
- * Until then it is an ordinary link to Twitch, so it still works with no
- * JavaScript — the script upgrades that link into an in-place player.
+ * The player itself is loaded on click, not on reveal: the embed sets
+ * third-party cookies, and not shipping those unasked is what keeps this site
+ * free of a consent banner. Until then it is a plain link to Twitch.
  *
- * No live/offline detection here: the player reports its own offline state,
- * which is why CLAUDE.md defers a LIVE badge (that would need a Worker).
+ * Fails open in every direction — a broken, slow or unexpected answer shows the
+ * player rather than hiding it, and so does having no JavaScript. Wrongly
+ * claiming "offline" would send people away exactly when a stream is running.
  */
 import { TWITCH_URL } from '../lib/stream-event';
 
@@ -27,29 +29,44 @@ const parentQuery = parents.map((parent) => `parent=${encodeURIComponent(parent)
 // autoplay defaults to true and muted to false, which would start a stream out
 // loud on page load. The click supplies the intent, so sound is fine then.
 const playerSrc = `https://player.twitch.tv/?channel=${CHANNEL}&${parentQuery}&autoplay=true&muted=false`;
+const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
 ---
-<section class="stream" aria-labelledby="stream-heading">
-  <h2 id="stream-heading">Stream</h2>
+<section
+  class="stream is-probing"
+  aria-labelledby="stream-heading"
+  data-status-url={statusUrl}
+>
+  <h2 id="stream-heading">Právě vysílám</h2>
 
   <div class="frame" data-player-src={playerSrc}>
     <a class="facade" href={TWITCH_URL} target="_blank" rel="noopener">
       <span class="play" aria-hidden="true">▶</span>
       <span class="facade-text">
         <strong>Přehrát stream</strong>
-        <small>Když nevysílám, přehrávač to sám napíše.</small>
+        <small>Přehrávač se načte až teď, ne při otevření stránky.</small>
       </span>
     </a>
   </div>
-
-  <p class="muted note">
-    Přehrávač se načítá až po kliknutí — jinak by Twitch ukládal cookies
-    každému, kdo se sem jen přišel podívat na rozvrh.
-  </p>
 </section>
+
+{/* No JavaScript means no way to ask whether the stream is running, so show
+    the player rather than hiding it for good. */}
+<noscript>
+  <style>
+    .stream.is-probing {
+      display: block;
+    }
+  </style>
+</noscript>
 
 <style>
   .stream {
     margin-bottom: 1.6rem;
+  }
+  /* Hidden until the check says the stream is live. Starting hidden keeps the
+     common case (offline) free of a block that appears and then vanishes. */
+  .stream.is-probing {
+    display: none;
   }
 
   .frame {
@@ -111,18 +128,50 @@ const playerSrc = `https://player.twitch.tv/?channel=${CHANNEL}&${parentQuery}&a
     font-size: 0.8rem;
     color: var(--muted);
   }
-
-  .note {
-    margin: 0.6rem 0 0;
-    font-size: 0.8rem;
-  }
 </style>
 
 <script>
-  const frame = document.querySelector<HTMLElement>('.frame[data-player-src]');
+  const section = document.querySelector<HTMLElement>('.stream[data-status-url]');
+  const frame = section?.querySelector<HTMLElement>('.frame[data-player-src]');
   const facade = frame?.querySelector<HTMLAnchorElement>('.facade');
 
-  if (frame && facade) {
+  if (section && frame && facade) {
+    const reveal = () => section.classList.remove('is-probing');
+
+    /**
+     * decapi answers in plain text: an uptime like "2 hours, 5 minutes" when
+     * live, or "<channel> is offline". Anything else — "user not found", an
+     * error page, a rewritten response — must not be read as live.
+     */
+    const looksLive = (text: string) => {
+      const answer = text.trim();
+      if (!answer || /offline/i.test(answer)) return false;
+      return /\d/.test(answer);
+    };
+
+    const check = async () => {
+      const url = section.dataset.statusUrl;
+      if (!url) return reveal();
+
+      try {
+        const response = await fetch(url, {
+          // decapi sets session cookies. Omitting credentials makes the
+          // browser drop them, so no third-party cookie is stored and the
+          // site still needs no consent banner.
+          credentials: 'omit',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(4000),
+        });
+        if (!response.ok) return reveal();
+        if (looksLive(await response.text())) reveal();
+      } catch {
+        // Offline, blocked, timed out, or the service is down — show it.
+        reveal();
+      }
+    };
+
+    check();
+
     facade.addEventListener('click', (event) => {
       const src = frame.dataset.playerSrc;
       if (!src) return;

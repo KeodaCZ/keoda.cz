@@ -75,7 +75,9 @@ social bios.
   private repo. API keys live in GitHub Actions Secrets and are used only during
   the build.
 - **Nothing an API key can reach may be fetched from the browser.** All external
-  data is fetched at build time and committed as JSON.
+  data is fetched at build time and committed as JSON. One approved exception:
+  the Twitch live check via decapi.me, which needs no key and cannot be known
+  at build time (see Live status).
 - **No build step that can't run from a clean clone.**
 
 ### Repository visibility
@@ -108,10 +110,28 @@ reports its own offline state — in Czech, with a link to the last broadcast an
 the upcoming schedule (verified 2026-09-03). A real `LIVE` badge outside the
 player would need a Worker (Actions cron can't do it — see below).
 
-The player lives in `TwitchEmbed.astro` on the homepage and is **loaded on
-click**, not on page view: the embed sets third-party cookies, and not shipping
-those unasked is what keeps this site free of a consent banner. Until clicked it
-is a plain link to Twitch, so it works without JavaScript.
+The player lives in `TwitchEmbed.astro` on the homepage. It is **hidden unless
+the channel is actually live**, and even then **loaded on click**, not on page
+view: the embed sets third-party cookies, and not shipping those unasked is what
+keeps this site free of a consent banner. Until clicked it is a plain link to
+Twitch, so it works without JavaScript.
+
+Live status comes from `decapi.me/twitch/uptime/keodacz` in the browser at page
+load — an exception to "all external data is fetched at build time", approved by
+the owner 2026-09-03, because a static build genuinely cannot know it and the
+alternative was a Worker. It needs no credentials, so the no-secrets-in-the-
+browser rule still holds.
+
+Two things that exception costs, both deliberate: a third-party request on every
+homepage view, and reliance on someone else's uptime. **decapi sets session
+cookies**, so the fetch uses `credentials: 'omit'` — the browser then drops
+them and nothing is stored on the visitor's device.
+
+It **fails open** in every direction: an error, a timeout (4s), an unexpected
+answer, or no JavaScript all show the player rather than hiding it. Claiming
+"offline" while a stream is running would send people away at the worst moment,
+so only a positive uptime answer keeps it hidden. All three paths were tested
+against the real service, including pointing it at an unreachable host.
 
 Two traps, both verified rather than assumed: `parent` needs one key per
 hostname that frames the player (`keoda.cz`, `www.keoda.cz`, `localhost`) with
