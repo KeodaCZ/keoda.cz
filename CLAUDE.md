@@ -525,6 +525,13 @@ memberships only, **not** donations. Streamer.bot is the right tool.
 
 ## Open questions
 
+- [ ] Offline state for the player slot (owner idea 2026-09-03): right now the
+      section simply disappears when the channel is offline. Something in its
+      place could be better — last VOD, latest clip, or a line pointing at the
+      next stream from the schedule we already have. Decide what actually earns
+      the space before building it; an empty box that says "offline" is worse
+      than nothing.
+
 - [ ] Do we want `kontakt@keoda.cz`? (needs Vedos mailhosting + MX records)
 - [ ] Move the data-fetching subsections to `.claude/rules/` once the pipeline
       works — see the maintenance note under Data layer
