@@ -146,3 +146,27 @@ a:focus-visible,
 .card :last-child {
   margin-bottom: 0;
 }
+
+/* Shared bits that more than one component needs. Anything used by a single
+   component stays scoped in that component instead. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.more {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.more a {
+  text-decoration: none;
+}
+
+.more a:hover {
+  text-decoration: underline;
+}
