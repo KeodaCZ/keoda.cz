@@ -4,6 +4,18 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # A push made with GITHUB_TOKEN deliberately does not trigger other
+  # workflows, so the content jobs' own commits would otherwise sit unpublished
+  # until the next cron run — up to twelve hours for a clip made this evening.
+  # workflow_run is the intended way across that boundary.
+  #
+  # It fires even when the content run committed nothing, so this costs a few
+  # redundant deploys a day. That is the accepted price: a redeploy is
+  # idempotent and free on a public repo, and there is no way to read whether
+  # the triggering run actually changed anything.
+  workflow_run:
+    workflows: ['Fetch content', 'Reconcile clips']
+    types: [completed]
   # The schedule is rendered at build time, so "Dnes" freezes at the last
   # deploy. These two runs land just after midnight in Prague — 22:20 UTC
   # during summer time, 23:20 UTC during winter time — so the calendar rolls
@@ -20,6 +32,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Don't publish off the back of a content run that failed. Skipping here
+    # skips build and deploy too, since both depend on this job.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
