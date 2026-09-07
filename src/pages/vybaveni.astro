@@ -18,6 +18,10 @@ import gear from '../../data/gear.json';
           {category.items.map((item) => (
             <li>
               {item.label ? <><strong>{item.label}:</strong> {item.name}</> : item.name}
+              {/* Optional, and only where it earns its place: a line saying
+                  what a thing is for. Hardware mostly explains itself from
+                  its label; software does not. */}
+              {item.note && <span class="note muted">{item.note}</span>}
             </li>
           ))}
         </ul>
@@ -53,5 +57,15 @@ import gear from '../../data/gear.json';
   }
   li {
     margin-bottom: 0.3rem;
+  }
+  /* Its own line rather than trailing the name: at two columns the names are
+     already close to wrapping, and a note tacked on made them ragged. */
+  .note {
+    display: block;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  li:has(.note) {
+    margin-bottom: 0.7rem;
   }
 </style>

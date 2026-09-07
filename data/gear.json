@@ -96,23 +96,33 @@
       "items": [
         {
           "label": null,
-          "name": "OBS Studio"
+          "name": "OBS Studio",
+          "note": "Samotné vysílání a nahrávání. Všechno ostatní se do něj zapojuje."
         },
         {
           "label": null,
-          "name": "Aitum Multistream"
+          "name": "Streamer.bot",
+          "note": "Automatizace — reakce na chat, alerty, odměny za body."
         },
         {
           "label": null,
-          "name": "Aitum Vertical"
+          "name": "Elgato Wave Link",
+          "note": "Mixuje zvuk po kanálech, takže hra, chat a mikrofon jdou nastavit zvlášť."
+        }
+      ]
+    },
+    {
+      "name": "Pluginy do OBS",
+      "items": [
+        {
+          "label": null,
+          "name": "Aitum Multistream",
+          "note": "Pošle jeden stream na Twitch, YouTube a další zároveň."
         },
         {
           "label": null,
-          "name": "Streamer.bot"
-        },
-        {
-          "label": null,
-          "name": "Elgato Wave Link"
+          "name": "Aitum Vertical",
+          "note": "Vertikální výstup pro TikTok a Shorts z téhož streamu."
         }
       ]
     }
