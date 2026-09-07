@@ -264,7 +264,16 @@ Support a manual override list.
 ### Twitch clips
 
 `helix/clips?broadcaster_id=<id>`. App access token via client_credentials —
-no user scope needed. Client ID + Secret in Actions Secrets.
+no user scope needed.
+
+**Actions Secrets names, fixed so scripts and setup cannot drift:**
+`YOUTUBE_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`. Repository
+secrets, not Actions *variables* — variables are unencrypted and shown in
+plain text in the UI and logs. Both credentials are read-only against public
+data: a YouTube API key does no account operations at all, and a
+client_credentials token carries no user scope, so neither can touch the
+owner's channels even if it leaked. Recovery is regenerating in the
+respective console.
 
 - Use the **numeric** `broadcaster_id`, not the login name. Fetch once via
   `Get Users?login=keodacz` and hardcode it.
