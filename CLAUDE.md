@@ -489,6 +489,43 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
   to the left edge and centred text inside it drifts with window width and
   browser zoom. Use `margin-block: 0`.
 
+### Favicon and share card
+
+Approved 2026-09-07. Both derive from the owner's own material; the brand
+folder itself stays gitignored and only these outputs were committed.
+
+- **Favicon**: the brush mark from `graphics/old/grafika streamu/Keoda logo.jpg`
+  — **the complete mark**: K, its sweeping tail, and the small glyph beside it
+  — flattened to ink-on-accent (owner picked dark-K-on-yellow, and the full
+  mark over a tighter crop on 2026-09-07). Shipped as `public/favicon.ico`
+  (16/32/48, PNG-encoded entries), `public/icon-32.png` and
+  `public/apple-touch-icon.png` (180, with a margin so iOS's rounded-corner
+  mask cannot clip the strokes).
+
+  **Do not crop the tail off.** Cropping to just the K letterform reads as a
+  capital **A**, not a K — the tail is what makes the letter legible, and the
+  owner spotted it immediately. The brush `KEODA` wordmark is separately
+  unusable at icon size. Accept that 16px is soft; recognisability beat
+  crispness here.
+- **Share card**: `public/og.jpg`, 1200×630 — the wasteland skyline from
+  `graphics/Backgrounds/Twitch background.jpg` under a bottom-weighted scrim,
+  with the name, tagline and `keoda.cz` in the site's own fonts. Wired up in
+  `Base.astro` with absolute `og:image` / `og:url` (relative ones are ignored
+  by most platforms) and a per-page `canonical`, trailing-slash-normalised.
+
+**Gotcha worth keeping: this project's `sharp` cannot render the site's fonts.**
+Its SVG renderer ignores `@font-face` outright, including a woff2 embedded as a
+data URI — proven by rendering the same text with an embedded Barlow Condensed
+and with a deliberately missing font and measuring identical 438px-wide output.
+Gradients and compositing it handles fine. So any future asset needing Barlow
+Condensed or Rubik has to be rasterised in a **browser** and composited in
+sharp, not typeset by sharp. ImageMagick is not available here either — on
+Windows `convert` resolves to the filesystem tool, not ImageMagick.
+
+The one-off generator scripts live in the scratchpad, not the repo: they read
+from the gitignored brand folder, so they could never run from a clean clone.
+The generated assets are committed instead.
+
 ## Working style
 
 - **Visual/brand decisions (colors, fonts, imagery, favicon, logo) require

@@ -13,6 +13,15 @@ interface Props {
   description?: string;
 }
 const { title, description } = Astro.props;
+
+const site = Astro.site ?? new URL('https://keoda.cz');
+const pageTitle = title === 'KeodaCZ' ? title : `${title} | KeodaCZ`;
+// Absolute, and trailing-slash-normalised: og:image and og:url are ignored by
+// most platforms when relative, and a link shared with and without the slash
+// should not count as two pages.
+const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), site);
+const ogImage = new URL('/og.jpg', site);
+const ogDescription = description ?? 'KeodaCZ — český streamer. Twitch, YouTube a spol.';
 ---
 <!doctype html>
 <html lang="cs">
@@ -28,8 +37,31 @@ const { title, description } = Astro.props;
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
       } catch (e) {}
     </script>
-    <title>{title === 'KeodaCZ' ? title : `${title} | KeodaCZ`}</title>
+    <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+
+    {/* .ico first for the browsers and crawlers that request /favicon.ico
+        blindly; the PNG is what modern browsers actually pick. */}
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {/* Share card. Most of this site's traffic arrives from links in social
+        bios, so a bare link with no preview is the one place it cannot afford
+        to look unfinished. */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="KeodaCZ" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={ogDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="KeodaCZ — zarostlé postapokalyptické město" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <Header />
