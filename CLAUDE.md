@@ -613,9 +613,31 @@ The generated assets are committed instead.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- Site progress so far: homepage (socials row, compact schedule, gear teaser),
-  `/kalendar`, `/vybaveni`, the Twitch player, and the CMS at `/admin`.
-  Next up: guides, then the data pipeline (YouTube + clips).
+- **State as of 2026-09-07, end of session.** Live and working: homepage
+  (socials, Twitch player, compact schedule, gear teaser), `/kalendar`,
+  `/vybaveni`, `/admin`, the 404 page, favicon, share card, `robots.txt`,
+  `sitemap.xml`, the deploy keepalive, and the content pipeline. Working tree
+  clean, everything pushed.
+
+  The pipeline has run for real: 3 videos / 83 Shorts / 425 streams in
+  `data/youtube.json`, 31 clips in `data/clips/2026.json`, and one clean
+  reconciliation pass. 208 tests gate the deploy.
+
+  **Next up, roughly in this order:**
+  1. **Nothing renders the fetched data yet** — no archive page, no clips
+     section. That is the obvious next build, and `clipLabel()` in
+     `src/lib/clip-title.ts` is already there for it. Worth knowing before
+     designing it: the channel is 425 streams against 3 edited videos, so the
+     stream archive is the substance and "videos" is a rounding error.
+  2. **Backfill the clip history.** The fetch window only reached 2026-06-09;
+     the channel goes back to 2023. Clips do not expire, so it is all still
+     there. Must merge, not overwrite, and cannot run locally — no credentials
+     on either machine — so it needs to be a `workflow_dispatch` job.
+  3. **The maintenance task under Data layer is now due.** All three jobs have
+     run successfully, so its trigger is met. This file is 723 lines against a
+     target of ~200.
+  4. Parked, needs the personal PC: branch `gear-software-notes` and the first
+     guide (see Pages).
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
   is 16:30Z in summer but 17:30Z in winter. Covered by tests.
