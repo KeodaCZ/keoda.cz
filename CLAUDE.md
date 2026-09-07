@@ -443,6 +443,18 @@ and the easiest page here; build it early. Plain markdown, no CMS.
 **Guides** — same treatment. Static markdown in this repo, explicitly *not*
 Notion, even though nutty's Notion page was the original reference for the idea.
 
+**`robots.txt` and `sitemap.xml`** — both endpoints (`src/pages/robots.txt.ts`,
+`sitemap.xml.ts`), not files in `public/`, so the site URL comes from
+`astro.config.mjs` and cannot drift. The sitemap globs `src/pages/**/*.astro`
+rather than keeping a list, so a new page appears by itself; it skips `404`,
+underscore-prefixed files and dynamic routes, and the `.ics` endpoints fall
+outside the glob. No `lastmod`/`changefreq`/`priority`: Google ignores the last
+two, and the deploy cron rebuilds twice a day, so a build timestamp would claim
+every page changed daily. `robots.txt` disallows `/admin/` and `/ics/`.
+Disallow only stops crawling, so `/admin` also carries its own `noindex` —
+that's the half that keeps it out of results. Neither is a security measure;
+`/admin` holds no credentials by design.
+
 **404** (`src/pages/404.astro`) — GitHub Pages served its own "Page not found ·
 GitHub Pages" screen until 2026-09-07, which read as a broken site. Astro emits
 this route as `dist/404.html`, not `dist/404/index.html`, which is the filename
