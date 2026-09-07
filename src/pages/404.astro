@@ -1,0 +1,61 @@
+---
+/**
+ * GitHub Pages serves this for any path it doesn't have, which until now was
+ * its own "Page not found · GitHub Pages" screen — off-brand and confusing
+ * enough to read as a broken site.
+ *
+ * Astro emits this route as dist/404.html rather than dist/404/index.html,
+ * which is the filename Pages looks for.
+ */
+import Base from '../layouts/Base.astro';
+---
+<Base title="Stránka nenalezena" noindex>
+  <div class="container">
+    <p class="code" aria-hidden="true">404</p>
+    <h1>Tuhle stránku <span class="accent">neznám</span></h1>
+    <p class="muted lead">
+      Buď je odkaz starý, nebo v adrese chybí písmeno. Odsud se dostaneš dál:
+    </p>
+
+    <nav aria-label="Kam dál">
+      <a class="btn" href="/">Na hlavní stránku</a>
+      <a href="/kalendar/">Kalendář streamů →</a>
+      <a href="/vybaveni/">Vybavení →</a>
+    </nav>
+  </div>
+</Base>
+
+<style>
+  /* Big and quiet: it labels the situation without shouting over the
+     sentence that actually tells the visitor what happened. */
+  .code {
+    margin: 2.4rem 0 0;
+    font-family: var(--font-heading);
+    font-size: clamp(4rem, 18vw, 8rem);
+    font-weight: 700;
+    line-height: 0.85;
+    letter-spacing: 0.02em;
+    color: var(--card-edge);
+  }
+
+  h1 {
+    margin-top: 0.3rem;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    text-transform: uppercase;
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .lead {
+    max-width: 44ch;
+    margin-bottom: 1.8rem;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem 1.6rem;
+    margin-bottom: 3rem;
+  }
+</style>

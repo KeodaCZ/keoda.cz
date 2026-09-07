@@ -443,6 +443,13 @@ and the easiest page here; build it early. Plain markdown, no CMS.
 **Guides** — same treatment. Static markdown in this repo, explicitly *not*
 Notion, even though nutty's Notion page was the original reference for the idea.
 
+**404** (`src/pages/404.astro`) — GitHub Pages served its own "Page not found ·
+GitHub Pages" screen until 2026-09-07, which read as a broken site. Astro emits
+this route as `dist/404.html`, not `dist/404/index.html`, which is the filename
+Pages looks for — don't "fix" that to a directory. It passes `noindex` to
+`Base.astro`, which then also drops the `canonical` link: naming a real URL as
+canonical for content that isn't at that URL is worse than saying nothing.
+
 **News — dropped for now.** Owner is unsure they'd use it, and a stale news
 section makes a site look abandoned worse than having none. Cancellations belong
 in `exceptions.json` instead. Adding news later is an afternoon's work; don't

@@ -11,8 +11,10 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  /** Keep this page out of search results — the 404 page, for one. */
+  noindex?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 
 const site = Astro.site ?? new URL('https://keoda.cz');
 const pageTitle = title === 'KeodaCZ' ? title : `${title} | KeodaCZ`;
@@ -39,7 +41,9 @@ const ogDescription = description ?? 'KeodaCZ — český streamer. Twitch, YouT
     </script>
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
-    <link rel="canonical" href={canonical} />
+    {/* No canonical on a noindex page: it would name a real URL for content
+        that is not that URL, which is worse than saying nothing. */}
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
 
     {/* .ico first for the browsers and crawlers that request /favicon.ico
         blindly; the PNG is what modern browsers actually pick. */}
