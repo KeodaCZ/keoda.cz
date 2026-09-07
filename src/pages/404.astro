@@ -26,10 +26,31 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
+  /* A dead end, not a page whose content ran out — so it sits in the middle
+     of the viewport rather than at the top of a mostly empty one.
+     `place-content` and not `margin`, because .container needs to keep its
+     own margin-inline: auto for the 1200px box to stay centred. */
+  /* Only this page's stylesheet, so no other page's <main> is affected.
+     A grid here makes the container stretch to main's full height; `min-height:
+     100%` on the container could not do it, because main gets its height from
+     the body flex layout while its own `height` stays auto, so a percentage
+     had nothing definite to resolve against. */
+  :global(main) {
+    display: grid;
+  }
+
+  .container {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    padding-block: 3rem;
+    text-align: center;
+  }
+
   /* Big and quiet: it labels the situation without shouting over the
      sentence that actually tells the visitor what happened. */
   .code {
-    margin: 2.4rem 0 0;
+    margin: 0;
     font-family: var(--font-heading);
     font-size: clamp(4rem, 18vw, 8rem);
     font-weight: 700;
@@ -48,6 +69,8 @@ import Base from '../layouts/Base.astro';
   }
   .lead {
     max-width: 44ch;
+    /* Centres the box itself, not just the text inside it. */
+    margin-inline: auto;
     margin-bottom: 1.8rem;
   }
 
@@ -55,7 +78,7 @@ import Base from '../layouts/Base.astro';
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 0.8rem 1.6rem;
-    margin-bottom: 3rem;
   }
 </style>

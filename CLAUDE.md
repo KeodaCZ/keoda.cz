@@ -462,6 +462,17 @@ Pages looks for — don't "fix" that to a directory. It passes `noindex` to
 `Base.astro`, which then also drops the `canonical` link: naming a real URL as
 canonical for content that isn't at that URL is worse than saying nothing.
 
+It is the one page centred in both axes (owner's call 2026-09-07) — a dead end
+rather than a page whose content ran out. Two gotchas that took two attempts:
+`min-height: 100%` on the container does nothing, because `main` takes its
+height from the body's flex layout while its own `height` stays `auto`, so a
+percentage has nothing definite to resolve against; the fix is
+`:global(main) { display: grid }` in the page's own style block, which stretches
+the container and — verified in the build output — lands only in
+`dist/404.html`, not in the shared CSS or any other page. And centre the
+container with `place-content`, never `margin`, or `.container` loses its
+`margin-inline: auto` (see the Design gotcha above).
+
 **News — dropped for now.** Owner is unsure they'd use it, and a stale news
 section makes a site look abandoned worse than having none. Cancellations belong
 in `exceptions.json` instead. Adding news later is an afternoon's work; don't
