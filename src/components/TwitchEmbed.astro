@@ -1,6 +1,7 @@
 ---
 /**
- * Twitch player for the channel, shown only while the channel is actually live.
+ * Twitch player for the channel, with a one-line status strip in its place
+ * while the channel is offline.
  *
  * Live status comes from decapi.me at page load, because a static build cannot
  * know it — an explicit, owner-approved exception to "all external data is
@@ -12,9 +13,11 @@
  * free of a consent banner. Until then it is a plain link to Twitch.
  *
  * Fails open in every direction — a broken, slow or unexpected answer shows the
- * player rather than hiding it, and so does having no JavaScript. Wrongly
- * claiming "offline" would send people away exactly when a stream is running.
+ * player rather than hiding it, and so does having no JavaScript. Only a
+ * definite "offline" ever prints the strip: wrongly claiming offline would send
+ * people away exactly when a stream is running, so it is never the fallback.
  */
+import { getUpcomingDays, timezone, weekdayLocative } from '../lib/schedule';
 import { TWITCH_URL } from '../lib/stream-event';
 
 const CHANNEL = 'keodacz';
@@ -29,28 +32,88 @@ const parentQuery = parents.map((parent) => `parent=${encodeURIComponent(parent)
 // autoplay defaults to true and muted to false, which would start a stream out
 // loud on page load. The click supplies the intent, so sound is fine then.
 const playerSrc = `https://player.twitch.tv/?channel=${CHANNEL}&${parentQuery}&autoplay=true&muted=false`;
+
+// A frame from the running stream, behind the play button. Applied as a CSS
+// background rather than an <img> on purpose: a browser skips background
+// images inside a `display: none` subtree, so while the channel is offline
+// this costs no third-party request at all. An <img> would be fetched
+// regardless of the section being hidden.
+//
+// Verified 2026-09-07: sets no cookies, `Access-Control-Allow-Origin: *`,
+// ~155 KB while live, `max-age=300`. Offline it 302s to Twitch's own grey
+// placeholder, which is off-palette but only reachable in the first few
+// minutes after going live, while the CDN still holds the old answer.
+const thumbUrl = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${CHANNEL}-1280x720.jpg`;
 const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
+
+// Title and category, fetched only once uptime has confirmed a live stream.
+// They are deliberately not a live signal: offline they keep returning the
+// *last* stream's title and game (verified 2026-09-07), so trusting them would
+// announce a stream that ended days ago. Fetching them late also keeps the
+// offline case — nearly every page view — at one third-party request.
+// These set decapi's session cookies too, so they use `credentials: 'omit'`.
+const titleUrl = `https://decapi.me/twitch/title/${CHANNEL}`;
+const gameUrl = `https://decapi.me/twitch/game/${CHANNEL}`;
+
+// Candidates for "the next stream" on the offline strip. Which one it is gets
+// picked in the browser, not here: once we know the channel is offline, a
+// stream whose start time has already passed today must not be offered as the
+// next one. Cancelled days are already gone; a day with an undecided time
+// stays, carrying no `start`.
+const upcoming = getUpcomingDays(14)
+  .filter((day) => day.streaming)
+  .map((day) => ({ date: day.date, start: day.start, weekday: weekdayLocative(day.date) }));
 ---
 <section
   class="stream is-probing"
-  aria-labelledby="stream-heading"
   data-status-url={statusUrl}
+  data-title-url={titleUrl}
+  data-game-url={gameUrl}
+  data-timezone={timezone}
+  data-upcoming={JSON.stringify(upcoming)}
 >
-  <h2 id="stream-heading">Právě vysílám</h2>
+  <div class="live">
+    {/* The stream's own title is the section's heading (owner's call
+        2026-09-07 — a separate "Právě vysílám" above it said less than the
+        title does). Filled in from decapi once the stream is confirmed live,
+        and stays hidden if the request fails: the player is the point, and a
+        heading is not worth inventing text for. */}
+    <h2 class="meta">
+      <span class="meta-title"></span>
+      <span class="meta-sep" aria-hidden="true">·</span>
+      <span class="meta-game"></span>
+    </h2>
 
-  <div class="frame" data-player-src={playerSrc}>
-    <a class="facade" href={TWITCH_URL} target="_blank" rel="noopener">
-      <span class="play" aria-hidden="true">▶</span>
-      <span class="facade-text">
-        <strong>Přehrát stream</strong>
-        <small>Přehrávač se načte až teď, ne při otevření stránky.</small>
-      </span>
-    </a>
+    <div class="frame" data-player-src={playerSrc}>
+      <a
+        class="facade"
+        href={TWITCH_URL}
+        target="_blank"
+        rel="noopener"
+        style={`--thumb: url('${thumbUrl}')`}
+      >
+        <span class="play" aria-hidden="true">▶</span>
+        <span class="facade-text">
+          <strong>Přehrát stream</strong>
+          <small>Přehrávač se načte až teď, ne při otevření stránky.</small>
+        </span>
+      </a>
+    </div>
   </div>
+
+  {/* One quiet line, not a box: the calendar card below already answers
+      "when", so all this adds is the one thing nothing else on the page
+      states — whether a stream is running right now. */}
+  <p class="offline">
+    <span class="ring" aria-hidden="true"></span><span class="status">Právě nevysílám</span><span
+      class="next"
+    ></span>
+  </p>
 </section>
 
-{/* No JavaScript means no way to ask whether the stream is running, so show
-    the player rather than hiding it for good. */}
+{/* No JavaScript means no way to ask whether the stream is running, so reveal
+    the section. With no state class set it shows the player, never the strip —
+    a static page must not assert something it cannot check. */}
 <noscript>
   <style>
     .stream.is-probing {
@@ -63,10 +126,61 @@ const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
   .stream {
     margin-bottom: 1.6rem;
   }
-  /* Hidden until the check says the stream is live. Starting hidden keeps the
-     common case (offline) free of a block that appears and then vanishes. */
+  /* Hidden until the check answers, so neither state flashes up and then
+     swaps. Whichever wins then pushes the page down once. */
   .stream.is-probing {
     display: none;
+  }
+
+  /* The player is the default state, and the offline strip is opt-in — that is
+     what makes every fallback path (no JavaScript, an error, a timeout, an
+     answer we don't recognise) land on the player. */
+  .offline {
+    display: none;
+  }
+  .stream.is-offline .live {
+    display: none;
+  }
+  .stream.is-offline .offline {
+    display: block;
+  }
+
+  /* Stream title + category, the section's heading. Sits above the frame, not
+     on it: over the thumbnail it would compete with the play button, and a
+     long title would have to be clamped. */
+  .meta {
+    display: none;
+    /* An h2 by markup, but a stream title is content rather than a label, so
+       it drops the site's condensed uppercase heading treatment and keeps the
+       owner's own wording and capitalisation. */
+    font-family: var(--font-body);
+    font-weight: 600;
+    /* clamp, because titles run to 140 characters and this is the widest
+       thing in the hero on a phone. */
+    font-size: clamp(1.1rem, 3.4vw, 1.35rem);
+    letter-spacing: 0;
+    line-height: 1.3;
+    text-transform: none;
+    margin: 0 0 0.7rem;
+  }
+  .meta.has-info {
+    display: block;
+  }
+  /* Only shown when there is something on both sides of it, so the "·" never
+     dangles when one of the two requests came back empty. */
+  .meta-sep {
+    display: none;
+    margin-inline: 0.35rem;
+    color: var(--muted);
+  }
+  .meta.has-both .meta-sep {
+    display: inline;
+  }
+  /* Lighter than the title, so the title still leads now that both sit in
+     the same heading. */
+  .meta-game {
+    font-weight: 400;
+    color: var(--accent);
   }
 
   .frame {
@@ -95,10 +209,24 @@ const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
     height: 100%;
     text-align: center;
     text-decoration: none;
-    color: var(--text);
+    /* Fixed light text, not var(--text): the scrim below is dark in both
+       themes, so in light mode the normal dark ink would vanish into it. */
+    color: var(--on-media);
+    /* Two layers over the frame instead of one flat scrim, which either
+       drowned the thumbnail or left the label unreadable on a busy image: a
+       soft spotlight right behind the button and caption, then a light
+       overall wash so the edges of the picture still read as a picture. */
+    background-image:
+      radial-gradient(ellipse 46% 38% at 50% 52%, rgba(19, 17, 8, 0.82), rgba(19, 17, 8, 0) 72%),
+      linear-gradient(to bottom, rgba(19, 17, 8, 0.42), rgba(19, 17, 8, 0.66)),
+      var(--thumb);
+    background-size: cover;
+    background-position: center;
   }
+  /* Yellow and ink, which are the two shared tokens — var(--accent) flips to
+     dark gold in light mode and would go invisible against the scrim. */
   .facade:hover .play {
-    background: var(--accent);
+    background: var(--btn-bg);
     color: var(--btn-text);
   }
 
@@ -107,9 +235,13 @@ const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
     place-items: center;
     width: 3.4rem;
     height: 3.4rem;
-    border: 1px solid var(--accent);
+    /* Its own dark fill, so the ring reads against any frame the stream
+       happens to be showing — a thin outline alone disappeared over a bright
+       one. */
+    border: 2px solid var(--btn-bg);
     border-radius: 999px;
-    color: var(--accent);
+    background: rgba(19, 17, 8, 0.55);
+    color: var(--btn-bg);
     font-size: 1.1rem;
     padding-left: 0.15rem;
   }
@@ -117,6 +249,8 @@ const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
   .facade-text {
     display: grid;
     gap: 0.15rem;
+    /* Cheaper than more scrim, and it only darkens the pixels behind glyphs. */
+    text-shadow: 0 1px 10px rgba(19, 17, 8, 0.95);
   }
   .facade-text strong {
     font-family: var(--font-heading);
@@ -126,32 +260,170 @@ const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
   }
   .facade-text small {
     font-size: 0.8rem;
+    color: var(--on-media-muted);
+  }
+
+  /* Offline strip */
+  .offline {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  /* A hollow ring rather than a filled dot, so it reads as "off" and not as a
+     bullet point in front of the sentence.
+
+     Inline rather than a flex child on purpose: as a flex item it centred
+     itself against the whole block, so once the line wrapped on a phone the
+     ring floated between the two lines instead of sitting by the first word. */
+  .ring {
+    display: inline-block;
+    vertical-align: 0.1em;
+    width: 0.6rem;
+    height: 0.6rem;
+    margin-right: 0.5rem;
+    border: 2px solid var(--muted);
+    border-radius: 999px;
+  }
+  .status {
+    font-weight: 600;
+  }
+  .next {
     color: var(--muted);
   }
 </style>
 
 <script>
+  interface Upcoming {
+    date: string;
+    /** Absent when the stream happens but no time is promised. */
+    start?: string;
+    weekday: string;
+  }
+
   const section = document.querySelector<HTMLElement>('.stream[data-status-url]');
   const frame = section?.querySelector<HTMLElement>('.frame[data-player-src]');
   const facade = frame?.querySelector<HTMLAnchorElement>('.facade');
+  const next = section?.querySelector<HTMLElement>('.next');
 
-  if (section && frame && facade) {
-    const reveal = () => section.classList.remove('is-probing');
+  if (section && frame && facade && next) {
+    /** 'YYYY-MM-DD' one day on. UTC arithmetic on a plain date is DST-safe
+     *  precisely because no timezone conversion ever happens. */
+    const dayAfter = (date: string) => {
+      const value = new Date(`${date}T00:00:00Z`);
+      value.setUTCDate(value.getUTCDate() + 1);
+      return value.toISOString().slice(0, 10);
+    };
+
+    /** The tail of the offline line, or '' when there is nothing to point at. */
+    const nextStream = () => {
+      let upcoming: Upcoming[];
+      try {
+        upcoming = JSON.parse(section.dataset.upcoming ?? '[]');
+      } catch {
+        return '';
+      }
+
+      const zone = section.dataset.timezone || 'Europe/Prague';
+      // hourCycle 'h23' rather than hour12:false, which spells midnight
+      // "24:00" in some engines and would then compare wrong against 'HH:MM'.
+      const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-CA', {
+          timeZone: zone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hourCycle: 'h23',
+        })
+          .formatToParts(new Date())
+          .map((part) => [part.type, part.value]),
+      );
+      const today = `${parts.year}-${parts.month}-${parts.day}`;
+      const now = `${parts.hour}:${parts.minute}`;
+
+      // Both formats are zero-padded, so plain string comparison orders them.
+      // A start already past today cannot be the next stream — that is the
+      // whole point of choosing here rather than at build time. A day with an
+      // undecided time never counts as past; no time was ever promised.
+      const stream = upcoming.find(
+        (day) => day.date > today || (day.date === today && (!day.start || day.start > now)),
+      );
+      if (!stream) return '';
+
+      const when =
+        stream.date === today ? 'dnes' : stream.date === dayAfter(today) ? 'zítra' : stream.weekday;
+
+      // Non-breaking space before the time, so a wrap on a phone never leaves
+      // "18:30" stranded alone on the second line.
+      return stream.start
+        ? ` — nejbližší stream ${when} od ${stream.start}`
+        : ` — nejbližší stream ${when}, čas ještě nevím`;
+    };
+
+    const showPlayer = () => section.classList.remove('is-probing');
+
+    /** Plain-text GET with decapi's cookies dropped, '' on any failure. */
+    const fetchText = async (url: string | undefined) => {
+      if (!url) return '';
+      try {
+        const response = await fetch(url, {
+          credentials: 'omit',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(4000),
+        });
+        if (!response.ok) return '';
+        // Twitch caps titles at 140 characters, so anything longer is not a
+        // title — most likely an error page. Don't paste it into the page.
+        const text = (await response.text()).trim();
+        return text.length > 140 ? '' : text;
+      } catch {
+        return '';
+      }
+    };
+
+    /** Title + category, once the stream is known to be live. */
+    const loadMeta = async () => {
+      const meta = section.querySelector<HTMLElement>('.meta');
+      const titleEl = meta?.querySelector<HTMLElement>('.meta-title');
+      const gameEl = meta?.querySelector<HTMLElement>('.meta-game');
+      if (!meta || !titleEl || !gameEl) return;
+
+      const [title, game] = await Promise.all([
+        fetchText(section.dataset.titleUrl),
+        fetchText(section.dataset.gameUrl),
+      ]);
+      if (!title && !game) return;
+
+      // textContent, never innerHTML: this string arrives from a third-party
+      // service and must never be able to inject markup into the page.
+      titleEl.textContent = title;
+      gameEl.textContent = game;
+      meta.classList.add('has-info');
+      if (title && game) meta.classList.add('has-both');
+    };
+
+    const showOffline = () => {
+      // Fill and switch state before revealing, so the player never flashes.
+      next.textContent = nextStream();
+      section.classList.add('is-offline');
+      section.classList.remove('is-probing');
+    };
 
     /**
      * decapi answers in plain text: an uptime like "2 hours, 5 minutes" when
      * live, or "<channel> is offline". Anything else — "user not found", an
-     * error page, a rewritten response — must not be read as live.
+     * error page, a rewritten response — is trusted in neither direction.
      */
-    const looksLive = (text: string) => {
+    const readStatus = (text: string) => {
       const answer = text.trim();
-      if (!answer || /offline/i.test(answer)) return false;
-      return /\d/.test(answer);
+      if (/offline/i.test(answer)) return 'offline';
+      if (/\d/.test(answer)) return 'live';
+      return 'unknown';
     };
 
     const check = async () => {
       const url = section.dataset.statusUrl;
-      if (!url) return reveal();
+      if (!url) return showPlayer();
 
       try {
         const response = await fetch(url, {
@@ -162,11 +434,18 @@ const statusUrl = `https://decapi.me/twitch/uptime/${CHANNEL}`;
           cache: 'no-store',
           signal: AbortSignal.timeout(4000),
         });
-        if (!response.ok) return reveal();
-        if (looksLive(await response.text())) reveal();
+        if (!response.ok) return showPlayer();
+        // Only a definite "offline" prints the strip. 'unknown' falls through
+        // to the player, same as an error would.
+        const status = readStatus(await response.text());
+        if (status === 'offline') return showOffline();
+        showPlayer();
+        // Only on a confirmed 'live'. On 'unknown' we show the player as a
+        // precaution but have no right to announce a title as the current one.
+        if (status === 'live') loadMeta();
       } catch {
-        // Offline, blocked, timed out, or the service is down — show it.
-        reveal();
+        // Offline, blocked, timed out, or the service is down — show the player.
+        showPlayer();
       }
     };
 

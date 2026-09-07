@@ -16,6 +16,13 @@
   --card-edge: rgba(19, 17, 8, 0.25);
   --btn-bg: #f2dc5a;
   --btn-text: #131108;
+
+  /* Text sitting on top of media — a stream thumbnail, later a clip cover.
+     Media carries its own dark scrim in both themes, so unlike every token
+     above these two deliberately do NOT flip with light/dark. The values are
+     the palette's own dark-mode text and muted, pinned. */
+  --on-media: #ded7b4;
+  --on-media-muted: #8f8968;
 }
 
 /* Dark mode: automatic via system preference (unless the visitor forced

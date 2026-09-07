@@ -13,6 +13,7 @@ import {
 } from './schedule-core';
 
 export type { Banner, ScheduleDay };
+export { weekdayLocative } from './schedule-core';
 
 export const timezone: string = scheduleData.timezone || 'Europe/Prague';
 /** Approximate end time, used only for calendar exports — the site itself

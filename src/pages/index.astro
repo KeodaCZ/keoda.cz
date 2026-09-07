@@ -3,18 +3,23 @@ import Base from '../layouts/Base.astro';
 import ScheduleCompact from '../components/ScheduleCompact.astro';
 import TwitchEmbed from '../components/TwitchEmbed.astro';
 import SocialLinks from '../components/SocialLinks.astro';
-import { TWITCH_URL } from '../lib/stream-event';
 ---
 <Base title="KeodaCZ" description="KeodaCZ — český streamer. Twitch, YouTube a spol.">
   <div class="container">
     <section class="hero">
       <h1>KeodaCZ</h1>
       <p class="muted tagline">Český streamer — Twitch, YouTube a spol.</p>
-      <a class="btn" href={TWITCH_URL} target="_blank" rel="noopener">▶ Sledovat na Twitchi</a>
+
+      {/* Above the socials row, not below it (owner's call 2026-09-07): while
+          a stream is running it is the reason anyone opened the page, and on
+          a phone the eight chips would push it under the fold. It renders
+          nothing at all when the channel is offline. */}
+      <TwitchEmbed />
+
+      {/* No Twitch button here on purpose — the socials row directly below
+          opens with a Twitch chip, so a second one just says it twice. */}
       <SocialLinks />
     </section>
-
-    <TwitchEmbed />
 
     <div class="panels">
       <ScheduleCompact />
@@ -40,9 +45,6 @@ import { TWITCH_URL } from '../lib/stream-event';
   }
   .tagline {
     font-size: 1.05rem;
-    margin-bottom: 1.3rem;
-  }
-  .hero :global(.btn) {
     margin-bottom: 1.3rem;
   }
 

@@ -11,6 +11,7 @@ import {
   getBanners,
   mergeExceptions,
   todayIn,
+  weekdayLocative,
 } from '../src/lib/schedule-core.ts';
 
 /** Banners are a list now; most checks care about the first (soonest) one. */
@@ -306,6 +307,23 @@ check('real CMS data banners', getBanners(PATTERN, fromCms, '2026-09-02').map((b
   'Zítra bonusový stream od 18:30',
   'V pátek nestreamuju',
 ]);
+
+// --- weekdayLocative: names the day for the offline strip ---------------
+// Czech needs the locative case and the preposition changes with it, which is
+// the only reason this isn't a plain lookup. Lowercase, to sit mid-sentence.
+check('locative Monday', weekdayLocative('2026-09-07'), 'v pondělí');
+check('locative Tuesday', weekdayLocative('2026-09-08'), 'v úterý');
+check('locative Wednesday takes "ve"', weekdayLocative('2026-09-02'), 've středu');
+check('locative Thursday takes "ve"', weekdayLocative('2026-09-03'), 've čtvrtek');
+check('locative Friday', weekdayLocative('2026-09-04'), 'v pátek');
+check('locative Saturday', weekdayLocative('2026-09-05'), 'v sobotu');
+check('locative Sunday', weekdayLocative('2026-09-06'), 'v neděli');
+// Purely a function of the date, so a page built yesterday still labels it
+// right — that's why the component computes "dnes"/"zítra" in the browser
+// instead of baking them in. A DST switch must not shift the day either.
+check('locative across the spring switch', weekdayLocative('2027-03-28'), 'v neděli');
+check('locative across the autumn switch', weekdayLocative('2026-10-25'), 'v neděli');
+check('locative on a leap day', weekdayLocative('2028-02-29'), 'v úterý');
 
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));

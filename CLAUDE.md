@@ -105,16 +105,62 @@ Dropped on purpose — do not build, do not suggest:
 Twitch login, user accounts, points/leaderboards, polls, predictions, giveaways.
 All need auth + a database.
 
-**Live status**: deferred, and the embed makes it unnecessary. The Twitch player
-reports its own offline state — in Czech, with a link to the last broadcast and
-the upcoming schedule (verified 2026-09-03). A real `LIVE` badge outside the
-player would need a Worker (Actions cron can't do it — see below).
+**Live status**: no build-time badge, ever — Actions cron can't do it (see
+Workflow schedule) and a real one would need a Worker. What exists instead is a
+client-side check in `TwitchEmbed.astro`, described below: player when live,
+one-line strip when offline. Nothing else on the site may claim live status,
+because nothing else can know it.
 
-The player lives in `TwitchEmbed.astro` on the homepage. It is **hidden unless
-the channel is actually live**, and even then **loaded on click**, not on page
-view: the embed sets third-party cookies, and not shipping those unasked is what
-keeps this site free of a consent banner. Until clicked it is a plain link to
-Twitch, so it works without JavaScript.
+The player lives in `TwitchEmbed.astro`, **inside the homepage hero between the
+tagline and the socials row** (owner's call 2026-09-07, after comparing all
+three candidate slots on a local build): while a stream is running it is the
+reason anyone opened the page, and below the socials the eight chips pushed it
+under the fold on a phone. Above the `h1` was tried and rejected. It is
+**hidden unless the channel is actually live**, and even then **loaded on
+click**, not on page view: the embed sets third-party cookies, and not shipping
+those unasked is what keeps this site free of a consent banner. Until clicked it
+is a plain link to Twitch, so it works without JavaScript.
+
+The facade carries a **frame from the running stream** as its background —
+`static-cdn.jtvnw.net/previews-ttv/live_user_keodacz-1280x720.jpg`. A CSS
+background and not an `<img>` on purpose: browsers skip background images
+inside a `display: none` subtree, so while the channel is offline it costs no
+request at all, where an `<img>` would be fetched regardless. Contrast is
+local, not a flat scrim — a radial spotlight behind the button, the play ring
+given its own dark fill, and a text-shadow on the caption; a scrim heavy
+enough to carry the text drowned the picture. Text over media uses
+`--on-media` / `--on-media-muted`, the only tokens that deliberately do **not**
+flip with the theme, because the scrim is dark in both.
+
+The **stream's own title is the section heading** — the owner removed a
+separate "Právě vysílám" above it on 2026-09-07 as saying less than the title
+does. Title and category come from `decapi.me/twitch/title` and `/game`,
+fetched **only after uptime confirms live**: offline those endpoints keep
+returning the *last* stream's values, so trusting them would announce a stream
+that ended days ago, and fetching them late keeps the offline case at one
+third-party request. The title is written with `textContent`, never
+`innerHTML` — it is third-party-delivered text — and an answer over 140
+characters (Twitch's own title limit) is discarded as not-a-title. The `h2`
+drops the site's condensed uppercase heading treatment: a stream title is
+content, not a label.
+
+**Offline, its place holds one quiet line**, not a box (owner's call
+2026-09-07): a hollow ring, "Právě nevysílám", and the next stream from the
+schedule. Deliberately not a card and not a link — the "Příští streamy" card
+sits right below and already answers *when*, and the hero already links to
+Twitch. All the line adds is the one thing nothing else on the page states:
+whether a stream is running right now. That matters most on a stream day past
+the start time, where the calendar's "Dnes od 18:30" otherwise reads as
+"he's on".
+
+Which day it names is picked **in the browser, not at build time**: once we know
+the channel is offline, a start time that has already passed today must not be
+offered as the next stream. So the build emits the upcoming timed streams in
+`data-upcoming` and the browser chooses. Weekday names are baked (a pure
+function of the date, via `weekdayLocative`) while "dnes"/"zítra" are resolved
+live — a page built yesterday would otherwise be a day out. A day with
+`timeUnknown` still counts, rendering "čas ještě nevím" rather than being
+skipped.
 
 Live status comes from `decapi.me/twitch/uptime/keodacz` in the browser at page
 load — an exception to "all external data is fetched at build time", approved by
@@ -123,15 +169,23 @@ alternative was a Worker. It needs no credentials, so the no-secrets-in-the-
 browser rule still holds.
 
 Two things that exception costs, both deliberate: a third-party request on every
-homepage view, and reliance on someone else's uptime. **decapi sets session
-cookies**, so the fetch uses `credentials: 'omit'` — the browser then drops
-them and nothing is stored on the visitor's device.
+homepage view, and reliance on someone else's uptime. **Every decapi endpoint
+sets session cookies** — `uptime`, `title` and `game` alike — so every fetch
+uses `credentials: 'omit'`; the browser then drops them and nothing is stored on
+the visitor's device. Any new decapi call must do the same.
 
 It **fails open** in every direction: an error, a timeout (4s), an unexpected
-answer, or no JavaScript all show the player rather than hiding it. Claiming
-"offline" while a stream is running would send people away at the worst moment,
-so only a positive uptime answer keeps it hidden. All three paths were tested
-against the real service, including pointing it at an unreachable host.
+answer, or no JavaScript all show the player. Claiming "offline" while a stream
+is running would send people away at the worst moment, so **only a definite
+"offline" prints the strip** — the player is the CSS default and the strip is
+opt-in, which is what makes every fallback path land on the player without
+needing its own branch. All four paths were tested against the real service
+(offline, a digit answer, an unrecognised answer, an unreachable host).
+
+Note decapi answers "<channel> is offline" for a channel that **does not
+exist**, so a typo in the channel name would read as offline rather than as an
+error. Harmless here — the name is a constant — but it means the offline answer
+is not proof the channel is real.
 
 Two traps, both verified rather than assumed: `parent` needs one key per
 hostname that frames the player (`keoda.cz`, `www.keoda.cz`, `localhost`) with
@@ -525,12 +579,12 @@ memberships only, **not** donations. Streamer.bot is the right tool.
 
 ## Open questions
 
-- [ ] Offline state for the player slot (owner idea 2026-09-03): right now the
-      section simply disappears when the channel is offline. Something in its
-      place could be better — last VOD, latest clip, or a line pointing at the
-      next stream from the schedule we already have. Decide what actually earns
-      the space before building it; an empty box that says "offline" is worse
-      than nothing.
+- [ ] Last VOD / latest clip as a **card next to the calendar** — owner's call
+      2026-09-07, when the offline strip was built. Explicitly *not* in the
+      player's slot: that stays the one-line status. Blocked on the data
+      pipeline (`data/youtube.json`, `data/clips/*.json`), so it lands with it.
+      Exact placement still open — beside `ScheduleCompact` on the homepage, or
+      wherever it earns the space once there is real data to show.
 
 - [ ] Do we want `kontakt@keoda.cz`? (needs Vedos mailhosting + MX records)
 - [ ] Move the data-fetching subsections to `.claude/rules/` once the pipeline

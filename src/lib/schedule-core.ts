@@ -204,6 +204,18 @@ export function getUpcomingDays(
   return days;
 }
 
+/**
+ * Czech locative weekday for a date — 'v pátek', 've středu'. Lowercase so it
+ * can sit mid-sentence.
+ *
+ * Deliberately a pure function of the date and not of "today": a page built
+ * yesterday still labels the day correctly, where a baked-in "zítra" would be
+ * a day out. Callers that want "dnes"/"zítra" compare the dates themselves.
+ */
+export function weekdayLocative(date: string): string {
+  return DAY_LOCATIVE[toDate(date).getUTCDay()].toLowerCase();
+}
+
 /** Czech day reference: "Dnes" / "Zítra" / "V pátek". */
 function dayReference(day: ScheduleDay): string {
   if (day.isToday) return 'Dnes';
