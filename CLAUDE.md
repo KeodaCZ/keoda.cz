@@ -441,7 +441,41 @@ and a button that just links to Twitch was rejected as useless.
 and the easiest page here; build it early. Plain markdown, no CMS.
 
 **Guides** — same treatment. Static markdown in this repo, explicitly *not*
-Notion, even though nutty's Notion page was the original reference for the idea.
+Notion. **Aimed at other streamers**, not at viewers (owner's call 2026-09-07):
+how his own setup fits together — multistreaming, OBS, vertical output,
+Streamer.bot. He explicitly ruled out game guides for viewers: "pro diváky ke
+hrám bych asi neměl co psát." So a guide's job is to explain the *how* behind
+what `/vybaveni` lists as the *what*, and the two pages should link to each
+other.
+
+Correction to an earlier note in this file: **nutty's Notion page was the
+reference for the gear page, not for guides.** What the owner liked was that it
+lists everything he uses — microphones, Elgato, OBS plugins — which is
+`/vybaveni`'s job. Ours is thinner than that reference: software is listed by
+name with no line on what each thing does, and OBS plugins are not a group at
+all. Enriching it that way is the closer match to what was actually asked for.
+
+> **Parked 2026-09-07, waiting on the owner — branch `gear-software-notes`.**
+>
+> That branch already adds an optional `note` per gear item (rendered under the
+> name), splits Aitum Multistream and Vertical out into a **Pluginy do OBS**
+> group — they are plugins, not standalone programs — and drafts a one-line
+> description for each of the five software entries.
+>
+> It is **not on `main` on purpose**: those five lines were written from general
+> knowledge of the software, not from how the owner actually uses it, so they
+> need his read-through first. Merge once he has confirmed them.
+>
+> Blocked on two things only he has:
+> - **the OBS plugin list** — the concrete gap against the nutty reference
+> - anything missing from the gear list entirely: Elgato devices (Stream Deck?),
+>   mic arm, mixer, monitors
+>
+> The first guide was to be **multistreaming via Aitum** (Twitch + YouTube at
+> once) — his most distinctive setup, and why YouTube is the canonical stream
+> archive. He declined to write it on 2026-09-07 ("návod psát nechci když to
+> nevidím před sebou"), so build the page shell first and let him react to
+> something concrete rather than asking for prose up front.
 
 **`robots.txt` and `sitemap.xml`** — both endpoints (`src/pages/robots.txt.ts`,
 `sitemap.xml.ts`), not files in `public/`, so the site URL comes from
