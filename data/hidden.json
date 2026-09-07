@@ -1,0 +1,4 @@
+{
+  "_comment": "IDs the site always skips, whatever the fetch finds. Hand-edited — the fetch scripts never write here. Works for both YouTube video ids and Twitch clip ids.",
+  "ids": []
+}

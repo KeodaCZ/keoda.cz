@@ -1,0 +1,57 @@
+name: Reconcile clips
+
+# Weekly check for clips that no longer exist on Twitch, so the archive stops
+# linking them. Separate from the fetch job on purpose: the fetch only ever
+# sees a window of history, so absence from a fetch proves nothing and must
+# never be read as deletion.
+#
+# The script refuses to write when more than ~20% of the archive appears to
+# have vanished — that is an API failure, not news — and exits non-zero so the
+# run shows up as failed rather than passing quietly.
+
+on:
+  schedule:
+    - cron: '15 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: content
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check every archived clip
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: node scripts/reconcile-clips.mjs
+
+      - name: Commit what changed
+        run: |
+          set -euo pipefail
+
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Žádný klip nezmizel ani se nevrátil — žádný commit."
+            exit 0
+          fi
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data
+          git commit -m 'Klipy: označení smazaných na Twitchi'
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push
+          echo "Změny commitnuté."

@@ -1,0 +1,79 @@
+name: Fetch content
+
+# Pulls the YouTube archive and new Twitch clips and commits the JSON. The site
+# never calls these APIs at request time — the repo is the database.
+#
+# workflow_dispatch is not a convenience: it is how the owner gets a same-day
+# clip onto the site without waiting up to six hours.
+
+on:
+  schedule:
+    - cron: '35 */6 * * *'
+  workflow_dispatch:
+
+# Only what committing needs. No pages/id-token here — this workflow does not
+# deploy; the push it makes is what triggers the deploy workflow.
+permissions:
+  contents: write
+
+# Two runs writing the same files would race and one would lose its commit.
+concurrency:
+  group: content
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      # Each fetch runs even if the other failed: a Twitch outage must not stop
+      # the YouTube archive updating, and vice versa. The step ids let the
+      # summary at the end report honestly which half worked.
+      - name: Fetch YouTube
+        id: youtube
+        continue-on-error: true
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: node scripts/fetch-youtube.mjs
+
+      - name: Fetch Twitch clips
+        id: clips
+        continue-on-error: true
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: node scripts/fetch-clips.mjs
+
+      - name: Commit what changed
+        run: |
+          set -euo pipefail
+
+          if [ -z "$(git status --porcelain data)" ]; then
+            echo "Nic nového — žádný commit."
+            exit 0
+          fi
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data
+          git commit -m 'Obsah: aktualizace z YouTube a Twitche'
+
+          # Another run may have pushed while this one was fetching.
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push
+          echo "Změny commitnuté."
+
+      - name: Say plainly if a fetch failed
+        if: steps.youtube.outcome == 'failure' || steps.clips.outcome == 'failure'
+        run: |
+          echo "YouTube: ${{ steps.youtube.outcome }}"
+          echo "Twitch:  ${{ steps.clips.outcome }}"
+          echo "::error::Aspoň jeden fetch selhal — koukni na log příslušného kroku."
+          exit 1

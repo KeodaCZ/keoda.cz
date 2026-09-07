@@ -1,0 +1,4 @@
+{
+  "_comment": "Escapes from the Shorts heuristic, which is duration-based because YouTube exposes no flag for it. Map a video id to \"video\", \"short\" or \"stream\". The known trap: a vertical video longer than 3 minutes is a regular video to YouTube, so force it here if it should read as a Short.",
+  "types": {}
+}
