@@ -1,0 +1,52 @@
+name: Keepalive
+
+# GitHub disables a repository's `schedule` triggers after 60 days with no
+# commits. The deploy workflow relies on its cron to re-render the schedule so
+# "Dnes" rolls over in Prague, so losing that cron freezes the calendar on
+# whatever day the last deploy happened — silently.
+#
+# Normal activity already prevents this: every exception edited in the CMS is a
+# commit to main. This only matters in a quiet spell, once the recurring
+# pattern is stable and nobody touches /admin for two months.
+
+on:
+  schedule:
+    # Weekly, not monthly. With a monthly run and the 40-day threshold below,
+    # a commit made just after a run could reach 59 days before the next check
+    # — close enough to 60 to lose the race. Weekly caps the worst case at 47.
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+# Only this workflow gets write access. The deploy workflow stays read-only.
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Commit only if the repo has gone quiet
+        run: |
+          set -euo pipefail
+
+          THRESHOLD_DAYS=40
+          last=$(git log -1 --format=%ct)
+          age_days=$(( ( $(date +%s) - last ) / 86400 ))
+          echo "Last commit was ${age_days} day(s) ago (threshold: ${THRESHOLD_DAYS})."
+
+          if [ "$age_days" -lt "$THRESHOLD_DAYS" ]; then
+            echo "Repo is active — nothing to do."
+            exit 0
+          fi
+
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # Empty on purpose: the commit itself is the whole point, and a
+          # marker file would mean a pointless diff and a file to explain.
+          git commit --allow-empty -m 'Keep the scheduled deploy alive'
+          git push
+          echo "Pushed an empty commit to reset the 60-day clock."

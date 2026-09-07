@@ -402,8 +402,8 @@ Actions cron caveats:
 - 5-minute minimum interval; delays of 5–30 min are common. Fine for content,
   useless for live status.
 - **Scheduled workflows auto-disable after 60 days without commits.** The job's own
-  commits reset this while content flows, but a quiet spell kills it silently. Add
-  a keepalive step.
+  commits reset this while content flows, but a quiet spell kills it silently.
+  Already handled: `.github/workflows/keepalive.yml` (see Deployment).
 
 ## Why JSON and not a database
 
@@ -466,16 +466,18 @@ all. Enriching it that way is the closer match to what was actually asked for.
 > knowledge of the software, not from how the owner actually uses it, so they
 > need his read-through first. Merge once he has confirmed them.
 >
-> Blocked on two things only he has:
-> - **the OBS plugin list** — the concrete gap against the nutty reference
-> - anything missing from the gear list entirely: Elgato devices (Stream Deck?),
->   mic arm, mixer, monitors
+> **Both blockers are the same blocker: he must be at the personal PC.** The
+> OBS plugin list and anything else missing from the gear page (Elgato devices,
+> a Stream Deck, mic arm, mixer, monitors) can only be read off that machine,
+> and the first guide — **multistreaming via Aitum**, Twitch and YouTube at
+> once, his most distinctive setup and the reason YouTube is the canonical
+> stream archive — has to be written with OBS open in front of him.
 >
-> The first guide was to be **multistreaming via Aitum** (Twitch + YouTube at
-> once) — his most distinctive setup, and why YouTube is the canonical stream
-> archive. He declined to write it on 2026-09-07 ("návod psát nechci když to
-> nevidím před sebou"), so build the page shell first and let him react to
-> something concrete rather than asking for prose up front.
+> So do **not** raise either of these while he is on the work PC, and don't try
+> to unblock them by building a page shell to react to: the missing thing is
+> the machine, not motivation or a starting point. Ask when he mentions being
+> at home. (See Two-machine workflow — he works from a work PC and a personal
+> PC, never simultaneously.)
 
 **`robots.txt` and `sitemap.xml`** — both endpoints (`src/pages/robots.txt.ts`,
 `sitemap.xml.ts`), not files in `public/`, so the site URL comes from
@@ -616,9 +618,23 @@ the deploy.
 
 The schedule is rendered at build time, so the deploy workflow also runs on cron
 at 22:20 and 23:20 UTC — one of the two lands just after midnight in Prague in
-either DST regime, so "Dnes" rolls over in weeks with no commits. Watch the
-60-day auto-disable rule (see Workflow schedule); a keepalive lands with the
-data pipeline.
+either DST regime, so "Dnes" rolls over in weeks with no commits.
+
+That cron is what `.github/workflows/keepalive.yml` protects. GitHub disables a
+repo's `schedule` triggers after 60 days with no commits, which would freeze the
+calendar on the last deploy's date and say nothing. The keepalive runs weekly
+and makes an **empty commit only when the last commit is over 40 days old** — so
+it adds nothing during normal activity (every CMS exception edit is a commit)
+and at most a handful of commits during a long quiet spell. Weekly rather than
+monthly on purpose: monthly runs plus a 40-day threshold could let a commit
+reach 59 days before the next check, which is too close to the limit. Weekly
+caps the worst case at 47.
+
+It is the only workflow with `contents: write`; the deploy workflow stays
+read-only. Its push uses `GITHUB_TOKEN`, which by design does not trigger other
+workflows, so it cannot set off a deploy loop. If everything ever does get
+disabled anyway, `workflow_dispatch` still works — running it by hand re-arms
+the clock.
 
 **Only `dist/` is deployed.** The Pages workflow uploads that one directory as the
 artifact, so repo-root files — this file included — are never served. There is no
