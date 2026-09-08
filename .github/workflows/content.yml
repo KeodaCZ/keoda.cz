@@ -11,16 +11,26 @@ on:
   # need to be up seconds after a stream). Streams end around 23:00 Prague, so
   # this is aimed at "done by breakfast".
   #
-  # 02:00 UTC is 04:00 Prague, deliberately earlier than the 07:00 he asked
-  # for: GitHub runs scheduled workflows one to four hours late in practice —
-  # measured over ten nights on this repo, not assumed — so this actually
-  # lands somewhere around 05:30–08:30 Prague. Aiming at 07:00 would have
-  # drifted into midday.
+  # 03:00 UTC, chosen for the *winter* case. The owner occasionally streams
+  # until 3am Prague, mostly at weekends, and the risk is a run firing while he
+  # is still live. Times below are UTC, and Prague is UTC+1 in winter:
+  #
+  #   02:00 UTC -> 04:00 Prague summer, 03:00 winter   <- too early in winter
+  #   03:00 UTC -> 05:00 Prague summer, 04:00 winter   <- earliest that clears 4am
+  #
+  # Only nominal, mind: GitHub runs these one to four hours late in practice —
+  # measured over ten nights on this repo, not assumed — so it actually lands
+  # mid-morning. That is fine; nothing here is time-critical, and aiming at
+  # the 07:00 originally suggested would have drifted past midday.
+  #
+  # Belt and braces anyway: a stream caught mid-flight is skipped by
+  # isStillLive() in fetch-youtube.mjs, so an early run cannot archive
+  # provisional metadata even if the timing does go wrong.
   #
   # The manual button covers wanting a clip up right now, which is why one
   # nightly run is enough rather than a second afternoon slot.
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 # Only what committing needs. No pages/id-token here — this workflow does not

@@ -51,6 +51,13 @@ export interface ScheduleDay {
 }
 
 export interface Banner {
+  /** Which day this is about, so a page built earlier can drop it. */
+  date: string;
+  /** The day word: 'Dnes' | 'Zítra' | 'V pátek'. Recomputed in the browser. */
+  when: string;
+  /** Everything after the day word, including its leading space or colon. */
+  rest: string;
+  /** `when + rest`, composed here so the two can never disagree. */
   label: string;
   detail?: string;
 }
@@ -236,11 +243,17 @@ export function weekdayLocative(date: string): string {
   return DAY_LOCATIVE[toDate(date).getUTCDay()].toLowerCase();
 }
 
-/** Czech day reference: "Dnes" / "Zítra" / "V pátek". */
-function dayReference(day: ScheduleDay): string {
-  if (day.isToday) return 'Dnes';
-  if (day.isTomorrow) return 'Zítra';
-  return DAY_LOCATIVE[toDate(day.date).getUTCDay()];
+/**
+ * Czech day reference: "Dnes" / "Zítra" / "V pátek".
+ *
+ * Takes the two dates rather than a `ScheduleDay` so the browser can call it
+ * with a live "today" — the banner sits on every page and a stale build would
+ * otherwise announce "Dnes nestreamuju" about yesterday.
+ */
+export function dayReferenceFor(date: string, today: string): string {
+  if (date === today) return 'Dnes';
+  if (date === addDays(today, 1)) return 'Zítra';
+  return DAY_LOCATIVE[toDate(date).getUTCDay()];
 }
 
 /**
@@ -264,24 +277,33 @@ export function getBanners(
   return getUpcomingDays(pattern, exceptions, today, 7)
     .filter((day) => day.status === 'off' || day.timeUnknown || day.timeChanged || day.highlight)
     .map((day) => {
-      const when = dayReference(day);
-      const detail = day.note;
+      const when = dayReferenceFor(day.date, today);
+      const rest = bannerRest(day);
+      const base = { date: day.date, when, rest, label: `${when}${rest}` };
 
-      if (day.status === 'off') return { label: `${when} nestreamuju`, detail };
-
-      if (day.timeUnknown) return { label: `${when} streamuju, čas ještě nevím`, detail };
-
-      if (day.added) {
-        return {
-          label: day.start ? `${when} bonusový stream od ${day.start}` : `${when} bonusový stream`,
-          detail,
-        };
-      }
-
-      if (day.timeChanged) return { label: `${when} streamuju od ${day.start}`, detail };
-
-      // Highlighted with nothing else changed — the owner's own words carry it.
-      const message = day.note ?? day.game;
-      return { label: message ? `${when}: ${message}` : `${when} speciální stream` };
+      // A highlighted day with nothing else changed says everything in `rest`
+      // already — repeating the note as a detail would print it twice.
+      if (isEditorialOnly(day)) return base;
+      return { ...base, detail: day.note };
     });
+}
+
+/** Whether nothing changed mechanically and `highlight` alone put it here. */
+function isEditorialOnly(day: ScheduleDay): boolean {
+  return day.status !== 'off' && !day.timeUnknown && !day.added && !day.timeChanged;
+}
+
+/**
+ * Everything after the day word, leading separator included, so the browser can
+ * swap the day word without re-deriving the sentence.
+ */
+function bannerRest(day: ScheduleDay): string {
+  if (day.status === 'off') return ' nestreamuju';
+  if (day.timeUnknown) return ' streamuju, čas ještě nevím';
+  if (day.added) return day.start ? ` bonusový stream od ${day.start}` : ' bonusový stream';
+  if (day.timeChanged) return ` streamuju od ${day.start}`;
+
+  // Highlighted with nothing else changed — the owner's own words carry it.
+  const message = day.note ?? day.game;
+  return message ? `: ${message}` : ' speciální stream';
 }

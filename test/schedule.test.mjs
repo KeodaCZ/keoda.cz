@@ -10,14 +10,28 @@ import {
   addDays,
   dayLabel,
   getUpcomingDays,
+  dayReferenceFor,
   getBanners,
   mergeExceptions,
   todayIn,
   weekdayLocative,
 } from '../src/lib/schedule-core.ts';
 
-/** Banners are a list now; most checks care about the first (soonest) one. */
-const firstBanner = (pattern, exceptions, today) =>
+/**
+ * Banners are a list; most checks care about the first (soonest) one, and
+ * about the text a reader sees rather than the pieces it is assembled from.
+ * `date`, `when` and `rest` exist so the browser can re-label a stale page and
+ * are asserted separately below.
+ */
+const firstBanner = (pattern, exceptions, today) => {
+  const banner = getBanners(pattern, exceptions, today)[0];
+  if (!banner) return null;
+  const { label, detail } = banner;
+  return detail === undefined ? { label } : { label, detail };
+};
+
+/** The whole record, for the fields the re-labelling depends on. */
+const firstBannerRaw = (pattern, exceptions, today) =>
   getBanners(pattern, exceptions, today)[0] ?? null;
 
 const PATTERN = { mon: '18:30', wed: '18:30', fri: '18:30', sat: '18:30', sun: '18:30' };
@@ -268,9 +282,11 @@ check('empty status does not erase off', mergeExceptions([
 check('duplicate date yields one row', dates('2026-09-02', 7, dupes), [
   '2026-09-02', '2026-09-04', '2026-09-05', '2026-09-06', '2026-09-07',
 ]);
-check('duplicate date yields one banner', getBanners(PATTERN, dupes, '2026-09-02'), [
-  { label: 'V pátek nestreamuju', detail: 'svatba' },
-]);
+check(
+  'duplicate date yields one banner',
+  getBanners(PATTERN, dupes, '2026-09-02').map((b) => ({ label: b.label, detail: b.detail })),
+  [{ label: 'V pátek nestreamuju', detail: 'svatba' }],
+);
 // The old behaviour kept only the first entry, which could drop a cancellation.
 check('cancellation survives being second', getBanners(PATTERN, [
   { date: '2026-09-04', game: 'hra' },
@@ -326,6 +342,54 @@ check('locative Sunday', weekdayLocative('2026-09-06'), 'v neděli');
 check('locative across the spring switch', weekdayLocative('2027-03-28'), 'v neděli');
 check('locative across the autumn switch', weekdayLocative('2026-10-25'), 'v neděli');
 check('locative on a leap day', weekdayLocative('2028-02-29'), 'v úterý');
+
+// --- the pieces the banner is re-labelled from ----------------------------
+// The banner sits on every page, so a stale build announcing "Dnes
+// nestreamuju" about yesterday is the most visible way this could go wrong.
+// It therefore ships the day word separately from the sentence.
+const offFriday = firstBannerRaw(PATTERN, [{ date: '2026-09-04', status: 'off' }], '2026-09-02');
+check('a banner carries the day it is about', offFriday.date, '2026-09-04');
+check('the day word is separate', offFriday.when, 'V pátek');
+check('and the rest keeps its leading space', offFriday.rest, ' nestreamuju');
+check('label is exactly the two joined', offFriday.label, offFriday.when + offFriday.rest);
+
+// Swapping the day word must produce the sentence the build would have made
+// on that day. Built on the 2nd it reads "V pátek"; the same stored record
+// must sharpen to "Zítra" and then "Dnes" as the day approaches.
+check(
+  'read on the 3rd, the same record reads "Zítra"',
+  dayReferenceFor('2026-09-04', '2026-09-03') + offFriday.rest,
+  'Zítra nestreamuju',
+);
+check(
+  'and on the day itself, "Dnes"',
+  dayReferenceFor('2026-09-04', '2026-09-04') + offFriday.rest,
+  'Dnes nestreamuju',
+);
+// Two or more days out it falls back to the weekday, which is what the build
+// itself produced.
+check(
+  'and two days out it is the weekday again',
+  dayReferenceFor('2026-09-04', '2026-09-02') + offFriday.rest,
+  offFriday.label,
+);
+
+// The colon form has no leading space, so joining must not introduce one.
+const editorial = firstBannerRaw(
+  PATTERN,
+  [{ date: '2026-09-05', highlight: true, note: 'program se přesouvá' }],
+  '2026-09-02',
+);
+check('the colon form starts with the colon', editorial.rest, ': program se přesouvá');
+check('and joins without a stray space', editorial.label, 'V sobotu: program se přesouvá');
+// That note is already the whole message, so repeating it as a detail would
+// print it twice in the ticker.
+check('an editorial banner carries no duplicate detail', editorial.detail, undefined);
+
+check('dayReferenceFor: today', dayReferenceFor('2026-09-04', '2026-09-04'), 'Dnes');
+check('dayReferenceFor: tomorrow', dayReferenceFor('2026-09-05', '2026-09-04'), 'Zítra');
+check('dayReferenceFor: Wednesday takes "Ve"', dayReferenceFor('2026-09-09', '2026-09-05'), 'Ve středu');
+check('dayReferenceFor: a past day still names its weekday', dayReferenceFor('2026-09-02', '2026-09-04'), 'Ve středu');
 
 // --- dayLabel: resolved in the browser, so the build going stale cannot lie --
 // 2026-09-11 is a Friday; 09-12 Saturday; 09-13 Sunday.

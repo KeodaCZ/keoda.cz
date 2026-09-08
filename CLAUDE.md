@@ -381,9 +381,25 @@ Rules:
   - `HORIZON_DAYS` is shared with the `.ics` routes, so a rendered
     add-to-calendar link can never point at a file the build didn't generate.
     Verified: 15 links, 15 files.
-- **Still rendered against build-time "today"**, and therefore still stale on a
-  late build: the schedule banner (`getBanners`) and which `.ics` files exist.
-  The banner is the one that would show, since it sits on every page.
+- **The banner re-anchors itself in the browser too** (2026-09-08). It is on
+  every page and its whole job is time-critical accuracy, so a stale build
+  saying "Dnes nestreamuju" about yesterday was the most visible way the
+  schedule could lie. `Banner` therefore carries `date`, `when` ('Dnes' |
+  'Zítra' | 'V pátek') and `rest` (everything after the day word, leading
+  space or colon included) alongside the composed `label`; the script drops
+  entries whose day has passed, re-words the rest through `dayReferenceFor()`,
+  and removes the whole strip if nothing is left. Verified against a real
+  rendered page replayed on four later dates.
+  - **Both copies of the marquee list must get the same treatment** — the loop
+    shifts by exactly one copy, so filtering only one would desync it.
+  - Filtering runs before the marquee block, so `retime()` measures the
+    shortened text.
+  - Known and deliberate: whether the strip scrolls or sits still is decided at
+    build time from the entry count, so dropping one can leave a single entry
+    still scrolling. Cosmetic, and better than rebuilding the ticker client-side.
+- **Still rendered against build-time "today"**: which `.ics` files exist. Not
+  worth chasing — a missing file only affects an add-to-calendar link for a day
+  beyond `HORIZON_DAYS`, and past files are harmless.
 - **Times are approximate.** Render "od 18:30", never a hard end time. The owner
   said "cca"; the site must not promise 23:00 sharp.
 - **The banner is derived from this data, not authored separately.** One entry

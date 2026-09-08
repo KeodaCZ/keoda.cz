@@ -1,5 +1,5 @@
 ---
-import { getBanners } from '../lib/schedule';
+import { getBanners, timezone } from '../lib/schedule';
 
 // Derived from exceptions.json — never authored separately, so one entry
 // drives both this banner and the calendar. Absent is the normal state.
@@ -19,15 +19,15 @@ const characters = banners.reduce(
 const seconds = Math.max(12, Math.round(characters * 0.12));
 ---
 {banners.length > 0 && (
-  <aside class="banner" aria-label="Změny v rozvrhu">
+  <aside class="banner" aria-label="Změny v rozvrhu" data-timezone={timezone}>
     {scrolling ? (
       <div class="viewport">
         <div class="rail">
           <div class="track" style={`--duration: ${seconds}s`}>
             <ul class="run">
               {banners.map((banner) => (
-                <li>
-                  <strong>{banner.label}</strong>
+                <li data-date={banner.date}>
+                  <strong><span class="when">{banner.when}</span>{banner.rest}</strong>
                   {banner.detail && <span class="detail">· {banner.detail}</span>}
                 </li>
               ))}
@@ -35,8 +35,8 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
             {/* Second copy exists only to make the loop seamless. */}
             <ul class="run" aria-hidden="true">
               {banners.map((banner) => (
-                <li>
-                  <strong>{banner.label}</strong>
+                <li data-date={banner.date}>
+                  <strong><span class="when">{banner.when}</span>{banner.rest}</strong>
                   {banner.detail && <span class="detail">· {banner.detail}</span>}
                 </li>
               ))}
@@ -51,8 +51,8 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
         </button>
       </div>
     ) : (
-      <div class="container single">
-        <strong>{banners[0].label}</strong>
+      <div class="container single" data-date={banners[0].date}>
+        <strong><span class="when">{banners[0].when}</span>{banners[0].rest}</strong>
         {banners[0].detail && <span class="detail">· {banners[0].detail}</span>}
       </div>
     )}
@@ -204,6 +204,51 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
 </style>
 
 <script>
+  /**
+   * Re-anchor the banner to the real date before anything else.
+   *
+   * This strip is on every page and its whole job is time-critical accuracy,
+   * so a stale build announcing "Dnes nestreamuju" about yesterday is the most
+   * visible way the schedule could lie. The build's cron is no help: measured
+   * over ten nights it fires one to two hours late, so the nightly rebuild
+   * lands around 02:00 Prague.
+   *
+   * Two things happen here — drop entries whose day has passed, and re-word
+   * the day for the ones that remain. Both copies of the list get the same
+   * treatment: the loop shifts by exactly one copy, so treating only one would
+   * desync the marquee.
+   *
+   * Not handled, and left visible rather than papered over: whether the strip
+   * scrolls or sits still is decided at build time from how many entries there
+   * were. If dropping one leaves a single entry, it keeps scrolling. Cosmetic,
+   * and preferable to rebuilding the ticker in the browser.
+   */
+  import { dayReferenceFor, todayIn } from '../lib/schedule-core';
+
+  const banner = document.querySelector<HTMLElement>('.banner');
+
+  if (banner) {
+    const today = todayIn(banner.dataset.timezone || 'Europe/Prague');
+    let left = 0;
+
+    for (const entry of banner.querySelectorAll<HTMLElement>('[data-date]')) {
+      const date = entry.dataset.date ?? '';
+
+      if (date < today) {
+        entry.remove();
+        continue;
+      }
+
+      left += 1;
+      const when = entry.querySelector<HTMLElement>('.when');
+      if (when) when.textContent = dayReferenceFor(date, today);
+    }
+
+    // Every entry was in the past, so there is nothing left to announce. An
+    // empty yellow strip would be worse than none.
+    if (left === 0) banner.remove();
+  }
+
   // Moving text needs a way to stop it — hovering is not enough for touch or
   // keyboard users. Driven through the Web Animations API rather than
   // animation-play-state, which reported "paused" while still running.
