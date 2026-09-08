@@ -18,8 +18,10 @@ interface Props {
   duration?: number;
   /** Small line under the title — a game, a clip's author. */
   meta?: string;
-  /** Corner badge, e.g. Twitch's own "featured" flag. */
+  /** Corner badge, top left. e.g. "Záznam", or Twitch's "featured" flag. */
   badge?: string;
+  /** Adds a broadcast glyph to the badge — for stream recordings. */
+  badgeIcon?: boolean;
   /** Vertical thumbnail, for Shorts. */
   portrait?: boolean;
   /**
@@ -43,6 +45,7 @@ const {
   duration,
   meta,
   badge,
+  badgeIcon = false,
   portrait = false,
   fit = 'cover',
   featured = false,
@@ -65,7 +68,25 @@ const length = duration ? formatDuration(duration) : '';
         decoding="async"
       />
       {length && <span class="length">{length}</span>}
-      {badge && <span class="badge">{badge}</span>}
+      {badge && (
+        <span class="badge">
+          {/* Broadcast glyph — a dot with two arcs. Inline so it costs no
+              request, and currentColor so it follows the badge. */}
+          {badgeIcon && (
+            <svg class="badge-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <circle cx="8" cy="8" r="2.1" fill="currentColor" />
+              <path
+                d="M4.2 4.2a5.4 5.4 0 0 0 0 7.6M11.8 4.2a5.4 5.4 0 0 1 0 7.6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          )}
+          <span>{badge}</span>
+        </span>
+      )}
     </span>
 
     <span class="body">
@@ -145,11 +166,20 @@ const length = duration ? formatDuration(duration) : '';
   .badge {
     top: 0.4rem;
     left: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.28rem;
     background: var(--btn-bg);
     color: var(--btn-text);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
+  }
+
+  .badge-icon {
+    flex: none;
+    width: 0.85em;
+    height: 0.85em;
   }
 
   .body {
