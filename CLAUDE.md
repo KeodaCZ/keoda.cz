@@ -452,8 +452,25 @@ results and the documented workaround is paging over separate `started_at` /
 
 - The scheduled job **merges**: read existing JSON, append unseen IDs, write back.
   The repo is the database.
-- A one-off backfill script walks month-sized windows back to channel start. Run
-  locally once, commit the result.
+- **Done 2026-09-08:** `scripts/backfill-clips.mjs` (`npm run clips:backfill`)
+  walks month windows back to channel start and merges. The floor is the
+  channel's own `created_at` from `Get Users` — 2017-07-17, so 110 windows —
+  not a year typed into the script: a guess that is too recent loses clips
+  with no error anywhere. A window that hits the pagination cap is **split in
+  half and retried**, because results come back by view count, so a capped
+  window loses an arbitrary slice rather than the oldest.
+
+  Result: 31 → **471 clips**, 2023-02-25 to 2026-09-06 (2023: 27, 2024: 157,
+  2025: 156, 2026: 131). Twitch's clip manager says ~475; the four missing are
+  presumably deleted ones. Re-running found 0 new and wrote nothing, which is
+  the merge behaving as designed — it is safe to run again.
+
+  Note 2024 has 157 clips against **zero** stream recordings. That is correct,
+  not a gap: 2024 was Twitch-only, and YouTube is the stream archive.
+
+  `monthWindows` is exported and unit-tested (`test/backfill-windows.test.mjs`)
+  because a gap between two windows is invisible — it is just clips that never
+  appear, from a script reporting success.
 - Write the merge logic from the start. Overwrite-style code is what gets written
   by default and it silently destroys the archive.
 
@@ -496,9 +513,11 @@ history stays readable; a committed SQLite file is a binary blob that rewrites
 whole on every commit. Version history, offline access, both machines, zero cost,
 nothing to authenticate against.
 
-Size is a non-worry: ~250 bytes per clip record, and it's a **build input** —
-Astro renders it to HTML, visitors never download it. Only client-side search
-would need data in the browser, and a stripped id+title+date index covers that.
+Size is a non-worry: **575 bytes per clip record measured** over the real 471
+(264 kB across the four year files — the earlier ~250 B estimate here was
+low), and it's a **build input** — Astro renders it to HTML, visitors never
+download it. Only client-side search would need data in the browser, and a
+stripped id+title+date index covers that.
 
 A real database only enters the picture with visitor writes (accounts, points),
 which is out of scope. That would be Cloudflare Workers + D1, a different project.
@@ -520,6 +539,57 @@ at `/ics/<date>.ics`). The homepage carries only a **compact** version
 (`ScheduleCompact.astro`) plus a link through; the full rows live on their own
 page. Deliberately no per-row "notify me" — notifications would need accounts,
 and a button that just links to Twitch was rejected as useless.
+
+**The content archive — three pages** (owner's call 2026-09-08). All three
+render through one `MediaCard.astro`, because a stream, a video, a Short and a
+clip are the same shape: a picture, a title, a line of context. That component
+class is `.media` and **must not** be `.card` — see the gotcha in its own file.
+
+- `/streamy` — the substance of the channel: 426 recordings, median length
+  four and a half hours. Tiles grouped by month with a sticky month heading,
+  48 per page. Each thumbnail carries a **ZÁZNAM badge, top left, with a
+  broadcast glyph** (owner asked for both; the glyph landed 2026-09-08 —
+  inline SVG, `currentColor`, so it costs no request and follows the badge in
+  either theme). It is behind a `badgeIcon` prop rather than always on:
+  `/klipy` reuses the same badge for Twitch's featured flag, where a broadcast
+  glyph would be a lie.
+- `/videa` — 3 videos, then 83 Shorts. Videos first and wider: the page has to
+  look deliberate with three of them. Shorts are two-per-row narrower than
+  first built, at the owner's request.
+- `/klipy` — 471 clips, 48 per page, ten pages. Paginated from the start,
+  which the backfill then justified: 31 → 471 without the route changing.
+
+**Titles are cleaned, not original** — `cleanTitle()` in `content-core.ts`,
+applied in the `content.ts` view rather than in the JSON, so the rule can
+change with no re-fetch. Measured on the real 426: **98% carry 🔴 and 95% carry
+`!dc !ig !clip`**, which is 832 red circles on one page of tiles. What it
+strips is exactly that boilerplate — `🔴 Johny Silverhand | Cyberpunk 2077 🔴
+!dc !ig !ttv` becomes `Johny Silverhand | Cyberpunk 2077` — and nothing else.
+The owner asked on 2026-09-08 whether the ZÁZNAM badge made the originals
+usable again; the argument for keeping them cleaned is that **🔴 means "live
+now", which is a lie in an archive of recordings**, while the badge is true.
+
+> **Filtering and sorting — asked for 2026-09-08, not built. Read this before
+> designing it.**
+>
+> Wanted: search by title, a date range, sort newest/oldest, "most viewed" for
+> clips, and a videos/Shorts filter on `/videa`.
+>
+> **I got the design wrong first and the owner caught it.** I said filtering
+> and pagination were incompatible on a static site (they are not — both move
+> to the browser), and then proposed dropping pagination and rendering
+> everything on one page. He objected correctly: that means endless scrolling
+> on a page that grows forever. Bytes were never the problem (471 clips is
+> 36 kB gzipped); the scroll is.
+>
+> So: **client-side filtering *and* client-side pagination.** The build emits
+> every item; the browser filters the full set and shows 48 at a time. Keep the
+> server-paginated routes working with JavaScript off.
+>
+> "Most viewed" is the one part that needs new data: view counts are
+> deliberately **not** stored (they churn on every fetch, see clips-store).
+> Capture them in the **weekly** reconciliation, which already fetches every
+> clip by id, so the churn is one commit a week rather than four a day.
 
 **Gear / used software** — styled like arcadebulls' gear page. Confirmed in scope
 and the easiest page here; build it early. Plain markdown, no CMS.
@@ -772,34 +842,30 @@ The generated assets are committed instead.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- **State as of 2026-09-07, end of session.** Live and working: homepage
+- **State as of 2026-09-08, end of session.** Live and working: homepage
   (socials, Twitch player, compact schedule, gear teaser), `/kalendar`,
   `/vybaveni`, `/admin`, the 404 page, favicon, share card, `robots.txt`,
-  `sitemap.xml`, the deploy keepalive, and the content pipeline. Working tree
-  clean, everything pushed.
+  `sitemap.xml`, the deploy keepalive, the content pipeline, and the three
+  archive pages — `/streamy`, `/videa`, `/klipy`.
 
   The pipeline runs on its own schedule and has been committing unprompted
   since 2026-09-07: `data/youtube.json` (a few videos, ~80 Shorts, 400+
-  streams) and `data/clips/2026.json`. Tests gate the deploy — deliberately no
-  count here, it only goes stale.
+  streams) and `data/clips/*.json` (471 after the backfill). Tests gate the
+  deploy — deliberately no count here, it only goes stale.
 
   The fetches can be run locally against a gitignored `.env` — see Running the
   fetches locally under Data layer. Prefer that to pushing and waiting.
 
   **Next up, roughly in this order:**
-  1. **Nothing renders the fetched data yet** — no archive page, no clips
-     section. That is the obvious next build, and `clipLabel()` in
-     `src/lib/clip-title.ts` is already there for it. Worth knowing before
-     designing it: the channel is 425 streams against 3 edited videos, so the
-     stream archive is the substance and "videos" is a rounding error.
-  2. **Backfill the clip history.** The fetch window only reached 2026-06-09;
-     the channel goes back to 2023. Clips do not expire, so it is all still
-     there. Must merge, not overwrite, and cannot run locally — no credentials
-     on either machine — so it needs to be a `workflow_dispatch` job.
-  3. **The maintenance task under Data layer is now due.** All three jobs have
-     run successfully, so its trigger is met. This file is 723 lines against a
-     target of ~200.
-  4. Parked, needs the personal PC: branch `gear-software-notes` and the first
+  1. **Filtering and sorting on the three archive pages.** Asked for
+     2026-09-08: search by title, a date range, sort newest/oldest, "most
+     viewed" for clips, and a videos/Shorts split on `/videa`. See the note
+     under Pages — and read it before starting, because the first design was
+     wrong.
+  2. **The maintenance task under Data layer is now due.** All three jobs have
+     run successfully, so its trigger is met. This file is well over its ~200
+     line target.
+  3. Parked, needs the personal PC: branch `gear-software-notes` and the first
      guide (see Pages).
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague

@@ -8,7 +8,8 @@
       "duration": 50,
       "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/2e664ba0-c290-428a-98a8-01f95d49c033/landscape/thumb/thumb-0000000000-480x272.jpg",
       "url": "https://www.twitch.tv/keodacz/clip/FrozenBlushingOstrichYee-BBLGA62IHkEZZ_3x",
-      "game": "Dead by Daylight"
+      "game": "Dead by Daylight",
+      "featured": true
     },
     {
       "id": "YawningSilkyPeachKappaPride-EOB49RH8lE0uuC9c",
@@ -311,6 +312,1009 @@
       "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/3cdf2dd0-d0d1-4c0b-9d36-d11b82709d93/landscape/thumb/thumb-0000000000-480x272.jpg",
       "url": "https://www.twitch.tv/keodacz/clip/CrunchyPolishedLardBudBlast-q1i5bFHzG7SbBuFn",
       "game": "Dead by Daylight"
+    },
+    {
+      "id": "ShyBusyHyenaKeepo-N6Ea9DJ5vtyZW6Id",
+      "title": "hellooooo",
+      "createdAt": "2026-06-01T19:32:11Z",
+      "creator": "STREAMERScz",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/0be2b558-7580-4bff-8d5b-04630ad6f6de/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ShyBusyHyenaKeepo-N6Ea9DJ5vtyZW6Id",
+      "game": "7 Days to Die"
+    },
+    {
+      "id": "CuteBoredSmoothieOMGScoots-8tKD6YzMteSIDWUf",
+      "title": "Martinek?",
+      "createdAt": "2026-05-31T19:52:26Z",
+      "creator": "Big_QweE",
+      "duration": 37.2,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/e1dd8f1e-2772-4133-95a8-b0d009c9b9ce/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/CuteBoredSmoothieOMGScoots-8tKD6YzMteSIDWUf",
+      "game": "FlatOut 2"
+    },
+    {
+      "id": "TastyDiligentMonitorPicoMause-cES2VVi0x6UzQh0p",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T19:53:39Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/f48701e9-f072-4bb9-bbdc-569af92856e1/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TastyDiligentMonitorPicoMause-cES2VVi0x6UzQh0p",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "ModernSnappyEmuDBstyle-0khNQhJJcNFYiQ2I",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T19:41:55Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/af89cb8d-6de5-4638-8a12-6e601749ff54/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ModernSnappyEmuDBstyle-0khNQhJJcNFYiQ2I",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "HungryStupidQuailKreygasm-JtpvY8we9U6ACvmP",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T19:07:04Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/98ebc1e4-3e46-4d52-a602-f15a035641a9/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/HungryStupidQuailKreygasm-JtpvY8we9U6ACvmP",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "BashfulIcyGoblinPlanking-u9b6AHixHJxd1FEg",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:51:05Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b078125c-77e7-492c-b0bc-8f81722555be/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/BashfulIcyGoblinPlanking-u9b6AHixHJxd1FEg",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "GracefulPricklyBadger4Head-QPBjcOt7gDDJ4m0j",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:49:37Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/d65dcd93-c8c5-4df5-a228-6442db09a29f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/GracefulPricklyBadger4Head-QPBjcOt7gDDJ4m0j",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "AffluentYummyPigeonRalpherZ-pbrRfT612bWyPr99",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:48:38Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/216c10c7-7026-4ce1-b745-14bf36d4a556/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/AffluentYummyPigeonRalpherZ-pbrRfT612bWyPr99",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "WildWrongEelWOOP-SIZwaOpa9n34ekHP",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:47:25Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/bd8c6013-eb00-45dc-8bb0-ecc91e54b155/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/WildWrongEelWOOP-SIZwaOpa9n34ekHP",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "TenderPeacefulMelonCoolStoryBob-nLidxagBJxU0zIe7",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:47:10Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/71a6ea05-6c65-4139-90c4-56fcb7616c75/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TenderPeacefulMelonCoolStoryBob-nLidxagBJxU0zIe7",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "ViscousOriginalHarePrimeMe-Jyn0u6SnfXvALnUv",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:45:46Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/724e2ce3-1e73-4343-acea-f8018770bc5b/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ViscousOriginalHarePrimeMe-Jyn0u6SnfXvALnUv",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "OptimisticAliveSpindleSoonerLater-gabAHzoP6ou3jixk",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:45:19Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/9a551b2a-4c22-43c6-9610-5284ea8ba30c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/OptimisticAliveSpindleSoonerLater-gabAHzoP6ou3jixk",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "SuperViscousWheelKevinTurtle-IBD2CyCj8LUYaco5",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:42:18Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/11bbfc90-358b-486c-a583-c6e75e00e96e/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SuperViscousWheelKevinTurtle-IBD2CyCj8LUYaco5",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "SmilingObliquePeachNomNom-HYzIO85Gop0YziM8",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:40:15Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/6d63f380-74ea-4540-95ed-e8357129705a/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SmilingObliquePeachNomNom-HYzIO85Gop0YziM8",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "InterestingSpoopySkirretHassanChop-C1YXvCihfPdVVVGO",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:12:29Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/8f44405e-3f77-4478-b314-05412b9a18a0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/InterestingSpoopySkirretHassanChop-C1YXvCihfPdVVVGO",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "CreativeFriendlyStarlingCoolStoryBob-q5A0r4eJh7GUnlQ7",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T18:12:04Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/50de1ed8-7851-4fb6-924f-ae960b12131c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/CreativeFriendlyStarlingCoolStoryBob-q5A0r4eJh7GUnlQ7",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "PunchyBadGullKappaClaus-gJgLJ_S4U8C2Nrpd",
+      "title": "🔴 Po 100 letech hraju CSko | Naštěstí jen prop hunt nebo něco 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-29T17:20:23Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ddb9bfe8-f4e6-4ca9-a686-294e1428168e/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PunchyBadGullKappaClaus-gJgLJ_S4U8C2Nrpd",
+      "game": "Counter-Strike"
+    },
+    {
+      "id": "BlindingBlazingTarsierYee-Aibn14mbFXwhu3mG",
+      "title": "🔴 Otestovali jsme IRL | Jdeme dohrát metro last light 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-20T17:34:31Z",
+      "creator": "KeodaCZ",
+      "duration": 35.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/21063abd-dbbc-4107-a7da-8eb913d10b58/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/BlindingBlazingTarsierYee-Aibn14mbFXwhu3mG",
+      "game": "Metro: Last Light Redux"
+    },
+    {
+      "id": "PreciousVastSkunkPeoplesChamp-SjrC6ZttIBo0Eu6S",
+      "title": "🔴 vzhůru do hlubin druhého metra 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-19T17:26:00Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/7dea9d5a-f6e5-4c8f-8cc7-961eafb370db/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PreciousVastSkunkPeoplesChamp-SjrC6ZttIBo0Eu6S",
+      "game": "Just Chatting"
+    },
+    {
+      "id": "EntertainingCrepuscularReindeerCurseLit-kWUrUPOXkL1gjmOV",
+      "title": "🔴 Dohráváme první metro🔴 !dc !ig !clip",
+      "createdAt": "2026-05-17T19:43:56Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/811294c4-defd-497c-8a0f-0d4dabb07bd0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EntertainingCrepuscularReindeerCurseLit-kWUrUPOXkL1gjmOV",
+      "game": "Metro 2033 Redux"
+    },
+    {
+      "id": "PlacidSmallFriesTakeNRG-PkF5NWvkjcUH_gu2",
+      "title": "🔴 Dostaneme se nějak do hry? | Metro 2033 Redux 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-16T19:45:31Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a9fcfc6c-433b-4a5a-b3a4-b4f274df29da/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PlacidSmallFriesTakeNRG-PkF5NWvkjcUH_gu2",
+      "game": "Metro 2033 Redux"
+    },
+    {
+      "id": "KindShyHerbsBudBlast-nQyrYj4z6eTylscY",
+      "title": "🔴 Dneska budeme pohodlně sedět. Teda až postavíme novou židli 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-13T19:04:54Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/2be1ef7a-6d9a-4370-931f-eb75c2ad7fc0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/KindShyHerbsBudBlast-nQyrYj4z6eTylscY",
+      "game": "Just Chatting"
+    },
+    {
+      "id": "DeliciousHonorableFriesKappaPride-_ZAv5FNa8r60xFwy",
+      "title": "🔴 Dneska budeme pohodlně sedět. Teda až postavíme novou židly 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-13T17:03:41Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ed53434a-65ac-4959-bf3b-7a0f03483bc5/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/DeliciousHonorableFriesKappaPride-_ZAv5FNa8r60xFwy",
+      "game": "Just Chatting"
+    },
+    {
+      "id": "InspiringTangentialLobsterGingerPower-WmFfv3UJepqEiY0s",
+      "title": "🔴 Dneska budeme pohodlně sedět. Teda až postavíme novou židly 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-13T16:52:59Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/cb32ead3-62d7-40d9-a095-a281073f4094/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/InspiringTangentialLobsterGingerPower-WmFfv3UJepqEiY0s",
+      "game": "Just Chatting"
+    },
+    {
+      "id": "DependableFriendlyCaterpillarDuDudu-owNC5ZmDC_Nzu__p",
+      "title": "🔴 Já už nemůžu ahhhhhhh | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-10T19:18:37Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/8174b378-ca5f-4a66-8624-5c452c9654a6/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/DependableFriendlyCaterpillarDuDudu-owNC5ZmDC_Nzu__p",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "WanderingColorfulKuduCoolCat-KWgxSJ-T1IqMwKBY",
+      "title": "🔴 Čeká nás act 2 | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-09T18:04:08Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/fe97abf8-2639-4026-b58c-2fc5a3fff054/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/WanderingColorfulKuduCoolCat-KWgxSJ-T1IqMwKBY",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "EasyCuriousAsparagusSpicyBoy-ommBybD6ao-M1WsB",
+      "title": "🔴 Přežijeme víc než 7 dní? | 7 Days to die 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-08T17:59:46Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/e372ae0f-9071-4784-8104-2bc25134fed6/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EasyCuriousAsparagusSpicyBoy-ommBybD6ao-M1WsB",
+      "game": "7 Days to Die"
+    },
+    {
+      "id": "CredulousElatedCheetahAMPTropPunch-fo1Jb8C2awDB3bHA",
+      "title": "🔴 Přežijeme víc než 7 dní? | 7 Days to die 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-08T17:57:25Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/1f6b4cbf-03e5-49b2-a81e-46ea37817ae0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/CredulousElatedCheetahAMPTropPunch-fo1Jb8C2awDB3bHA",
+      "game": "7 Days to Die"
+    },
+    {
+      "id": "AcceptableCallousOysterDancingBaby-rXdHO77iSrCHdtpo",
+      "title": "🔴 Přežijeme víc než 7 dní? | 7 Days to die 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-08T17:51:06Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/4af1c7f5-2c03-4439-b5ad-90b31a1c2682/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/AcceptableCallousOysterDancingBaby-rXdHO77iSrCHdtpo",
+      "game": "7 Days to Die"
+    },
+    {
+      "id": "EnticingEntertainingPelicanNotATK-2gwGRsEtRgYG00_t",
+      "title": "🔴 Postoupíme dneska někam? | Hollow Knight: Silksong | Večer možná chill jinde XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-07T20:22:14Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/52a63ffb-78b6-4abe-b167-c01b3a8c2235/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EnticingEntertainingPelicanNotATK-2gwGRsEtRgYG00_t",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "OnerousTiredFinchPeanutButterJellyTime-3cM6EV54omDxCsm8",
+      "title": "🔴 Postoupíme dneska někam? | Hollow Knight: Silksong | Večer možná chill jinde XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-07T20:18:32Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/c1b649b1-3810-4dbc-bdb9-af8d5156ec8c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/OnerousTiredFinchPeanutButterJellyTime-3cM6EV54omDxCsm8",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "BlindingToughCookieTinyFace-1QzFnoiNde9nl2L_",
+      "title": "🔴 Postoupíme dneska někam? | Hollow Knight: Silksong | Večer možná chill jinde XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-07T19:22:29Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a382d790-6203-4cce-9fa2-7bf49c032866/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/BlindingToughCookieTinyFace-1QzFnoiNde9nl2L_",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "EnticingIgnorantZucchiniANELE-55z8M4sFRaYSjf5O",
+      "title": "🔴 Postoupíme dneska někam? | Hollow Knight: Silksong | Večer možná chill jinde XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-07T18:20:40Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/01ca3428-e288-469f-a6b2-6f26e18f09f5/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EnticingIgnorantZucchiniANELE-55z8M4sFRaYSjf5O",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "SuaveCrazyNightingalePMSTwin-6-XZTaQkzOq0l9ye",
+      "title": "🔴 Postoupíme dneska někam? | Hollow Knight: Silksong | Večer možná chill jinde XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-07T18:10:54Z",
+      "creator": "KeodaCZ",
+      "duration": 41.3,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/de106c1f-5b70-41eb-93ab-ad3c868f9c4f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SuaveCrazyNightingalePMSTwin-6-XZTaQkzOq0l9ye",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "PlayfulDifferentOrangeHeyGirl-G8g4MB2_Mf1NEAyp",
+      "title": "🔴 Postoupíme dneska někam? | Hollow Knight: Silksong | Večer možná chill jinde XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-07T18:02:12Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/f61e3eed-9240-480b-b99f-3e4c9c407ebf/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PlayfulDifferentOrangeHeyGirl-G8g4MB2_Mf1NEAyp",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "AverageSlipperyTubersFunRun-n-Sy5zcOOlkCdUiS",
+      "title": "🔴 Včera se nám dařilo tak snad dneska budeme pokračovat | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-06T18:50:24Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b7f655de-6884-435a-9fc9-9e754c8a1825/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/AverageSlipperyTubersFunRun-n-Sy5zcOOlkCdUiS",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "RespectfulFastWolfDAESuppy-062L3nkAyrnabZqw",
+      "title": "🔴 Pomalu se posouváme | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-05T19:07:20Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/d8a407e4-5ac0-42d8-9571-723e341c4fa0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/RespectfulFastWolfDAESuppy-062L3nkAyrnabZqw",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "InexpensiveTransparentAniseEleGiggle-L0uM58pNG_KmO5IF",
+      "title": "🔴 Čas vyrazit na další bose | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-04T19:09:26Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/f40269bb-ba9f-4f0b-8ebe-cff2d66a5424/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/InexpensiveTransparentAniseEleGiggle-L0uM58pNG_KmO5IF",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "TransparentGorgeousSnoodTakeNRG-LSrM13wFNhgQmQJW",
+      "title": "🔴 Dneska REPO společně se Scootrem a pak uvidíme 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-01T16:11:58Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/4e31ea04-b38c-45f5-bfbc-004ca93e113d/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TransparentGorgeousSnoodTakeNRG-LSrM13wFNhgQmQJW",
+      "game": "R.E.P.O."
+    },
+    {
+      "id": "HonorableDarkOctopusDuDudu-bkOQ4FwlMQExsS8H",
+      "title": "🔴 Dneska REPO společně se Scootrem a pak uvidíme 🔴 !dc !ig !clip",
+      "createdAt": "2026-05-01T16:05:49Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/edef70e0-bb04-424b-9d5e-59d486147b65/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/HonorableDarkOctopusDuDudu-bkOQ4FwlMQExsS8H",
+      "game": "R.E.P.O."
+    },
+    {
+      "id": "NurturingSuccessfulOstrichDatBoi-o_Y-KeT9M-xk2SDH",
+      "title": "🔴 Plošinový horor pokračuje | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-29T19:37:45Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/9a94803c-aad1-4ed6-b667-1f9b0abfe750/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/NurturingSuccessfulOstrichDatBoi-o_Y-KeT9M-xk2SDH",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "GloriousRenownedGnatWTRuck-YbcszbDyAKcHPm65",
+      "title": "🔴 Jdeme se vrátit do hororů plošinovky | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-28T19:25:33Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/79115feb-3471-4abf-b03d-4701d06cf34b/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/GloriousRenownedGnatWTRuck-YbcszbDyAKcHPm65",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "InspiringCrispyBottleJonCarnage-GhgPlPK3SNu8bge-",
+      "title": "🔴 Jdeme se vrátit do hororů plošinovky | Hollow Knight: Silksong 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-28T18:45:34Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/2fff7645-ef8f-4b83-ab67-7b17494003ab/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/InspiringCrispyBottleJonCarnage-GhgPlPK3SNu8bge-",
+      "game": "Hollow Knight: Silksong"
+    },
+    {
+      "id": "TsundereBusyLemurBCouch-dN7HAv7ZYNfapODe",
+      "title": "mag boots",
+      "createdAt": "2026-04-27T17:03:43Z",
+      "creator": "KeodaCZ",
+      "duration": 47.3,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/f1178af7-ba9b-4208-a0bb-accea299f9ed/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TsundereBusyLemurBCouch-dN7HAv7ZYNfapODe",
+      "game": "High on Life"
+    },
+    {
+      "id": "GenerousCheerfulPigOneHand-pnGPxF55SgbpPCUw",
+      "title": "🔴 Dneska jen chill | Možná windrose, možná Farlight XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-26T19:58:04Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/c6eca497-5796-4b4b-9daa-1a9a8294e180/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/GenerousCheerfulPigOneHand-pnGPxF55SgbpPCUw",
+      "game": "Windrose"
+    },
+    {
+      "id": "VainClumsyPuffinCopyThis-BENlSQWVsIG196EN",
+      "title": "🔴 Celodenní stream? | Remnant II adventure a čekáme na manga s dokončením story 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-25T18:22:47Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/289c3592-6ff9-45f6-8266-a126589fad8a/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/VainClumsyPuffinCopyThis-BENlSQWVsIG196EN",
+      "game": "Remnant II"
+    },
+    {
+      "id": "SarcasticGentleOxRalpherZ-kNoq8MMz6DKKN9Q0",
+      "title": "🔴 Celodenní stream? | Remnant II adventure a čekáme na manga s dokončením story 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-25T18:04:10Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/5647b885-276c-4b51-8dda-3cf0a84b08fb/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SarcasticGentleOxRalpherZ-kNoq8MMz6DKKN9Q0",
+      "game": "Remnant II"
+    },
+    {
+      "id": "EnchantingBillowingShieldHeyGirl-CZ5gnri5AiZjpDX7",
+      "title": "🔴 Celodenní stream? | Remnant II adventure a čekáme na manga s dokončením story 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-25T18:00:23Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/803d324d-3c04-472a-9e12-8e372acd36a0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EnchantingBillowingShieldHeyGirl-CZ5gnri5AiZjpDX7",
+      "game": "Remnant II"
+    },
+    {
+      "id": "PopularKawaiiNewtRitzMitz-2Xk1W7hU3aETMj9a",
+      "title": "🔴 Celodenní stream? | Remnant II s @mangorar_ | Později možná Windrose 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-25T13:09:24Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/8e54a765-ddab-493e-af93-05f4310bc3ab/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PopularKawaiiNewtRitzMitz-2Xk1W7hU3aETMj9a",
+      "game": "Remnant II"
+    },
+    {
+      "id": "LittleInspiringMonkeyStinkyCheese-ul2yIBHd0nSzGDqU",
+      "title": "🔴 Celodenní stream? | Remnant II s @mangorar_ | Později možná Windrose 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-25T12:03:24Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/eb0cf4d6-af62-4e63-be2e-604ee2ec82ae/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/LittleInspiringMonkeyStinkyCheese-ul2yIBHd0nSzGDqU",
+      "game": "Remnant II"
+    },
+    {
+      "id": "TenuousAdventurousAmazonVoteNay-6cr46l1Vfyd5uEJf",
+      "title": "🔴 Zbraně co mluví? Ok 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-24T17:09:38Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/6bae5b83-e04b-4f3a-a099-0b8b50709b84/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TenuousAdventurousAmazonVoteNay-6cr46l1Vfyd5uEJf",
+      "game": "High on Life"
+    },
+    {
+      "id": "FriendlyPlainMinkDansGame-k3-44igm7wSU-KLD",
+      "title": "Mačkej vše",
+      "createdAt": "2026-04-24T16:48:15Z",
+      "creator": "Mangorar_",
+      "duration": 59.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b3bd0c95-7072-4874-9a4e-955becf94577/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/FriendlyPlainMinkDansGame-k3-44igm7wSU-KLD",
+      "game": "High on Life"
+    },
+    {
+      "id": "RudeFrozenPonyYouDontSay-l40etnLSJVWEsV81",
+      "title": "🔴 Vzhůru do čtvrté oblasti | Pragmata 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-22T21:34:25Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b2763e30-a203-4792-b855-1439974e18ee/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/RudeFrozenPonyYouDontSay-l40etnLSJVWEsV81",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "PlayfulEasyMosquitoJKanStyle-_etH66JqO1toZTdv",
+      "title": "🔴 Vzhůru do čtvrté oblasti | Pragmata 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-22T21:34:06Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/37d2afae-df6e-4dc5-9e6c-3b6e20498232/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PlayfulEasyMosquitoJKanStyle-_etH66JqO1toZTdv",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "PlacidCourageousSnailKappaClaus-Nr2O6Szq4kL3t09O",
+      "title": "Diana dance",
+      "createdAt": "2026-04-21T21:07:02Z",
+      "creator": "KeodaCZ",
+      "duration": 32.3,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/6ca1f9f4-0d3d-44ee-833d-57610d6b07e0/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PlacidCourageousSnailKappaClaus-Nr2O6Szq4kL3t09O",
+      "game": "PRAGMATA",
+      "featured": true
+    },
+    {
+      "id": "TransparentSuspiciousEmuCurseLit-qj6VIN-AKfzwkHJV",
+      "title": "🔴 Otec s dcerou prohledávají kolébku neboli PRAGMATA 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-21T19:31:13Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/1b5f8325-2b48-4f1b-aeac-eeeee826f708/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TransparentSuspiciousEmuCurseLit-qj6VIN-AKfzwkHJV",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "WittyVainMartenM4xHeh-_GJdrA7MvbryDnay",
+      "title": "🔴 Otec s dcerou prohledávají kolébku neboli PRAGMATA 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-21T19:23:00Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/87783757-1efc-4f86-901e-1b89d62a38f7/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/WittyVainMartenM4xHeh-_GJdrA7MvbryDnay",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "ResoluteGrotesqueQuailPlanking-BDTb8XlWiPBswPyo",
+      "title": "🔴 Otec s dcerou prohledávají kolébku neboli PRAGMATA 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-21T18:56:19Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/8c5c9e4e-1140-41c3-8d73-ad6bf350d0fd/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ResoluteGrotesqueQuailPlanking-BDTb8XlWiPBswPyo",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "TolerantJazzyMilkOhMyDog-DxBQ4bW3KDGB6e2E",
+      "title": "🔴 Otec s dcerou prohledávají kolébku neboli PRAGMATA 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-21T18:43:08Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/4989a7da-12df-4dd3-b765-30b7becd8d8f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TolerantJazzyMilkOhMyDog-DxBQ4bW3KDGB6e2E",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "BetterAmorphousEmuYee-W5w4c7mska69KuyH",
+      "title": "🔴 Už se jdu taky podívat na pedo simulátor otece 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-20T17:55:16Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/8d29828f-e8fd-4578-a3b6-3aa2fc515297/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/BetterAmorphousEmuYee-W5w4c7mska69KuyH",
+      "game": "PRAGMATA"
+    },
+    {
+      "id": "ExquisiteEntertainingKangarooPhilosoraptor-2b6D6R68LDYCuB6h",
+      "title": "🔴 Nedělní chillec | Možná Papers please, možná DbD, možná Farlight XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-19T19:12:43Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/45dddcb1-8650-44c5-b01f-f9299823ab2a/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ExquisiteEntertainingKangarooPhilosoraptor-2b6D6R68LDYCuB6h",
+      "game": "Papers, Please"
+    },
+    {
+      "id": "RealLittleBunnyTheTarFu-eABgykdPcyTugX7A",
+      "title": "🔴 Budu pracovat v nemocnici? | GenK RP 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-15T19:02:42Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/bc1ec82d-e8ed-4ba1-b753-e3b624ab9611/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/RealLittleBunnyTheTarFu-eABgykdPcyTugX7A",
+      "game": "Grand Theft Auto V"
+    },
+    {
+      "id": "HealthySassyLadiesRickroll-_Et-AG1qnMl2aTs8",
+      "title": "🔴 Čekají nás další bossové | Remnant 2 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-10T20:56:56Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/27b3333d-71ac-45aa-ad80-54c4a618870c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/HealthySassyLadiesRickroll-_Et-AG1qnMl2aTs8",
+      "game": "Remnant II"
+    },
+    {
+      "id": "ArtsyImpossibleCardGrammarKing-P99GyyA-2FvrHX6P",
+      "title": "🔴 Čekají nás další bossové | Remnant 2 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-10T20:54:39Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/5c778893-9969-4876-8703-de2cc76d90dd/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ArtsyImpossibleCardGrammarKing-P99GyyA-2FvrHX6P",
+      "game": "Remnant II"
+    },
+    {
+      "id": "TrappedFurryPonyRalpherZ-DXWIjSPPzRUoDuV9",
+      "title": "🔴 Čekají nás další bossové | Remnant 2 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-10T16:08:52Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/f703d024-952f-485b-b8d4-d1fdce8e853e/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/TrappedFurryPonyRalpherZ-DXWIjSPPzRUoDuV9",
+      "game": "Remnant II"
+    },
+    {
+      "id": "SavageAbrasiveRatDeIlluminati-RMDKMPITwi39E1eK",
+      "title": "A že ho neodkopl",
+      "createdAt": "2026-04-07T18:26:32Z",
+      "creator": "KeodaCZ",
+      "duration": 4.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/61408845-2894-4f01-b4bd-b7fadbcbfa19/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SavageAbrasiveRatDeIlluminati-RMDKMPITwi39E1eK",
+      "game": "Super Battle Golf",
+      "featured": true
+    },
+    {
+      "id": "RichSlipperyStarSSSsss--IyESEaR9Olt8UFr",
+      "title": "🔴 Po restartu RP čekám ve frontě a hraju Dead Cells XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-07T16:48:38Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/9e424ad3-21bf-4ef0-908c-c42db07dbaef/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/RichSlipperyStarSSSsss--IyESEaR9Olt8UFr",
+      "game": "Dead Cells"
+    },
+    {
+      "id": "EmpathicThirstyHarePhilosoraptor-pqzoGQ0vBBXaiy1p",
+      "title": "🔴 Jindřich ze Skalice objevuje Kutnou Horu 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-06T20:56:36Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b9ce8e78-049a-4b66-94b4-45b7219b8405/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EmpathicThirstyHarePhilosoraptor-pqzoGQ0vBBXaiy1p",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "DarlingDifficultSushiFunRun-6CPFbUMXgGKQ0DDP",
+      "title": "🔴 Jindřich ze Skalice objevuje Kutnou Horu 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-06T20:41:48Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/4a8df3bc-aa94-4bcd-b67b-59e32f7abc0f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/DarlingDifficultSushiFunRun-6CPFbUMXgGKQ0DDP",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "FuriousBreakableJalapenoDxCat-SK6W252nySPSqHNy",
+      "title": "🔴 Jindřich ze Skalice objevuje Kutnou Horu 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-06T17:36:39Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a98bd040-5aae-49a6-8f93-99cd397dbc56/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/FuriousBreakableJalapenoDxCat-SK6W252nySPSqHNy",
+      "game": "Just Chatting"
+    },
+    {
+      "id": "PowerfulThirstyPineappleRuleFive-ch5lDoivFBCjiFHI",
+      "title": "🔴 Naše Remnant dobrodružství pokračuje v druhém díle 🔴 !dc !ig !clip",
+      "createdAt": "2026-04-05T15:12:28Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ba761427-6f64-4904-a390-ab046fe9beb8/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PowerfulThirstyPineappleRuleFive-ch5lDoivFBCjiFHI",
+      "game": "Remnant II"
+    },
+    {
+      "id": "SuperStylishTrayBleedPurple-GPqnLv_2TSmO9KaZ",
+      "title": "realičnichtoš, realičništoš, realičnost, realistnost,.... xdddddddddddd",
+      "createdAt": "2026-03-30T23:17:57Z",
+      "creator": "Kubrastig_",
+      "duration": 59.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/76c33c46-3212-469b-b308-e41b47acb481/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SuperStylishTrayBleedPurple-GPqnLv_2TSmO9KaZ",
+      "game": "Just Chatting"
+    },
+    {
+      "id": "OutstandingTriangularCasetteLeeroyJenkins-x5S13y5USNXPRFSj",
+      "title": "🔴 Změna plánu. Kubra nemá co dělat tak jdeme hrát Super Battle Golf 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-29T21:19:31Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/833c004b-f69a-4fba-9925-f3e960cd7c24/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/OutstandingTriangularCasetteLeeroyJenkins-x5S13y5USNXPRFSj",
+      "game": "Super Battle Golf"
+    },
+    {
+      "id": "ElatedUnsightlyWoodcockAsianGlow-snYIKJ7AYeU48TWK",
+      "title": "🔴 Změna plánu. Kubra nemá co dělat tak jdeme hrát Super Battle Golf 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-29T19:46:28Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ce6e3c9b-0d29-43e1-90a7-f49256ea664d/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ElatedUnsightlyWoodcockAsianGlow-snYIKJ7AYeU48TWK",
+      "game": "Super Battle Golf"
+    },
+    {
+      "id": "BadFrigidAlbatrossBuddhaBar-ZkiIR4E6qCIK1zwB",
+      "title": "🔴 Po 100 letech se posunu v hlavním příběhu (snad) 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-23T18:56:37Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/63653bd6-eb79-4115-9608-2cc525795829/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/BadFrigidAlbatrossBuddhaBar-ZkiIR4E6qCIK1zwB",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "BeautifulFreezingPeafowlOptimizePrime-NaS0LkNyOciyd9vV",
+      "title": "🔴 Co se děje na pirátských vodách? Jdeme nějaké PvP 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-22T16:11:02Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b8b06b72-f068-43b1-b5b8-c72c81b17156/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/BeautifulFreezingPeafowlOptimizePrime-NaS0LkNyOciyd9vV",
+      "game": "Sea of Thieves"
+    },
+    {
+      "id": "LazyYummyOpossumCopyThis-zMef-eIE1d9pf2OS",
+      "title": "🔴 Dneska jdeme do VR | Nějaký ten Beat Saber a něco dalšího XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-20T21:09:12Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/1cbc5398-c1dd-4e12-a3c3-b9ed2b93183c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/LazyYummyOpossumCopyThis-zMef-eIE1d9pf2OS",
+      "game": "Beat Saber"
+    },
+    {
+      "id": "EvilJoyousAsteriskSoBayed-tfqqx_P327gaDe7s",
+      "title": "🔴 Dneska pečeme brownies | Večer se vracíme do Kutné Hory 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-15T15:03:19Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/9a057729-09fd-469a-9984-eee3bfbe6ca4/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/EvilJoyousAsteriskSoBayed-tfqqx_P327gaDe7s",
+      "game": "Food & Drink"
+    },
+    {
+      "id": "IcyChillyCrocodilePermaSmug-vIk38dsYmkW0ae-C",
+      "title": "🔴 Dneska pečeme brownies | Večer se vracíme do Kutné Hory 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-15T14:45:21Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/d8b1039f-02e0-47c1-bcee-87104dab5587/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/IcyChillyCrocodilePermaSmug-vIk38dsYmkW0ae-C",
+      "game": "Food & Drink"
+    },
+    {
+      "id": "PeacefulCharmingWhaleBuddhaBar-03Q4rk4jeJ02FDJW",
+      "title": "🔴 Posuneme se do další oblasti? 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-12T22:44:11Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/84894fb1-e779-4c04-b304-5c04f749a51f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PeacefulCharmingWhaleBuddhaBar-03Q4rk4jeJ02FDJW",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "FuriousGeniusPotatoDxCat-5-V8Lk9cpedfLI4H",
+      "title": "WTF???",
+      "createdAt": "2026-03-12T21:46:10Z",
+      "creator": "Kubrastig_",
+      "duration": 8.6,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ae1bd6e2-930d-4529-8642-a8bf904a761f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/FuriousGeniusPotatoDxCat-5-V8Lk9cpedfLI4H",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "CrunchyHeartlessApeTebowing-UK4ODBFaA19_9-GT",
+      "title": "🔴 Spolupirát mi odešel | Brno transit Demo je super XD | Chiil na nitraMMania 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-10T20:39:04Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/07d6aa19-8738-4126-82ff-5b1825850a9b/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/CrunchyHeartlessApeTebowing-UK4ODBFaA19_9-GT",
+      "game": "TrackMania United Forever"
+    },
+    {
+      "id": "GleamingIntelligentPhoneKlappa-eUS0fqpZAryfewv6",
+      "title": "🔴 Na svatbě jsem pořád nebyl ale možná dneska XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-08T23:28:33Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/550bae48-ee54-47a8-8ffe-ca46ec391fb9/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/GleamingIntelligentPhoneKlappa-eUS0fqpZAryfewv6",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "SassyTemperedApeSaltBae-PdWPJhomkICpKsJu",
+      "title": "🔴 Na svatbě jsem pořád nebyl ale možná dneska XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-08T22:51:41Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/0c277e49-c589-473d-8e73-52a7780905b8/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SassyTemperedApeSaltBae-PdWPJhomkICpKsJu",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "PoorProductiveKeyboardBuddhaBar-ZUzT4xS-L0TfDKj5",
+      "title": "🔴 Na svatbě jsem pořád nebyl ale možná dneska XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-08T22:48:36Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/e1ff8068-6857-492c-b11f-e4d60af4f7ed/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PoorProductiveKeyboardBuddhaBar-ZUzT4xS-L0TfDKj5",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "FunnyEasyClamSquadGoals-m2B4WSfFO514c4Fu",
+      "title": "🔴 Na svatbě jsem pořád nebyl ale možná dneska XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-08T22:48:04Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/589776c9-7d26-4c87-810b-9edbdd474930/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/FunnyEasyClamSquadGoals-m2B4WSfFO514c4Fu",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "NaivePowerfulPastaPRChase-uo_zKsEZso10M9gI",
+      "title": "🔴 Dostaneme se už dneska na svatbu? (pochybuju XD) 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-06T21:14:45Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/29952c6d-acf7-46ae-a945-290fb183475f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/NaivePowerfulPastaPRChase-uo_zKsEZso10M9gI",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "ConfidentPrettiestJackalDogFace-u21-3lx28fzIDLfC",
+      "title": "🔴 Dostali jsme se do Troskovic, teď musíme vymyslet jak se dostat na svatbu 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-04T23:42:36Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/855a01fc-706c-4495-b215-cb0a1f3562f2/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ConfidentPrettiestJackalDogFace-u21-3lx28fzIDLfC",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "ColorfulAffluentFlamingoWow-fe0dofsBr6cnttrp",
+      "title": "🔴 Dostali jsme se do Troskovic, teď musíme vymyslet jak se dostat na svatbu 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-04T23:37:21Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/1fff547e-d3ef-499f-8674-ad2b5fd625bc/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/ColorfulAffluentFlamingoWow-fe0dofsBr6cnttrp",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "SpookyFriendlySardineDAESuppy-_Ik06Dc0LzLhwx7z",
+      "title": "🔴 Dostali jsme se do Troskovic, teď musíme vymyslet jak se dostat na svatbu 🔴 !dc !ig !clip",
+      "createdAt": "2026-03-04T19:55:32Z",
+      "creator": "KeodaCZ",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/18a344f4-6665-4dcd-81ae-d3a829aacea4/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SpookyFriendlySardineDAESuppy-_Ik06Dc0LzLhwx7z",
+      "game": "Kingdom Come: Deliverance II"
+    },
+    {
+      "id": "DeliciousMoldyOilBrainSlug-UXl92Of9zNwr6P36",
+      "title": "Žiju... XD",
+      "createdAt": "2026-02-26T19:26:48Z",
+      "creator": "dragoneshuntercz",
+      "duration": 11.3,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/cfa0a909-d132-4a81-a59f-71c85c146f2a/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/DeliciousMoldyOilBrainSlug-UXl92Of9zNwr6P36",
+      "game": "Games + Demos",
+      "featured": true
+    },
+    {
+      "id": "SleepyPolishedSkunkFailFish-CTtq0g4NPxzAvZDq",
+      "title": "🔴 Máme za sebou 2 roky v bradavicích teď se jdeme podávat do lesa 🔴 !dc !ig !clip",
+      "createdAt": "2026-02-18T00:03:39Z",
+      "creator": "KeodaCZ",
+      "duration": 30,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/78ce3fce-2db0-42c2-b911-8881e562393f/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SleepyPolishedSkunkFailFish-CTtq0g4NPxzAvZDq",
+      "game": "Sons of the Forest"
+    },
+    {
+      "id": "WanderingLazyAppleDatSheffy-NKbILfBKWTc8IKQc",
+      "title": "🔴 Blížíme se ke vzpouře robotů 🔴 !dc !ig !clip",
+      "createdAt": "2026-02-15T22:16:05Z",
+      "creator": "KeodaCZ",
+      "duration": 30,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/f7e7f29f-1135-4a48-97ad-a4d37a65213d/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/WanderingLazyAppleDatSheffy-NKbILfBKWTc8IKQc",
+      "game": "Detroit: Become Human"
+    },
+    {
+      "id": "GlutenFreeSpineyBisonNerfRedBlaster-sCL_QOnr1dzKYHJ_",
+      "title": "uuuprrrkkk nebo ne jsem mrkev",
+      "createdAt": "2026-02-05T22:39:07Z",
+      "creator": "mrakomor25",
+      "duration": 30,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a9ca35ac-72f0-42c8-af4e-9e6b42a96b08/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/GlutenFreeSpineyBisonNerfRedBlaster-sCL_QOnr1dzKYHJ_",
+      "game": "Guild Wars 2"
+    },
+    {
+      "id": "PleasantHelplessCougarOSsloth-Um9vpivZ5uLOnsQ4",
+      "title": "POMOC STRÁŽNEJ",
+      "createdAt": "2026-01-26T20:29:31Z",
+      "creator": "Kubrastig_",
+      "duration": 5,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/b9669c41-2a76-4ce5-9ec8-7fae1301458c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PleasantHelplessCougarOSsloth-Um9vpivZ5uLOnsQ4",
+      "game": "Kingdom Come: Deliverance"
+    },
+    {
+      "id": "DepressedBeautifulSoymilkCharlieBitMe-m13qAFzAbBqHE7zf",
+      "title": "🔴 Nemám tušení kde jsem skončil ale jdeme pokračovat v KCD :) 🔴 !dc !ig !clip",
+      "createdAt": "2026-01-19T18:56:28Z",
+      "creator": "KeodaCZ",
+      "duration": 30,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ded5ad98-b49d-4127-a37e-c3b8595902d9/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/DepressedBeautifulSoymilkCharlieBitMe-m13qAFzAbBqHE7zf",
+      "game": "Kingdom Come: Deliverance"
+    },
+    {
+      "id": "SpoopyUnusualPancakeHassaanChop-I0YRBU0EtBmokioZ",
+      "title": "KeodaSex",
+      "createdAt": "2026-01-15T23:45:58Z",
+      "creator": "Kubrastig_",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/71c2d825-0f46-465f-b052-266fd58fe3a8/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SpoopyUnusualPancakeHassaanChop-I0YRBU0EtBmokioZ",
+      "game": "Kingdom Come: Deliverance"
+    },
+    {
+      "id": "AgitatedPluckyEchidnaVoteYea-nqQk7uI8jgF7zIuK",
+      "title": "podkopejteto někdo pod ním ahaaa tak nic on to zvladl sám",
+      "createdAt": "2026-01-15T00:46:09Z",
+      "creator": "mrakomor25",
+      "duration": 30,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/94d8f49f-f602-4531-8c85-97a4efba6fe4/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/AgitatedPluckyEchidnaVoteYea-nqQk7uI8jgF7zIuK",
+      "game": "Minecraft"
+    },
+    {
+      "id": "SparklyGentleMooseRickroll-RZyhnINg8V5c_4sZ",
+      "title": "ale jestl AAAAAAAARRRRRR",
+      "createdAt": "2026-01-14T22:41:25Z",
+      "creator": "mrakomor25",
+      "duration": 29.9,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/ad42f04c-b0d3-4bd4-821f-e74057cdd92c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/SparklyGentleMooseRickroll-RZyhnINg8V5c_4sZ",
+      "game": "Minecraft"
+    },
+    {
+      "id": "PerfectTransparentMushroomUWot-2CdE3JAwPeCxmqXZ",
+      "title": "🔴 KCD by zatím stačilo | LoTR MC na konec XD 🔴 !dc !ig !clip",
+      "createdAt": "2026-01-13T22:44:07Z",
+      "creator": "KeodaCZ",
+      "duration": 30,
+      "thumb": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/878bf747-5ac0-405b-8339-04d283f5496c/landscape/thumb/thumb-0000000000-480x272.jpg",
+      "url": "https://www.twitch.tv/keodacz/clip/PerfectTransparentMushroomUWot-2CdE3JAwPeCxmqXZ",
+      "game": "Minecraft"
     }
   ]
 }

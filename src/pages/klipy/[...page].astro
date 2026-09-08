@@ -3,15 +3,15 @@
  * Twitch clips — made by viewers, not by the owner, which is the whole reason
  * they get their own page and carry a credit.
  *
- * Paginated from the start even though there are only thirty-odd today: the
- * archive goes back to 2023 once the backfill runs, and retrofitting
- * pagination onto a page people have already linked to is worse than having it
- * early.
+ * Paginated from the start, which the backfill then justified: the page went
+ * from 31 clips to 471 in one commit, back to 2023, without the route or any
+ * link to it changing.
  */
 import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
 import MediaCard from '../../components/MediaCard.astro';
 import type { Clip } from '../../lib/content';
+import { clips } from '../../lib/content';
 import { clipLabel } from '../../lib/clip-title';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -30,9 +30,9 @@ const title = page.currentPage === 1 ? 'Klipy' : `Klipy — strana ${page.curren
   <div class="container">
     <h1>Klipy z <span class="accent">Twitche</span></h1>
     <p class="muted intro">
-      Momenty, které nastříhali diváci. Klipy na Twitchi nemizí, takže tady zůstávají —
-      na rozdíl od záznamů streamů, které proto sbírám
-      na <a href="/streamy/">YouTube</a>.
+      {clips.length} momentů, které nastříhali diváci, od nejnovějšího. Klipy na Twitchi
+      nemizí, takže tady zůstávají až do roku 2023 — na rozdíl od záznamů streamů,
+      které proto sbírám na <a href="/streamy/">YouTube</a>.
     </p>
 
     <div class="grid">
@@ -78,8 +78,8 @@ const title = page.currentPage === 1 ? 'Klipy' : `Klipy — strana ${page.curren
   }
 
   /* Two columns on a phone rather than one full-width card per screen: this is
-     an archive meant for browsing, and it grows to hundreds of clips once the
-     backfill runs. A 160px thumbnail is still plenty to recognise a clip by. */
+     an archive of several hundred clips meant for browsing. A 160px thumbnail
+     is still plenty to recognise a clip by. */
   .grid {
     display: grid;
     gap: 1.2rem 0.9rem;
