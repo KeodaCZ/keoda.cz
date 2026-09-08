@@ -87,6 +87,37 @@ export function classify(video, overrides = {}) {
   return video.duration > 0 && video.duration <= SHORT_MAX_SECONDS ? 'short' : 'video';
 }
 
+/**
+ * A broadcast still in progress: it has a start time but no end time yet.
+ *
+ * These are skipped, and observing the real feed is what showed why. One
+ * stream produced two commits four hours apart — the same video, with
+ * `publishedAt` rewritten from 17:12 to 21:53, `duration` changed, and the
+ * thumbnail swapped from `maxresdefault_live.jpg` to `maxresdefault.jpg`.
+ * YouTube reports provisional metadata while a stream runs and finalises it
+ * afterwards, so archiving one mid-flight means storing values that are wrong
+ * and then rewriting them.
+ *
+ * Nothing is lost by waiting: the next run after the stream ends picks it up
+ * with final values, and the homepage already shows the live player while it
+ * is on.
+ */
+export function isStillLive(video) {
+  return Boolean(video.startedAt) && !video.endedAt;
+}
+
+/**
+ * When the thing actually happened.
+ *
+ * For a stream that is `actualStartTime`, which never changes — unlike
+ * `publishedAt`, which YouTube moves to roughly the end of the broadcast once
+ * it finishes processing. An archive sorted on `publishedAt` would order
+ * streams by when YouTube finished with them.
+ */
+export function happenedAt(video) {
+  return video.startedAt || video.publishedAt || '';
+}
+
 async function uploadsPlaylistId() {
   const { items } = await get('channels', { part: 'contentDetails', forHandle: CHANNEL_HANDLE });
   const id = items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
@@ -131,6 +162,7 @@ async function details(ids) {
 
     for (const item of items ?? []) {
       const thumbs = item.snippet?.thumbnails ?? {};
+      const live = item.liveStreamingDetails;
       out.push({
         id: item.id,
         title: item.snippet?.title ?? '',
@@ -138,7 +170,9 @@ async function details(ids) {
         duration: parseDuration(item.contentDetails?.duration),
         thumb: (thumbs.maxres ?? thumbs.standard ?? thumbs.high ?? thumbs.medium ?? {}).url ?? '',
         // Presence of liveStreamingDetails is what marks a past broadcast.
-        wasLive: Boolean(item.liveStreamingDetails),
+        wasLive: Boolean(live),
+        startedAt: live?.actualStartTime ?? '',
+        endedAt: live?.actualEndTime ?? '',
       });
     }
   }
@@ -165,12 +199,34 @@ async function main() {
   const overrides = readJson(OVERRIDES, { types: {} }).types ?? {};
 
   const buckets = { videos: [], shorts: [], streams: [] };
+  let skippedLive = 0;
+
   for (const video of videos) {
+    if (isStillLive(video)) {
+      skippedLive += 1;
+      continue;
+    }
+
     const kind = classify(video, overrides);
-    const record = { ...video };
-    // wasLive is only meaningful on the stream list; elsewhere it is noise.
-    if (kind !== 'stream') delete record.wasLive;
+    const record = {
+      id: video.id,
+      title: video.title,
+      // One field name across all three buckets, so consumers need no special
+      // case — but sourced from actualStartTime for streams, which is stable.
+      publishedAt: happenedAt(video),
+      duration: video.duration,
+      thumb: video.thumb,
+    };
+    // Only meaningful on a stream; elsewhere it is noise in the diff.
+    if (kind === 'stream') {
+      record.wasLive = true;
+      record.endedAt = video.endedAt;
+    }
     buckets[kind === 'short' ? 'shorts' : kind === 'stream' ? 'streams' : 'videos'].push(record);
+  }
+
+  if (skippedLive > 0) {
+    console.log(`Přeskočeno ${skippedLive} právě běžících streamů — metadata ještě nejsou finální.`);
   }
 
   for (const list of Object.values(buckets)) {

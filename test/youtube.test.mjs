@@ -7,7 +7,7 @@
  * longer than three minutes is a regular video to YouTube, and must be one
  * here too.
  */
-import { parseDuration, classify } from '../scripts/fetch-youtube.mjs';
+import { parseDuration, classify, isStillLive, happenedAt } from '../scripts/fetch-youtube.mjs';
 
 let passed = 0;
 const failures = [];
@@ -73,6 +73,39 @@ check(
   classify(video({ duration: 45 }), { x: 'kdovico' }),
   'short',
 );
+
+// --- a broadcast still in progress ----------------------------------------
+// Observed for real: one stream produced two commits four hours apart, with
+// publishedAt rewritten from 17:12 to 21:53, a changed duration and the
+// thumbnail swapped off _live.jpg. YouTube's metadata is provisional until a
+// stream ends, so mid-flight streams are skipped rather than stored and then
+// corrected.
+check(
+  'started but not ended is live now',
+  isStillLive({ startedAt: '2026-09-07T17:12:30Z', endedAt: '' }),
+  true,
+);
+check(
+  'started and ended is an archive item',
+  isStillLive({ startedAt: '2026-09-07T17:12:30Z', endedAt: '2026-09-07T21:34:00Z' }),
+  false,
+);
+// An ordinary upload has neither, and must not be mistaken for a live stream.
+check('a plain video is not live', isStillLive({ startedAt: '', endedAt: '' }), false);
+check('nor is one with no live fields at all', isStillLive({}), false);
+
+// --- which date counts ----------------------------------------------------
+check(
+  'a stream is dated by when it started, not when YouTube finished with it',
+  happenedAt({ startedAt: '2026-09-07T17:12:30Z', publishedAt: '2026-09-07T21:53:24Z' }),
+  '2026-09-07T17:12:30Z',
+);
+check(
+  'an ordinary upload falls back to publishedAt',
+  happenedAt({ startedAt: '', publishedAt: '2026-05-01T10:00:00Z' }),
+  '2026-05-01T10:00:00Z',
+);
+check('and with neither, an empty string rather than undefined', happenedAt({}), '');
 
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));
