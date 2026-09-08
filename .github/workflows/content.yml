@@ -7,8 +7,20 @@ name: Fetch content
 # clip onto the site without waiting up to six hours.
 
 on:
+  # Once a night, not every six hours (owner's call 2026-09-08: clips do not
+  # need to be up seconds after a stream). Streams end around 23:00 Prague, so
+  # this is aimed at "done by breakfast".
+  #
+  # 02:00 UTC is 04:00 Prague, deliberately earlier than the 07:00 he asked
+  # for: GitHub runs scheduled workflows one to four hours late in practice —
+  # measured over ten nights on this repo, not assumed — so this actually
+  # lands somewhere around 05:30–08:30 Prague. Aiming at 07:00 would have
+  # drifted into midday.
+  #
+  # The manual button covers wanting a clip up right now, which is why one
+  # nightly run is enough rather than a second afternoon slot.
   schedule:
-    - cron: '35 */6 * * *'
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 # Only what committing needs. No pages/id-token here — this workflow does not

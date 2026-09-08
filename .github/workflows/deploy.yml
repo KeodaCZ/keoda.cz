@@ -16,10 +16,19 @@ on:
   workflow_run:
     workflows: ['Fetch content', 'Reconcile clips']
     types: [completed]
-  # The schedule is rendered at build time, so "Dnes" freezes at the last
-  # deploy. These two runs land just after midnight in Prague — 22:20 UTC
-  # during summer time, 23:20 UTC during winter time — so the calendar rolls
-  # over on its own even in weeks with no commits.
+  # Times below are UTC. 22:20 UTC is 00:20 Prague in summer; 23:20 UTC is
+  # 00:20 Prague in winter. So whichever the season, one of the two lands just
+  # after Prague midnight and the other is a harmless extra.
+  #
+  # This used to be what rolled "Dnes" over in the calendar, and it was never
+  # good enough at it: GitHub runs these one to two hours late in practice, so
+  # the nightly build actually landed around 02:00 Prague and until then the
+  # page called yesterday "Dnes". The calendar now decides "today" in the
+  # browser (see ScheduleCompact/ScheduleFull), so a late or missed run can no
+  # longer mislabel a day.
+  #
+  # Kept anyway, for the things still rendered against build-time "today":
+  # the schedule banner, and which .ics files exist.
   schedule:
     - cron: '20 22 * * *'
     - cron: '20 23 * * *'

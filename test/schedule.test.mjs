@@ -7,6 +7,8 @@
  * Pattern streams Mon/Wed/Fri/Sat/Sun, so Tue and Thu are free days.
  */
 import {
+  addDays,
+  dayLabel,
   getUpcomingDays,
   getBanners,
   mergeExceptions,
@@ -324,6 +326,30 @@ check('locative Sunday', weekdayLocative('2026-09-06'), 'v neděli');
 check('locative across the spring switch', weekdayLocative('2027-03-28'), 'v neděli');
 check('locative across the autumn switch', weekdayLocative('2026-10-25'), 'v neděli');
 check('locative on a leap day', weekdayLocative('2028-02-29'), 'v úterý');
+
+// --- dayLabel: resolved in the browser, so the build going stale cannot lie --
+// 2026-09-11 is a Friday; 09-12 Saturday; 09-13 Sunday.
+check('today', dayLabel('2026-09-11', '2026-09-11', 'pátek'), 'Dnes');
+check('tomorrow', dayLabel('2026-09-12', '2026-09-11', 'sobota'), 'Zítra');
+check('further out falls back to the weekday', dayLabel('2026-09-13', '2026-09-11', 'neděle'), 'neděle');
+// A day already past must not be labelled "Dnes" just because the build was.
+check('yesterday is not today', dayLabel('2026-09-10', '2026-09-11', 'čtvrtek'), 'čtvrtek');
+
+// The scenario this exists for: the page was built on the 11th and is being
+// read on the 12th, because the nightly rebuild is running hours late.
+check('a stale build no longer calls the 11th "Dnes"', dayLabel('2026-09-11', '2026-09-12', 'pátek'), 'pátek');
+check('and the 12th becomes "Dnes"', dayLabel('2026-09-12', '2026-09-12', 'sobota'), 'Dnes');
+
+// Month and year boundaries, where naive date maths goes wrong.
+check('across a month end', dayLabel('2026-10-01', '2026-09-30', 'čtvrtek'), 'Zítra');
+check('across a year end', dayLabel('2027-01-01', '2026-12-31', 'pátek'), 'Zítra');
+// Adding a day must not be affected by DST — these are plain dates.
+check('across the spring DST switch', dayLabel('2027-03-28', '2027-03-27', 'neděle'), 'Zítra');
+check('across the autumn DST switch', dayLabel('2026-10-25', '2026-10-24', 'neděle'), 'Zítra');
+
+check('addDays is exported and works over a month end', addDays('2026-09-30', 1), '2026-10-01');
+check('and backwards', addDays('2026-10-01', -1), '2026-09-30');
+check('and over a leap day', addDays('2028-02-28', 1), '2028-02-29');
 
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));

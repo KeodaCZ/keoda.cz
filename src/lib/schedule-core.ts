@@ -146,10 +146,30 @@ function toDate(iso: string): Date {
   return new Date(Date.UTC(year, month - 1, day));
 }
 
-function addDays(iso: string, amount: number): string {
+export function addDays(iso: string, amount: number): string {
   const date = toDate(iso);
   date.setUTCDate(date.getUTCDate() + amount);
   return date.toISOString().slice(0, 10);
+}
+
+/**
+ * How to name a day relative to "today" — 'Dnes', 'Zítra', or its weekday.
+ *
+ * Exists to be called **in the browser**, not only at build time. A build
+ * renders one fixed idea of "today" and then goes stale: GitHub's cron is
+ * delayed by one to four hours in practice (measured), so the nightly rebuild
+ * meant to land at 00:20 Prague actually lands around 02:00, leaving the
+ * calendar calling yesterday "Dnes" for the first couple of hours after
+ * midnight — exactly when people look, since the stream ends around 23:00.
+ *
+ * The weekday is passed in rather than derived here because it is a pure
+ * function of the date and is safely baked at build time; only the
+ * today-relative part has to be resolved live.
+ */
+export function dayLabel(date: string, today: string, weekday: string): string {
+  if (date === today) return 'Dnes';
+  if (date === addDays(today, 1)) return 'Zítra';
+  return weekday;
 }
 
 /**

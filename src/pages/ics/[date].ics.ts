@@ -8,7 +8,7 @@ import { icsBody, type CalendarEvent } from '../../lib/calendar-links';
 import { streamEvent } from '../../lib/stream-event';
 
 export const getStaticPaths = (() =>
-  getUpcomingDays(14)
+  getUpcomingDays()
     // Cancelled days have nothing to add, and a day with no known time can't
     // become a calendar entry.
     .filter((day) => day.streaming && day.start)

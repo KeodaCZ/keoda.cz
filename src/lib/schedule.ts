@@ -43,7 +43,21 @@ export function todayInPrague(): string {
   return todayIn(timezone);
 }
 
-export function getUpcomingDays(dayCount = 14): ScheduleDay[] {
+/**
+ * How far ahead the build renders, in calendar days.
+ *
+ * Wider than the two weeks the calendar shows, on purpose. The pages decide
+ * "today" in the browser so a stale build cannot mislabel a day, and that only
+ * works if there are still enough future days left in the page after the past
+ * ones are hidden. GitHub's cron runs one to four hours late in practice, and
+ * a failed run means a whole day, so the slack is real rather than theoretical.
+ *
+ * One constant for the pages and the .ics routes together, so a rendered
+ * add-to-calendar link can never point at a file the build didn't generate.
+ */
+export const HORIZON_DAYS = 21;
+
+export function getUpcomingDays(dayCount: number = HORIZON_DAYS): ScheduleDay[] {
   return getUpcomingDaysCore(pattern, exceptions, todayInPrague(), dayCount);
 }
 

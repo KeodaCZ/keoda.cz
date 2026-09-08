@@ -9,7 +9,11 @@ import {
 import { googleCalendarUrl } from '../lib/calendar-links';
 import { streamEvent } from '../lib/stream-event';
 
-const days = getUpcomingDays(14);
+/** What the page promises to show. The build renders past this (HORIZON_DAYS)
+ *  so the browser still has two full weeks after hiding stale days. */
+const VISIBLE_DAYS = 14;
+
+const days = getUpcomingDays();
 
 const WEEKDAY_SHORT: Record<string, string> = {
   pondělí: 'PO',
@@ -36,15 +40,19 @@ function calendarLinks(day: ScheduleDay) {
   };
 }
 ---
-<div class="list">
+<div class="list" data-schedule data-timezone={timezone} data-limit={VISIBLE_DAYS}>
   {days.length === 0 ? (
     <p class="muted">Zatím tu nic nesvítí — rozvrh se doplní.</p>
   ) : (
     <ul>
-      {days.map((day) => {
+      {days.map((day, index) => {
         const links = calendarLinks(day);
         return (
-          <li class:list={['row', { off: !day.streaming, today: day.isToday }]}>
+          <li
+            class:list={['row', { off: !day.streaming, today: day.isToday }]}
+            data-date={day.date}
+            hidden={index >= VISIBLE_DAYS}
+          >
             <span class="badge">
               <span class="badge-day">{day.dayMonth}</span>
               <span class="badge-weekday">{WEEKDAY_SHORT[day.weekday]}</span>
@@ -66,7 +74,10 @@ function calendarLinks(day: ScheduleDay) {
                   </span>
                 </>
               )}
-              {day.isToday && <span class="time-label">DNES</span>}
+              {/* Rendered always, shown by CSS only on the row the browser
+                  decides is today — so a stale build cannot label the wrong
+                  one, and no JavaScript means the build's own class stands. */}
+              <span class="time-label">DNES</span>
             </span>
 
             {links ? (
@@ -118,6 +129,11 @@ function calendarLinks(day: ScheduleDay) {
     background:
       radial-gradient(circle at 1px 1px, var(--card-edge) 1px, transparent 0) 0 0 / 14px 14px,
       var(--card);
+  }
+  /* `display: grid` above beats the `hidden` attribute's UA rule, so a hidden
+     row would stay visible. Class+attribute outranks the class alone. */
+  .row[hidden] {
+    display: none;
   }
   .row.today {
     border-color: var(--accent);
@@ -192,10 +208,16 @@ function calendarLinks(day: ScheduleDay) {
   .time-value.dash {
     color: var(--muted);
   }
+  /* Only on the row that is actually today. Driven by the class rather than by
+     removing the element, so the browser can move it without rebuilding. */
   .time-label {
+    display: none;
     font-size: 0.65rem;
     letter-spacing: 0.16em;
     color: var(--muted);
+  }
+  .today .time-label {
+    display: block;
   }
 
   /* Add-to-calendar menu. <details> so it works without JavaScript. */
@@ -273,6 +295,34 @@ function calendarLinks(day: ScheduleDay) {
 </style>
 
 <script>
+  /**
+   * Decides "today" here rather than trusting the build — same reason as the
+   * compact card: GitHub's cron runs one to four hours late in practice, so
+   * the nightly rebuild lands around 02:00 Prague instead of 00:20 and until
+   * then the page calls yesterday "Dnes". Without JavaScript the build's own
+   * labels stand, which is correct at build time.
+   */
+  import { todayIn } from '../lib/schedule-core';
+
+  for (const list of document.querySelectorAll<HTMLElement>('[data-schedule]')) {
+    const today = todayIn(list.dataset.timezone || 'Europe/Prague');
+    const limit = Number(list.dataset.limit) || 14;
+    let shown = 0;
+
+    for (const row of list.querySelectorAll<HTMLElement>('.row[data-date]')) {
+      const date = row.dataset.date ?? '';
+
+      if (date < today || shown >= limit) {
+        row.hidden = true;
+        continue;
+      }
+
+      row.hidden = false;
+      shown += 1;
+      row.classList.toggle('today', date === today);
+    }
+  }
+
   // Keep at most one menu open, and close on outside click or Escape.
   const menus = document.querySelectorAll<HTMLDetailsElement>('details.add');
 

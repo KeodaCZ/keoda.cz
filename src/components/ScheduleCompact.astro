@@ -1,12 +1,20 @@
 ---
-/** Small homepage version of the calendar. The full one lives on /kalendar. */
-import { getUpcomingDays, type ScheduleDay } from '../lib/schedule';
+/**
+ * Small homepage version of the calendar. The full one lives on /kalendar.
+ *
+ * Which day is "today" is decided in the browser, not baked in — see the
+ * script at the bottom.
+ */
+import { getUpcomingDays, timezone, type ScheduleDay } from '../lib/schedule';
 
 interface Props {
   limit?: number;
 }
 const { limit = 5 } = Astro.props;
-const days = getUpcomingDays(14).slice(0, limit);
+
+// Render more rows than are shown, so a build that is a day or two stale still
+// has `limit` future days left once the browser hides the past ones.
+const days = getUpcomingDays().slice(0, limit + 5);
 
 interface Part {
   text: string;
@@ -30,15 +38,20 @@ function detailParts(day: ScheduleDay): Part[] {
   return parts;
 }
 ---
-<section class="card">
+<section class="card" data-schedule data-timezone={timezone} data-limit={limit}>
   <h2>Příští streamy</h2>
 
   {days.length === 0 ? (
     <p class="muted">Zatím tu nic nesvítí — rozvrh se doplní.</p>
   ) : (
     <ul>
-      {days.map((day) => (
-        <li class:list={['day', { off: !day.streaming, today: day.isToday }]}>
+      {days.map((day, index) => (
+        <li
+          class:list={['day', { off: !day.streaming, today: day.isToday }]}
+          data-date={day.date}
+          data-weekday={day.weekday}
+          hidden={index >= limit}
+        >
           <span class="when">
             <span class="weekday">{day.isToday ? 'Dnes' : day.weekday}</span>
             <span class="date muted">{day.dayMonth}</span>
@@ -71,6 +84,13 @@ function detailParts(day: ScheduleDay): Part[] {
     gap: 0.2rem 0.8rem;
     padding-block: 0.5rem;
     border-bottom: 1px solid var(--card-edge);
+  }
+  /* `display: flex` above beats the `hidden` attribute's UA rule, so hidden
+     rows stayed visible while `row.hidden` reported true — a screenshot caught
+     it, a property read did not. Class+attribute outranks the class alone, so
+     no !important is needed. */
+  .day[hidden] {
+    display: none;
   }
   .day:last-child {
     border-bottom: 0;
@@ -113,3 +133,44 @@ function detailParts(day: ScheduleDay): Part[] {
     color: var(--muted);
   }
 </style>
+
+<script>
+  /**
+   * Decides "today" here rather than trusting the build.
+   *
+   * A build bakes one fixed idea of today and then goes stale. GitHub's cron
+   * runs one to four hours late in practice — measured across ten nights — so
+   * the rebuild meant to land at 00:20 Prague actually lands around 02:00,
+   * and until then the card calls yesterday "Dnes". That is the worst possible
+   * window: the stream ends around 23:00 and that is when people look.
+   *
+   * Without JavaScript the build's own labels stand, which is today's
+   * behaviour — correct at build time, stale afterwards. So this is an
+   * enhancement, never a requirement.
+   */
+  import { dayLabel, todayIn } from '../lib/schedule-core';
+
+  for (const card of document.querySelectorAll<HTMLElement>('[data-schedule]')) {
+    const today = todayIn(card.dataset.timezone || 'Europe/Prague');
+    const limit = Number(card.dataset.limit) || 5;
+    let shown = 0;
+
+    for (const row of card.querySelectorAll<HTMLElement>('.day[data-date]')) {
+      const date = row.dataset.date ?? '';
+
+      // A day that has already been and gone, and the overflow rendered only
+      // as slack for exactly this case.
+      if (date < today || shown >= limit) {
+        row.hidden = true;
+        continue;
+      }
+
+      row.hidden = false;
+      shown += 1;
+      row.classList.toggle('today', date === today);
+
+      const label = row.querySelector<HTMLElement>('.weekday');
+      if (label) label.textContent = dayLabel(date, today, row.dataset.weekday ?? '');
+    }
+  }
+</script>

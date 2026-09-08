@@ -362,6 +362,28 @@ Rules:
 
 - **Times are local Europe/Prague, stored as local, rendered as local.** Do not
   store UTC — 18:30 must stay 18:30 across both DST switches.
+- **Which day is "today" is decided in the browser, not at build time.** A
+  build bakes one fixed today and then goes stale, and the cron meant to
+  refresh it runs hours late (see Actions cron caveats), so the calendar used
+  to call yesterday "Dnes" for the first couple of hours after midnight —
+  exactly when people look, since the stream ends around 23:00. Both
+  `ScheduleCompact` and `ScheduleFull` therefore render past `HORIZON_DAYS`
+  (21) with a `data-date` per row, and a small script hides days already gone,
+  relabels via `dayLabel()`, and caps how many show. Verified against a build
+  read six days later: still correct. Weekday names stay baked — a pure
+  function of the date — and only the today-relative part is resolved live,
+  the same split as the offline strip. Without JavaScript the build's own
+  labels stand, which is correct at build time.
+  - Gotcha: the `hidden` attribute does nothing against an author `display`
+    rule, so `.day` / `.row` need their own `[hidden] { display: none }`.
+    Reading `el.hidden` reported the rows as hidden while they were plainly
+    still on screen; a screenshot caught it and a property read did not.
+  - `HORIZON_DAYS` is shared with the `.ics` routes, so a rendered
+    add-to-calendar link can never point at a file the build didn't generate.
+    Verified: 15 links, 15 files.
+- **Still rendered against build-time "today"**, and therefore still stale on a
+  late build: the schedule banner (`getBanners`) and which `.ics` files exist.
+  The banner is the one that would show, since it sits on every page.
 - **Times are approximate.** Render "od 18:30", never a hard end time. The owner
   said "cca"; the site must not promise 23:00 sharp.
 - **The banner is derived from this data, not authored separately.** One entry
@@ -432,13 +454,21 @@ Merge-only would keep deleted clips forever as dead links. Weekly job:
 
 ### Workflow schedule
 
-- Incremental add: every 6h, `cron` + `workflow_dispatch` (manual button, needed
-  for same-day removals).
+- Incremental add: **once nightly** at 02:00 UTC, plus `workflow_dispatch`.
+  Owner's call 2026-09-08 — clips do not need to be up seconds after a stream,
+  and the manual button covers wanting one right now. 02:00 UTC rather than the
+  07:00 Prague he asked for, precisely because of the delay above: it lands
+  around 05:30–08:30 Prague, where aiming at 07:00 would have drifted to
+  midday.
 - Reconciliation: weekly.
 
 Actions cron caveats:
-- 5-minute minimum interval; delays of 5–30 min are common. Fine for content,
-  useless for live status.
+- 5-minute minimum interval. **Delays measured on this repo are one to four
+  hours**, not the 5–30 minutes usually quoted — ten consecutive nights of the
+  deploy cron fired 1h35m to 2h06m late, and content runs up to 4h30m late.
+  Never schedule anything here that needs to happen at a particular time; if
+  correctness depends on the clock, resolve it in the browser instead (as the
+  calendar does).
 - **Scheduled workflows auto-disable after 60 days without commits.** The job's own
   commits reset this while content flows, but a quiet spell kills it silently.
   Already handled: `.github/workflows/keepalive.yml` (see Deployment).
