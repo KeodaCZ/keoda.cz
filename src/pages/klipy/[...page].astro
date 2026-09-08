@@ -1,0 +1,112 @@
+---
+/**
+ * Twitch clips — made by viewers, not by the owner, which is the whole reason
+ * they get their own page and carry a credit.
+ *
+ * Paginated from the start even though there are only thirty-odd today: the
+ * archive goes back to 2023 once the backfill runs, and retrofitting
+ * pagination onto a page people have already linked to is worse than having it
+ * early.
+ */
+import type { GetStaticPaths, Page } from 'astro';
+import Base from '../../layouts/Base.astro';
+import MediaCard from '../../components/MediaCard.astro';
+import type { Clip } from '../../lib/content';
+import { clipLabel } from '../../lib/clip-title';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const { clips } = await import('../../lib/content');
+  return paginate(clips, { pageSize: 48 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<Clip> };
+
+const title = page.currentPage === 1 ? 'Klipy' : `Klipy — strana ${page.currentPage}`;
+---
+<Base
+  title={title}
+  description="Klipy z Twitche — nejlepší momenty, které nastříhali diváci."
+>
+  <div class="container">
+    <h1>Klipy z <span class="accent">Twitche</span></h1>
+    <p class="muted intro">
+      Momenty, které nastříhali diváci. Klipy na Twitchi nemizí, takže tady zůstávají —
+      na rozdíl od záznamů streamů, které proto sbírám
+      na <a href="/streamy/">YouTube</a>.
+    </p>
+
+    <div class="grid">
+      {page.data.map((clip, index) => {
+        const label = clipLabel(clip);
+        return (
+          <MediaCard
+            href={clip.url}
+            title={label.text}
+            thumb={clip.thumb}
+            date={clip.date}
+            duration={clip.duration}
+            meta={clip.creator ? `klip: ${clip.creator}` : undefined}
+            badge={clip.featured ? 'Doporučeno' : undefined}
+            eager={index < 4}
+          />
+        );
+      })}
+    </div>
+
+    {(page.url.prev || page.url.next) && (
+      <nav class="pager" aria-label="Stránkování">
+        {page.url.prev ? <a href={page.url.prev}>← Novější</a> : <span class="muted">← Novější</span>}
+        <span class="muted count">Strana {page.currentPage} z {page.lastPage}</span>
+        {page.url.next ? <a href={page.url.next}>Starší →</a> : <span class="muted">Starší →</span>}
+      </nav>
+    )}
+  </div>
+</Base>
+
+<style>
+  h1 {
+    margin-top: 2rem;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    text-transform: uppercase;
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .intro {
+    max-width: 54ch;
+    margin-bottom: 2.4rem;
+  }
+
+  /* Two columns on a phone rather than one full-width card per screen: this is
+     an archive meant for browsing, and it grows to hundreds of clips once the
+     backfill runs. A 160px thumbnail is still plenty to recognise a clip by. */
+  .grid {
+    display: grid;
+    gap: 1.2rem 0.9rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+    margin-bottom: 2rem;
+  }
+  @media (min-width: 40rem) {
+    .grid {
+      gap: 1.4rem 1.1rem;
+      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    }
+  }
+
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.4rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-block: 2rem 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-edge);
+  }
+  .pager a {
+    font-weight: 600;
+  }
+  .count {
+    font-size: 0.9rem;
+  }
+</style>

@@ -3,13 +3,16 @@
 <header>
   <div class="container inner">
     <a class="logo" href="/">KEODACZ</a>
-    <div class="right">
-      <nav>
-        <a href="/kalendar/">Kalendář</a>
-        <a href="/vybaveni/">Vybavení</a>
-      </nav>
-      <button id="theme-toggle" type="button" title="Vzhled: automaticky">🌓</button>
-    </div>
+    {/* Three siblings rather than a nested wrapper, so the nav can take a row
+        of its own on a phone while the logo and the toggle share the first. */}
+    <nav>
+      <a href="/kalendar/">Kalendář</a>
+      <a href="/streamy/">Streamy</a>
+      <a href="/videa/">Videa</a>
+      <a href="/klipy/">Klipy</a>
+      <a href="/vybaveni/">Vybavení</a>
+    </nav>
+    <button id="theme-toggle" type="button" title="Vzhled: automaticky">🌓</button>
   </div>
 </header>
 
@@ -17,10 +20,14 @@
   header {
     border-bottom: 1px solid var(--card-edge);
   }
+  /* Five links plus the logo and the toggle do not fit a phone on one line.
+     They wrap rather than hiding behind a hamburger — no JavaScript, nothing
+     to open, every destination visible. */
   .inner {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.4rem 1.2rem;
     padding-block: 0.8rem;
   }
   .logo {
@@ -31,14 +38,26 @@
     text-decoration: none;
     color: var(--text);
   }
-  .right {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-  }
   nav {
     display: flex;
-    gap: 1.2rem;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    /* Pushes the nav and the toggle to the right on a wide screen. */
+    margin-left: auto;
+  }
+
+  /* Narrow: the nav gets its own row and the toggle stays up beside the logo.
+     Letting all three wrap freely put the toggle alone on a third line and
+     made the header 159px tall before any content. */
+  @media (max-width: 46rem) {
+    nav {
+      order: 3;
+      flex-basis: 100%;
+      margin-left: 0;
+    }
+    #theme-toggle {
+      margin-left: auto;
+    }
   }
   nav a {
     font-weight: 600;

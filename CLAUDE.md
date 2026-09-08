@@ -593,6 +593,70 @@ the container and — verified in the build output — lands only in
 container with `place-content`, never `margin`, or `.container` loses its
 `margin-inline: auto` (see the Design gotcha above).
 
+### The content archive
+
+Three pages, owner's call 2026-09-08 after seeing the numbers:
+
+- **`/streamy`** — 400+ recordings, paginated 40 a page, grouped by month with a
+  sticky heading. A **list, not a thumbnail grid**: median length is four and a
+  half hours and nobody picks a VOD by its picture, they look for *when*.
+  Grouping also makes the shape of the archive legible, including that **2024
+  is missing entirely** (42 streams in 2023, none in 2024, 211 in 2025) while
+  Shorts from 2024 exist — so he streamed, but those recordings are not on
+  YouTube. Worth asking about before anyone treats it as a bug.
+- **`/videa`** — the three edited videos first with wide cards, then all 83
+  Shorts in a portrait grid. Together because both are his own published
+  output. The page has to look deliberate with three videos and still work with
+  thirty, so videos use `auto-fill` rather than a fixed column count.
+- **`/klipy`** — viewer-made Twitch clips, paginated 48 a page (already
+  paginated at 31 clips: retrofitting it onto a linked page is worse than
+  having it early). Credits the clip's author, which is the reason these are not
+  merged with Shorts.
+
+`src/lib/content-core.ts` holds the pure helpers (tested); `content.ts` binds
+them to the JSON, applies `hidden.json` / `featured.json`, drops clips the
+reconciliation marked `removed`, and globs `data/clips/*.json` so a new year
+file needs no code change.
+
+`featured.json` sets the order and is applied **in the order listed there** —
+that order is the owner's ranking. A clip's own `featured` flag comes from
+Twitch and deliberately drives only a badge, never the ordering, or the archive
+would reshuffle without anyone touching the repo.
+
+Stream titles go through `cleanTitle()`: he wraps them in 🔴 and ends them with
+`!dc !ig !clip`, which is 423 of 512 titles carrying the same noise. It strips
+standalone `!word` tokens and 🔴 only, keeps his other emoji, and falls back to
+the original if stripping would leave nothing. Run over the real archive: 0
+emptied, and the five biggest reductions all correct.
+
+**Thumbnails — measured, not guessed:**
+
+| | |
+| --- | --- |
+| YouTube `maxresdefault` | 188 kB, 1280×720 |
+| YouTube `hqdefault` | **17 kB**, 480×360 with 45px letterbox bars |
+| YouTube `mqdefault` | 11 kB, 320×180, too soft for a card |
+| Shorts `oardefault` | ~100 kB, 1080×1920, the only reliable portrait one |
+| Shorts `frame0` | 21 kB, 268×480 — **unusable**, see below |
+
+`hqdefault`'s bars are exactly 45px top and bottom, leaving precisely 480×270,
+so a 16:9 box with `object-fit: cover` crops them off and shows the full frame
+at a ninth of the bytes. That crop is load-bearing, not tidying.
+
+**Do not switch Shorts to `frame0`.** It is small and truly 9:16, but it is
+literally the first frame — two of ten sampled Shorts came back solid black
+(brightness 0.0) because they fade in. `oardefault` stays, at roughly 7×
+oversized for a 150px card; lazy loading keeps the cost to what is scrolled to.
+
+Neither `i.ytimg.com` nor `static-cdn.jtvnw.net` sets a cookie (verified
+2026-09-08), so unlike the Twitch player these load on view and the site still
+needs no consent banner. **Check any new image host the same way.**
+
+Gotcha: `MediaCard`'s wrapper is `.media`, not `.card`. `.card` is a global
+utility with 1.2rem of padding, and reusing the name silently inherited it —
+every thumbnail rendered 114px wide inside a 155px column. A component class
+must not collide with a global one.
+
 **News — dropped for now.** Owner is unsure they'd use it, and a stale news
 section makes a site look abandoned worse than having none. Cancellations belong
 in `exceptions.json` instead. Adding news later is an afternoon's work; don't

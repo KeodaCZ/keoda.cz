@@ -1,0 +1,176 @@
+---
+/**
+ * One thumbnail card. Used for streams, videos, Shorts and clips, because all
+ * four are the same shape: a picture, a title, and a line of context.
+ *
+ * Thumbnails are third-party images. Verified 2026-09-08 that neither
+ * i.ytimg.com nor static-cdn.jtvnw.net sets a cookie, so unlike the Twitch
+ * player these can load on view and the site still needs no consent banner.
+ * Any new image host has to be checked the same way before it goes in here.
+ */
+import { formatDate, formatDuration } from '../lib/content-core';
+
+interface Props {
+  href: string;
+  title: string;
+  thumb: string;
+  date: string;
+  duration?: number;
+  /** Small line under the title — a game, a clip's author. */
+  meta?: string;
+  /** Corner badge, e.g. Twitch's own "featured" flag. */
+  badge?: string;
+  /** Vertical thumbnail, for Shorts. */
+  portrait?: boolean;
+  /** Bigger type and thumbnail, for the newest item on a page. */
+  featured?: boolean;
+  /** Set on the first few cards, which are above the fold. */
+  eager?: boolean;
+}
+
+const {
+  href,
+  title,
+  thumb,
+  date,
+  duration,
+  meta,
+  badge,
+  portrait = false,
+  featured = false,
+  eager = false,
+} = Astro.props;
+
+const length = duration ? formatDuration(duration) : '';
+---
+<article class:list={['media', { portrait, featured }]}>
+  <a href={href} target="_blank" rel="noopener">
+    <span class="frame">
+      {/* width/height are the intrinsic size of the file we ask for, so the
+          box is reserved before the image lands and nothing jumps. */}
+      <img
+        src={thumb}
+        alt=""
+        width={portrait ? 320 : 480}
+        height={portrait ? 568 : 270}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+      />
+      {length && <span class="length">{length}</span>}
+      {badge && <span class="badge">{badge}</span>}
+    </span>
+
+    <span class="body">
+      <span class="title">{title}</span>
+      {/* No "·" between the two: in a 164px card the line wraps and the
+          separator was left dangling at the end of the first row. A gap says
+          the same thing and survives wrapping. */}
+      <span class="meta muted">
+        <span>{formatDate(date)}</span>
+        {meta && <span>{meta}</span>}
+      </span>
+    </span>
+  </a>
+</article>
+
+<style>
+  /* Not `.card`: that is a global utility with 1.2rem of padding, and reusing
+     the name silently inherited it — every thumbnail came out 114px wide
+     inside a 155px column. A component class must not collide with a global
+     one. */
+  .media {
+    min-width: 0;
+  }
+  a {
+    display: grid;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--card-edge);
+    border-radius: 10px;
+    background: var(--card);
+    aspect-ratio: 16 / 9;
+  }
+  .media.portrait .frame {
+    aspect-ratio: 9 / 16;
+  }
+  /* `cover` is doing real work, not just tidying: YouTube's hqdefault is 4:3
+     with 45px letterbox bars, and this is what crops them off to leave the
+     exact 16:9 frame. */
+  .frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  a:hover .frame {
+    border-color: var(--accent);
+  }
+
+  .length,
+  .badge {
+    position: absolute;
+    bottom: 0.4rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    /* Fixed dark ground with light text: it sits on a photograph, so it must
+       not follow the theme. */
+    background: rgba(19, 17, 8, 0.82);
+    color: var(--on-media);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+  }
+  .length {
+    right: 0.4rem;
+  }
+  .badge {
+    left: 0.4rem;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .body {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  .title {
+    font-weight: 600;
+    line-height: 1.3;
+    /* Two lines, then ellipsis — titles here run to 140 characters and a card
+       grid falls apart if one of them is four lines tall. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  a:hover .title {
+    color: var(--accent);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem 0.7rem;
+    font-size: 0.85rem;
+  }
+  .meta span {
+    white-space: nowrap;
+  }
+
+  /* The newest item on a page: same card, more of it. */
+  .media.featured .title {
+    font-size: 1.15rem;
+    -webkit-line-clamp: 3;
+  }
+</style>

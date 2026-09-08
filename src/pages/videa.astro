@@ -1,0 +1,115 @@
+---
+/**
+ * Edited videos and Shorts — everything the owner published himself, as
+ * opposed to stream recordings (/streamy) and viewer-made clips (/klipy).
+ *
+ * There are three videos and eighty-three Shorts today, which is why videos
+ * come first and get the bigger cards: the page has to look deliberate with
+ * three of them and still work with thirty. Shorts sit below in a grid rather
+ * than being mixed in — they are a different watch.
+ */
+import Base from '../layouts/Base.astro';
+import MediaCard from '../components/MediaCard.astro';
+import { shorts, videos, youtubeThumb } from '../lib/content';
+import { youtubeShortUrl, youtubeUrl } from '../lib/content-core';
+---
+<Base
+  title="Videa"
+  description="Videa a Shorts od KeodaCZ — natočené a stříhané, mimo záznamy streamů."
+>
+  <div class="container">
+    <h1>Videa a <span class="accent">Shorts</span></h1>
+    <p class="muted intro">
+      Co jsem natočil a sestříhal. Záznamy streamů jsou zvlášť
+      v <a href="/streamy/">archivu streamů</a>.
+    </p>
+
+    {videos.length > 0 && (
+      <section class="block">
+        <h2>Videa</h2>
+        <div class="videos">
+          {/* No "featured" first card: with three equal-width cards in a row,
+              making one's title bigger reads as a mistake rather than as
+              emphasis. */}
+          {videos.map((video, index) => (
+            <MediaCard
+              href={youtubeUrl(video.id)}
+              title={video.title}
+              thumb={youtubeThumb(video)}
+              date={video.date}
+              duration={video.duration}
+              eager={index < 3}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    {shorts.length > 0 && (
+      <section class="block">
+        <h2>Shorts <span class="count muted">{shorts.length}</span></h2>
+        <div class="shorts">
+          {shorts.map((short, index) => (
+            <MediaCard
+              href={youtubeShortUrl(short.id)}
+              title={short.title}
+              thumb={`https://i.ytimg.com/vi/${short.id}/oardefault.jpg`}
+              date={short.date}
+              duration={short.duration}
+              portrait
+              eager={index < 2}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  h1 {
+    margin-top: 2rem;
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    text-transform: uppercase;
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .intro {
+    max-width: 52ch;
+    margin-bottom: 2.4rem;
+  }
+
+  .block {
+    margin-bottom: 3rem;
+  }
+  .block h2 {
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .count {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  /* Videos: wide cards, because there are few of them and they are the point
+     of the page. `auto-fill` rather than a fixed count so three of them do not
+     stretch to fill a desktop row and look like a mistake. */
+  .videos {
+    display: grid;
+    gap: 1.4rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  }
+
+  /* Shorts: many, small, vertical. */
+  .shorts {
+    display: grid;
+    gap: 1rem 0.9rem;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  }
+</style>

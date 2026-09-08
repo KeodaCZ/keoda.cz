@@ -2,9 +2,9 @@
  * Checks for the clip label rule. Run: npm test
  *
  * The risk here is not missing a bad title — it is throwing away a good one.
- * A false positive silently replaces something the owner wrote with a generic
- * "game · date", and nobody would notice which titles went missing. So the
- * tests lean on real examples from data/clips, and on the near-misses.
+ * A false positive silently replaces something the owner wrote with the game
+ * name, and nobody would notice which titles went missing. So the tests lean
+ * on real examples from data/clips, and on the near-misses.
  */
 import { isStreamTitle, clipLabel } from '../src/lib/clip-title.ts';
 
@@ -57,39 +57,31 @@ check('but a title containing the game does survive', isStreamTitle('Dead by Day
 check('and without a game to compare, it stands', isStreamTitle('Dead by Daylight'), false);
 
 // --- the rendered label ---------------------------------------------------
+// No date in the label: every surface that shows a clip prints the date on its
+// own line, so including it here printed it twice.
 check(
   'a good title stands alone',
-  clipLabel({ title: 'Kolo kolo mlýnský', game: DBD, createdAt: '2026-08-17T19:00:00Z' }),
+  clipLabel({ title: 'Kolo kolo mlýnský', game: DBD }),
   { text: 'Kolo kolo mlýnský', isFallback: false },
 );
 check(
-  'a stand-in carries the date, or identical rows would repeat',
-  clipLabel({ title: '🔴 Dead by Daylight 🔴 !dc !ig !clip', game: DBD, createdAt: '2026-08-02T19:00:00Z' }),
-  { text: 'Dead by Daylight · 2. 8.', isFallback: true },
-);
-check(
-  'the month is not zero-padded, matching the calendar',
-  clipLabel({ title: '', game: 'Just Chatting', createdAt: '2026-01-05T19:00:00Z' }),
-  { text: 'Just Chatting · 5. 1.', isFallback: true },
-);
-check(
-  'no game still yields something printable',
-  clipLabel({ title: '', createdAt: '2026-08-02T19:00:00Z' }),
-  { text: 'Klip · 2. 8.', isFallback: true },
-);
-check(
-  'a broken date does not produce a dangling separator',
-  clipLabel({ title: '', game: DBD, createdAt: 'nesmysl' }),
+  'a stream title falls back to the game alone',
+  clipLabel({ title: '🔴 Dead by Daylight 🔴 !dc !ig !clip', game: DBD }),
   { text: 'Dead by Daylight', isFallback: true },
 );
 check(
-  'nothing at all is still not blank',
-  clipLabel({ createdAt: '' }),
+  'an auto-title falls back too',
+  clipLabel({ title: 'a', game: 'Just Chatting' }),
+  { text: 'Just Chatting', isFallback: true },
+);
+check(
+  'with no game either, something printable',
+  clipLabel({ title: '' }),
   { text: 'Klip', isFallback: true },
 );
 check(
   'a title is trimmed, not just accepted',
-  clipLabel({ title: '  item 👀  ', game: DBD, createdAt: '2026-09-06T19:00:00Z' }),
+  clipLabel({ title: '  item 👀  ', game: DBD }),
   { text: 'item 👀', isFallback: false },
 );
 

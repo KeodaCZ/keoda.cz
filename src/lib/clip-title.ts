@@ -16,7 +16,6 @@
 export interface ClipLike {
   title?: string;
   game?: string;
-  createdAt: string;
 }
 
 export interface ClipLabel {
@@ -56,18 +55,18 @@ export function isStreamTitle(title: string | undefined, game?: string): boolean
   return false;
 }
 
-/** '2026-08-02T20:11:00Z' -> '2. 8.', matching the calendar's date style. */
-function dayMonth(createdAt: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(createdAt);
-  if (!match) return '';
-  return `${Number(match[3])}. ${Number(match[2])}.`;
-}
-
 /**
- * The line to render for a clip.
+ * The heading to render for a clip: its own title, or the game as a stand-in.
  *
- * A usable title stands alone. A stand-in carries the date as well, because
- * without it several clips from the same game would render as the same row.
+ * Deliberately without a date. An earlier version appended one so that several
+ * clips from the same game would not render identically — but every place that
+ * shows a clip already prints the date on its own line, so including it here
+ * printed it twice. The card, not this function, supplies the context.
+ *
+ * (That earlier version also read `createdAt`, which the view model renames to
+ * `date` — so the date was silently undefined and dropped anyway. Caught by
+ * reading the rendered page rather than by a test, since both spellings type
+ * fine when the field is optional.)
  */
 export function clipLabel(clip: ClipLike): ClipLabel {
   const title = (clip.title ?? '').trim();
@@ -76,11 +75,6 @@ export function clipLabel(clip: ClipLike): ClipLabel {
     return { text: title, isFallback: false };
   }
 
-  const date = dayMonth(clip.createdAt);
   const game = (clip.game ?? '').trim();
-
-  if (game && date) return { text: `${game} · ${date}`, isFallback: true };
-  if (game) return { text: game, isFallback: true };
-  if (date) return { text: `Klip · ${date}`, isFallback: true };
-  return { text: 'Klip', isFallback: true };
+  return { text: game || 'Klip', isFallback: true };
 }
