@@ -24,12 +24,30 @@ export function yearOf(clip) {
  * Everything else is written once and then left alone, so a re-fetch of the
  * same clip produces no diff.
  *
- * View counts are deliberately NOT stored at all: they change constantly, and
- * with a fetch every 6 hours they would rewrite hundreds of lines a day,
- * bloating the repo and burying real changes in the history. The site wants
- * recent clips, and `featured` covers highlights.
+ * View counts are deliberately not in here: the nightly fetch must never touch
+ * them. They are written by the **weekly** reconciliation instead, which
+ * already asks Twitch about every clip by id — see `recordViews` below.
  */
 const MUTABLE = ['title', 'game', 'featured'];
+
+/**
+ * Whether a new view count is worth rewriting the line for.
+ *
+ * The site needs the *ranking*, not the number, so exactness buys nothing and
+ * costs a lot: written verbatim, a weekly run would rewrite nearly every one
+ * of several hundred lines, and the whole reason this archive is JSON is that
+ * its diffs stay readable. A tenth is well inside the noise of "which clips
+ * are the most watched" and keeps a weekly commit down to the clips that
+ * actually moved.
+ *
+ * The floor of 10 is what stops small numbers thrashing: without it a clip
+ * going 3 → 4 views is a 33% change and would churn every week.
+ */
+export function shouldUpdateViews(previous, next) {
+  if (!Number.isFinite(next) || next < 0) return false;
+  if (!Number.isFinite(previous)) return true;
+  return Math.abs(next - previous) >= Math.max(10, previous * 0.1);
+}
 
 /**
  * Folds freshly fetched clips into the existing archive.
@@ -94,11 +112,17 @@ export function mergeClips(existing, fetched) {
  * the whole archive would creep upward as legitimate removals accumulate until
  * every run tripped the safety valve for no reason.
  *
+ * View counts ride along on the same pass, because this run has already asked
+ * Twitch about every clip and the answer carries `view_count` whether we want
+ * it or not. Doing it here rather than in the nightly fetch is the whole
+ * point: weekly churn instead of daily.
+ *
  * @param {Record<string, {clips: object[]}>} existing
  * @param {Set<string>} presentIds  ids Twitch confirmed still exist
  * @param {string[]} checkedIds  ids this run actually asked about
+ * @param {Map<string, number>} views  id -> view count, for the present ones
  */
-export function applyRemovals(existing, presentIds, checkedIds) {
+export function applyRemovals(existing, presentIds, checkedIds, views = new Map()) {
   const checked = new Set(checkedIds);
   const byYear = {};
   for (const [year, file] of Object.entries(existing ?? {})) {
@@ -107,6 +131,7 @@ export function applyRemovals(existing, presentIds, checkedIds) {
 
   const newlyRemoved = [];
   const restored = [];
+  const reviewed = [];
   let wasPresent = 0;
 
   for (const file of Object.values(byYear)) {
@@ -121,6 +146,11 @@ export function applyRemovals(existing, presentIds, checkedIds) {
           delete clip.removed;
           restored.push(clip.id);
         }
+        const next = views.get(clip.id);
+        if (next !== undefined && shouldUpdateViews(clip.views, next)) {
+          clip.views = next;
+          reviewed.push(clip.id);
+        }
       } else if (!clip.removed) {
         clip.removed = true;
         newlyRemoved.push(clip.id);
@@ -132,6 +162,7 @@ export function applyRemovals(existing, presentIds, checkedIds) {
     byYear: sortAll(byYear),
     newlyRemoved,
     restored,
+    reviewed,
     wasPresent,
     // 0 when nothing was present to lose, so an empty archive cannot trip the valve.
     missingRatio: wasPresent === 0 ? 0 : newlyRemoved.length / wasPresent,

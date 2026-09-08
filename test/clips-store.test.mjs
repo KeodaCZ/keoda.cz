@@ -11,6 +11,7 @@ import {
   mergeClips,
   applyRemovals,
   looksLikeApiFailure,
+  shouldUpdateViews,
   yearOf,
 } from '../scripts/lib/clips-store.mjs';
 
@@ -108,12 +109,15 @@ const same = mergeClips(archive, [clip('old', '2026-01-01T10:00:00Z')]);
 check('re-fetching an unchanged clip reports no update', same.updated, []);
 check('and adds nothing', same.added, []);
 
-// A view count must never reach the archive: at four fetches a day it would
-// rewrite the whole file daily and bury real changes in the git history.
-const withViews = mergeClips(empty, [clip('a', '2026-09-01T10:00:00Z', { views: 999 })]);
-check('view counts are not a tracked field', withViews.updated, []);
-const bumped = mergeClips(withViews.byYear, [clip('a', '2026-09-01T10:00:00Z', { views: 12345 })]);
+// The nightly fetch must never rewrite a view count. They are stored (the
+// weekly reconciliation writes them, see below), but a nightly job touching
+// them would rewrite the whole file every day and bury real changes in the
+// history — which is the reason they live in the weekly one.
+const mergedViews = mergeClips(empty, [clip('a', '2026-09-01T10:00:00Z', { views: 999 })]);
+check('view counts are not a merge-tracked field', mergedViews.updated, []);
+const bumped = mergeClips(mergedViews.byYear, [clip('a', '2026-09-01T10:00:00Z', { views: 12345 })]);
 check('so a changed view count is not an update either', bumped.updated, []);
+check('and the stored count stands', bumped.byYear[2026].clips[0].views, 999);
 
 // --- merge updates what can really change ---------------------------------
 const retitled = mergeClips(archive, [clip('old', '2026-01-01T10:00:00Z', { title: 'nový titulek' })]);
@@ -234,6 +238,66 @@ check('so the valve stays open', looksLikeApiFailure(stillFine), false);
 
 // An empty archive must not read as "everything vanished".
 check('an empty archive is not a failure', looksLikeApiFailure(applyRemovals({}, new Set(), [])), false);
+
+// --- view counts ----------------------------------------------------------
+//
+// These exist to make "nejsledovanější" sortable, and the danger is not
+// wrongness but churn: written verbatim every week they would rewrite nearly
+// the whole archive and bury real changes in the history.
+
+check('a first count is always worth writing', shouldUpdateViews(undefined, 42), true);
+check('an unchanged count is not', shouldUpdateViews(120, 120), false);
+check('a tenth is the threshold, and 12 clears it on 120', shouldUpdateViews(120, 132), true);
+check('11 does not', shouldUpdateViews(120, 131), false);
+check('a drop counts the same as a rise', shouldUpdateViews(120, 108), true);
+// Without the floor, 3 -> 4 is a 33% change and would churn every single week.
+check('small numbers need 10 absolute, not 10%', shouldUpdateViews(3, 4), false);
+check('and 3 -> 13 does clear the floor', shouldUpdateViews(3, 13), true);
+check('zero views is a real previous value', shouldUpdateViews(0, 10), true);
+check('nonsense from the API is refused', shouldUpdateViews(120, NaN), false);
+check('so is a negative count', shouldUpdateViews(120, -5), false);
+
+const viewArchive = {
+  2026: {
+    clips: [
+      clip('fresh', '2026-09-01T10:00:00Z'),
+      clip('moved', '2026-08-01T10:00:00Z', { views: 100 }),
+      clip('still', '2026-07-01T10:00:00Z', { views: 100 }),
+      clip('gone', '2026-06-01T10:00:00Z', { views: 500 }),
+    ],
+  },
+};
+const reconciled = applyRemovals(
+  viewArchive,
+  new Set(['fresh', 'moved', 'still']),
+  ['fresh', 'moved', 'still', 'gone'],
+  new Map([
+    ['fresh', 7],
+    ['moved', 250],
+    ['still', 103],
+    // Twitch cannot report views for a clip it says no longer exists, but if it
+    // ever did, a removed clip must not be quietly revived by a view write.
+    ['gone', 9000],
+  ]),
+);
+const byId = Object.fromEntries(reconciled.byYear[2026].clips.map((c) => [c.id, c]));
+
+check('a clip with no count gets one', byId.fresh.views, 7);
+check('a materially changed count is written', byId.moved.views, 250);
+check('a barely changed one is left alone', byId.still.views, 100);
+check('only the written ones are reported', reconciled.reviewed.sort(), ['fresh', 'moved']);
+check('a vanished clip is still marked removed', byId.gone.removed, true);
+check('and does not get a view count off the back of it', byId.gone.views, 500);
+
+// Views must not smuggle a judgement into a clip this run never asked about.
+const unasked = applyRemovals(viewArchive, new Set(['fresh']), ['fresh'], new Map([['gone', 1]]));
+const unaskedById = Object.fromEntries(unasked.byYear[2026].clips.map((c) => [c.id, c]));
+check('an unchecked clip keeps its old count', unaskedById.gone.views, 500);
+check('and is not marked removed', unaskedById.gone.removed, undefined);
+
+// The archive handed in must not change under the caller — the same guarantee
+// the merge gives, now that this function writes a second kind of field.
+check('the input archive is untouched', viewArchive[2026].clips[0].views, undefined);
 
 if (failures.length) {
   console.error(`${failures.length} FAILED, ${passed} passed:\n  ` + failures.join('\n  '));

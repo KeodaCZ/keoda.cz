@@ -36,31 +36,42 @@ async function main() {
   console.log(`Kanál ${user.display_name} potvrzen. Kontroluju ${allIds.length} klipů.`);
 
   const present = new Set();
+  const views = new Map();
   const checked = [];
 
   for (let i = 0; i < allIds.length; i += BATCH) {
     const batch = allIds.slice(i, i + BATCH);
     const { data } = await helix(token, 'clips', { id: batch });
-    for (const clip of data ?? []) present.add(clip.id);
+    for (const clip of data ?? []) {
+      present.add(clip.id);
+      // Free with the answer we already needed, and the only place the site
+      // can learn it — the nightly fetch must not write view counts.
+      if (Number.isFinite(clip.view_count)) views.set(clip.id, clip.view_count);
+    }
     // Only ids we actually asked about may be judged; a batch that threw would
     // otherwise read as a batch full of deletions.
     checked.push(...batch);
     console.log(`  dávka ${i / BATCH + 1}: ${batch.length} dotázáno, ${data?.length ?? 0} existuje`);
   }
 
-  const result = applyRemovals(existing, present, checked);
+  const result = applyRemovals(existing, present, checked, views);
 
   console.log(
     `Zmizelo: ${result.newlyRemoved.length} z ${result.wasPresent} dosud existujících ` +
       `(${(result.missingRatio * 100).toFixed(1)} %).`,
   );
+  console.log(`Zhlédnutí přepsána u ${result.reviewed.length} klipů.`);
 
   if (looksLikeApiFailure(result, THRESHOLD)) {
     console.error(
       `✗ Nad ${THRESHOLD * 100} % — to je porucha API, ne mazání. Nic nezapisuju.\n` +
         '  Pust to znovu ručně (workflow_dispatch); jestli to vyjde stejně, koukni na Twitch ručně.',
     );
-    process.exit(1);
+    // exitCode, not exit(): exiting with a fetch still in flight trips a libuv
+    // assertion on Windows and returns 127, which in CI reads as a missing
+    // command rather than as this deliberate refusal.
+    process.exitCode = 1;
+    return;
   }
 
   const written = writeClipArchive(result.byYear);
