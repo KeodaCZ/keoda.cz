@@ -19,6 +19,7 @@
  */
 import path from 'node:path';
 import { ROOT, readJson, writeJsonIfChanged } from './lib/files.mjs';
+import { fail, scrub } from './lib/secrets.mjs';
 
 const CHANNEL_HANDLE = 'KeodaCZ';
 const API = 'https://www.googleapis.com/youtube/v3';
@@ -47,14 +48,16 @@ async function get(resource, params) {
   if (!response.ok) {
     let detail = '';
     try {
-      // The error body names the cause (quota, disabled API, bad key) and
-      // contains no secret — the key travels in the query, not the response.
+      // The error body names the cause: quota, disabled API, bad key. It
+      // carries no credential itself, but the key does ride in the query
+      // string, so the message goes through scrub() below anyway — a
+      // network-layer failure can put the whole URL into an error.
       const body = await response.json();
       detail = body?.error?.message ? ` — ${body.error.message}` : '';
     } catch {
       /* keep the status only */
     }
-    throw new Error(`YouTube ${resource}: HTTP ${response.status}${detail}`);
+    throw new Error(scrub(`YouTube ${resource}: HTTP ${response.status}${detail}`));
   }
   return response.json();
 }
@@ -196,8 +199,5 @@ async function main() {
 
 // Only run when invoked directly, so the tests can import the pure helpers.
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('fetch-youtube.mjs')) {
-  main().catch((error) => {
-    console.error(`✗ ${error.message}`);
-    process.exit(1);
-  });
+  main().catch(fail);
 }

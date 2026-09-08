@@ -15,6 +15,7 @@
  */
 import { applyRemovals, looksLikeApiFailure } from './lib/clips-store.mjs';
 import { readClipArchive, writeClipArchive } from './lib/files.mjs';
+import { fail } from './lib/secrets.mjs';
 import { assertBroadcaster, getAppToken, helix } from './lib/twitch.mjs';
 
 // Helix caps `Get Clips?id=` at 100 ids per request.
@@ -69,7 +70,4 @@ async function main() {
   console.log(written.length ? `Přepsané roky: ${written.join(', ')}.` : 'Beze změny, nic se nezapsalo.');
 }
 
-main().catch((error) => {
-  console.error(`✗ ${error.message}`);
-  process.exit(1);
-});
+main().catch(fail);

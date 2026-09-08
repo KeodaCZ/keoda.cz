@@ -37,7 +37,7 @@ jobs:
         env:
           TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
-        run: node scripts/reconcile-clips.mjs
+        run: npm run clips:reconcile
 
       - name: Commit what changed
         run: |

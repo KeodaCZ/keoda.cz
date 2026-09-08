@@ -71,6 +71,38 @@ check(
   { 2026: ['mid', 'old'] },
 );
 
+// --- identity is the id, never the title or the date ----------------------
+// The window is 90 days wide and runs every six hours, so almost everything it
+// returns is already stored. Identity therefore has to be exact, and Twitch's
+// clip id is the only field that is: two clips from one stream routinely share
+// a title and a timestamp, because Twitch copies the stream's title in when the
+// clipper types nothing.
+const sameSecond = [
+  { ...clip('id-one', '2026-09-01T20:11:07Z'), title: '🔴 Dead by Daylight 🔴 !dc !ig !clip' },
+  { ...clip('id-two', '2026-09-01T20:11:07Z'), title: '🔴 Dead by Daylight 🔴 !dc !ig !clip' },
+];
+const twins = mergeClips(empty, sameSecond);
+check('same title, same second, different ids — both kept', twins.added.length, 2);
+check('and both are in the archive', ids(twins.byYear), { 2026: ['id-one', 'id-two'] });
+
+// Re-fetching the identical window must be a no-op, however many times it runs.
+const again = mergeClips(twins.byYear, sameSecond);
+check('re-fetching the same window adds nothing', again.added, []);
+check('and updates nothing', again.updated, []);
+const third = mergeClips(again.byYear, sameSecond);
+check('a third pass is still a no-op', ids(third.byYear), { 2026: ['id-one', 'id-two'] });
+
+// The reverse: one clip whose title and date both changed is still that clip.
+const edited = mergeClips(twins.byYear, [
+  { ...clip('id-one', '2020-01-01T00:00:00Z'), title: 'přepsaný titulek' },
+]);
+check('a changed title does not create a second record', edited.added, []);
+check(
+  'and a changed date does not move it to another year — createdAt is written once',
+  ids(edited.byYear),
+  { 2026: ['id-one', 'id-two'] },
+);
+
 // --- merge does not churn -------------------------------------------------
 const same = mergeClips(archive, [clip('old', '2026-01-01T10:00:00Z')]);
 check('re-fetching an unchanged clip reports no update', same.updated, []);

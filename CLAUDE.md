@@ -226,6 +226,35 @@ stream out loud on page load; both are set explicitly.
 All external content is pulled by GitHub Actions and committed as JSON. The site
 never calls an API at runtime.
 
+### Running the fetches locally
+
+`npm run fetch:youtube`, `npm run fetch:clips`, `npm run clips:reconcile`.
+
+Each is `node --env-file-if-exists=.env …`, so the same command reads a local
+`.env` here and takes the values from Secrets in Actions — the workflows call
+these npm scripts, so what gets tested locally is literally what CI runs. No
+dependency for it; Node 24 reads env files itself.
+
+`.env` is gitignored (along with `.env.*`, excepting `.env.example`), and the
+ignore rule went in before the file ever existed. Never commit it.
+
+**Local credentials must be separate from the ones in Secrets.** Twitch's own
+docs: "Getting a new secret invalidates the previous secret" — so regenerating
+on the existing app would leave the Actions secret dead and the pipeline
+failing silently. Register a second application instead. A second YouTube API
+key in the same project is fine; keys don't interfere.
+
+Errors print one scrubbed line (`DEBUG=1` adds the stack). `scrub()` in
+`scripts/lib/secrets.mjs` strips the API key and the client secret from
+anything printed, because the YouTube key rides in the query string and a
+network-layer failure can carry the whole URL into an error — which then gets
+pasted somewhere. Tested. The Twitch *client id* is deliberately left readable:
+it is not a credential, and hiding it only makes errors harder to read.
+
+Use `process.exitCode`, not `process.exit()`, in these scripts: exiting while a
+fetch is in flight trips a libuv assertion on Windows and returns 127, which in
+CI reads as "command not found".
+
 ### Files
 
 ```

@@ -17,6 +17,7 @@
  */
 import { mergeClips } from './lib/clips-store.mjs';
 import { readClipArchive, writeClipArchive } from './lib/files.mjs';
+import { fail } from './lib/secrets.mjs';
 import {
   BROADCASTER_ID,
   assertBroadcaster,
@@ -91,7 +92,4 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(`✗ ${error.message}`);
-  process.exit(1);
-});
+main().catch(fail);
