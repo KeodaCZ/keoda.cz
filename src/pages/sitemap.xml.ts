@@ -20,11 +20,25 @@ const pages = import.meta.glob('./**/*.astro', { eager: true });
 function toRoute(file: string): string | null {
   const slug = file.replace(/^\.\//, '').replace(/\.astro$/, '');
 
-  // Astro's own error page, partials, and any dynamic route we cannot
-  // enumerate from the filename alone.
+  // Astro's own error page, and partials.
   if (slug === '404' || slug === '500') return null;
-  if (slug.split('/').some((part) => part.startsWith('_'))) return null;
-  if (/[[\]]/.test(slug)) return null;
+
+  const parts = slug.split('/');
+  if (parts.some((part) => part.startsWith('_'))) return null;
+
+  // A paginated section — './streamy/[...page]' — has its first page at the
+  // parent path, so list that. Without this the sitemap silently lost
+  // /streamy/ and /klipy/ the moment they became paginated, which is exactly
+  // the kind of gap a glob is supposed to prevent. Later pages are reachable
+  // from it by the "Starší →" links, so a crawler finds them anyway.
+  const last = parts.at(-1) ?? '';
+  if (/^\[\.\.\..+\]$/.test(last)) {
+    const parent = parts.slice(0, -1).join('/');
+    return parent ? `/${parent}/` : '/';
+  }
+
+  // Any other dynamic route cannot be enumerated from the filename.
+  if (parts.some((part) => /[[\]]/.test(part))) return null;
 
   return slug === 'index' ? '/' : `/${slug.replace(/\/index$/, '')}/`;
 }
