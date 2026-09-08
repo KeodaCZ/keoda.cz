@@ -648,9 +648,13 @@ The generated assets are committed instead.
   `sitemap.xml`, the deploy keepalive, and the content pipeline. Working tree
   clean, everything pushed.
 
-  The pipeline has run for real: 3 videos / 83 Shorts / 425 streams in
-  `data/youtube.json`, 31 clips in `data/clips/2026.json`, and one clean
-  reconciliation pass. 208 tests gate the deploy.
+  The pipeline runs on its own schedule and has been committing unprompted
+  since 2026-09-07: `data/youtube.json` (a few videos, ~80 Shorts, 400+
+  streams) and `data/clips/2026.json`. Tests gate the deploy — deliberately no
+  count here, it only goes stale.
+
+  The fetches can be run locally against a gitignored `.env` — see Running the
+  fetches locally under Data layer. Prefer that to pushing and waiting.
 
   **Next up, roughly in this order:**
   1. **Nothing renders the fetched data yet** — no archive page, no clips
