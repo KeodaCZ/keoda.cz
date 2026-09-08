@@ -103,7 +103,18 @@ export function classify(video, overrides = {}) {
  * is on.
  */
 export function isStillLive(video) {
-  return Boolean(video.startedAt) && !video.endedAt;
+  if (Boolean(video.startedAt) && !video.endedAt) return true;
+
+  // Second signal, and the more trustworthy one. The run that stored this
+  // stream mid-flight fired three seconds after its actualEndTime, so an end
+  // time appearing tells us nothing about whether the rest of the record has
+  // settled — and it plainly had not: publishedAt, duration and the thumbnail
+  // were all still provisional.
+  //
+  // YouTube serves `maxresdefault_live.jpg` while a broadcast is unprocessed
+  // and swaps to `maxresdefault.jpg` afterwards, so the suffix says outright
+  // that this record is not final yet.
+  return /_live\.[a-z]+(\?|$)/i.test(video.thumb ?? '');
 }
 
 /**

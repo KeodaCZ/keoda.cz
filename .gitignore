@@ -7,10 +7,9 @@ dist/
 Twitch and Youtube assets/
 
 # local API credentials for running the fetch scripts by hand — never commit.
-# The committed .env.example documents the names and holds no values.
+# The names and the second-Twitch-app warning live in CLAUDE.md.
 .env
 .env.*
-!.env.example
 
 # OS noise
 Thumbs.db

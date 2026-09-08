@@ -94,6 +94,34 @@ check(
 check('a plain video is not live', isStillLive({ startedAt: '', endedAt: '' }), false);
 check('nor is one with no live fields at all', isStillLive({}), false);
 
+// The thumbnail is the second and stronger signal. The run that stored this
+// stream half-finished fired three seconds after its actualEndTime, so an end
+// time being present proves nothing about the rest of the record — but the
+// _live suffix says outright that YouTube has not processed it yet.
+check(
+  'an end time plus a _live thumbnail is still provisional',
+  isStillLive({
+    startedAt: '2026-09-07T17:21:29Z',
+    endedAt: '2026-09-07T21:44:03Z',
+    thumb: 'https://i.ytimg.com/vi/rKy9BEIZ0B4/maxresdefault_live.jpg',
+  }),
+  true,
+);
+check(
+  'the same stream once processed is fine',
+  isStillLive({
+    startedAt: '2026-09-07T17:21:29Z',
+    endedAt: '2026-09-07T21:44:03Z',
+    thumb: 'https://i.ytimg.com/vi/rKy9BEIZ0B4/maxresdefault.jpg',
+  }),
+  false,
+);
+check('other _live sizes too', isStillLive({ thumb: 'https://i.ytimg.com/vi/x/hqdefault_live.jpg' }), true);
+check('a query string does not hide it', isStillLive({ thumb: 'https://i.ytimg.com/vi/x/mqdefault_live.webp?v=2' }), true);
+// Must not fire on an id or channel name that merely contains the word.
+check('"live" elsewhere in the URL is not the marker', isStillLive({ thumb: 'https://i.ytimg.com/vi/live_stuff/maxresdefault.jpg' }), false);
+check('nor a video id ending in live', isStillLive({ thumb: 'https://i.ytimg.com/vi/abclive/hqdefault.jpg' }), false);
+
 // --- which date counts ----------------------------------------------------
 check(
   'a stream is dated by when it started, not when YouTube finished with it',
