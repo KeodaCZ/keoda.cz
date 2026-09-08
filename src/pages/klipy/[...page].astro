@@ -6,10 +6,15 @@
  * Paginated from the start, which the backfill then justified: the page went
  * from 31 clips to 471 in one commit, back to 2023, without the route or any
  * link to it changing.
+ *
+ * Filtering and sorting are layered on top rather than replacing that — see
+ * ArchiveFilter for how the two views coexist. This page is the one that also
+ * sorts by view count, which is why the weekly reconciliation stores it.
  */
 import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
 import MediaCard from '../../components/MediaCard.astro';
+import ArchiveFilter from '../../components/ArchiveFilter.astro';
 import type { Clip } from '../../lib/content';
 import { clips } from '../../lib/content';
 import { clipLabel } from '../../lib/clip-title';
@@ -22,6 +27,25 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props as { page: Page<Clip> };
 
 const title = page.currentPage === 1 ? 'Klipy' : `Klipy — strana ${page.currentPage}`;
+
+/** One place the card's props are decided, so the two views cannot drift. */
+const cardProps = (clip: Clip) =>
+  ({
+    href: clip.url,
+    title: clipLabel(clip).text,
+    thumb: clip.thumb,
+    date: clip.date,
+    duration: clip.duration,
+    meta: clip.creator ? `klip: ${clip.creator}` : undefined,
+    badge: clip.featured ? 'Doporučeno' : undefined,
+    badgeAt: 'bottom-left',
+    views: clip.views,
+  }) as const;
+
+// The archive is already sorted newest-first, so its own ends are the bounds
+// the date pickers should offer — no point letting someone pick 2019.
+const newest = clips[0]?.date.slice(0, 10) ?? '';
+const oldest = clips.at(-1)?.date.slice(0, 10) ?? '';
 ---
 <Base
   title={title}
@@ -35,31 +59,42 @@ const title = page.currentPage === 1 ? 'Klipy' : `Klipy — strana ${page.curren
       které proto sbírám na <a href="/streamy/">YouTube</a>.
     </p>
 
-    <div class="grid">
-      {page.data.map((clip, index) => {
-        const label = clipLabel(clip);
-        return (
-          <MediaCard
-            href={clip.url}
-            title={label.text}
-            thumb={clip.thumb}
-            date={clip.date}
-            duration={clip.duration}
-            meta={clip.creator ? `klip: ${clip.creator}` : undefined}
-            badge={clip.featured ? 'Doporučeno' : undefined}
-            eager={index < 4}
-          />
-        );
-      })}
-    </div>
+    <ArchiveFilter
+      nouns={['klip', 'klipy', 'klipů']}
+      pageSize={48}
+      oldest={oldest}
+      newest={newest}
+      searchHint="název nebo autor klipu…"
+      sorts={[
+        { value: 'nejnovejsi', label: 'Nejnovější' },
+        { value: 'nejstarsi', label: 'Nejstarší' },
+        { value: 'nejsledovanejsi', label: 'Nejsledovanější' },
+      ]}
+    >
+      <Fragment slot="results">
+        {/* Every clip, inert until something is filtered. */}
+        <template data-pool>
+          {clips.map((clip) => <MediaCard {...cardProps(clip)} />)}
+        </template>
+        <div class="grid" data-results></div>
+      </Fragment>
 
-    {(page.url.prev || page.url.next) && (
-      <nav class="pager" aria-label="Stránkování">
-        {page.url.prev ? <a href={page.url.prev}>← Novější</a> : <span class="muted">← Novější</span>}
-        <span class="muted count">Strana {page.currentPage} z {page.lastPage}</span>
-        {page.url.next ? <a href={page.url.next}>Starší →</a> : <span class="muted">Starší →</span>}
-      </nav>
-    )}
+      <Fragment slot="server">
+        <div class="grid">
+          {page.data.map((clip, index) => (
+            <MediaCard {...cardProps(clip)} eager={index < 4} />
+          ))}
+        </div>
+
+        {(page.url.prev || page.url.next) && (
+          <nav class="pager" aria-label="Stránkování">
+            {page.url.prev ? <a href={page.url.prev}>← Novější</a> : <span class="muted">← Novější</span>}
+            <span class="muted count">Strana {page.currentPage} z {page.lastPage}</span>
+            {page.url.next ? <a href={page.url.next}>Starší →</a> : <span class="muted">Starší →</span>}
+          </nav>
+        )}
+      </Fragment>
+    </ArchiveFilter>
   </div>
 </Base>
 
@@ -74,7 +109,7 @@ const title = page.currentPage === 1 ? 'Klipy' : `Klipy — strana ${page.curren
   }
   .intro {
     max-width: 54ch;
-    margin-bottom: 2.4rem;
+    margin-bottom: 2rem;
   }
 
   /* Two columns on a phone rather than one full-width card per screen: this is

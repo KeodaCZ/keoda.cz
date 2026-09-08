@@ -540,57 +540,6 @@ at `/ics/<date>.ics`). The homepage carries only a **compact** version
 page. Deliberately no per-row "notify me" — notifications would need accounts,
 and a button that just links to Twitch was rejected as useless.
 
-**The content archive — three pages** (owner's call 2026-09-08). All three
-render through one `MediaCard.astro`, because a stream, a video, a Short and a
-clip are the same shape: a picture, a title, a line of context. That component
-class is `.media` and **must not** be `.card` — see the gotcha in its own file.
-
-- `/streamy` — the substance of the channel: 426 recordings, median length
-  four and a half hours. Tiles grouped by month with a sticky month heading,
-  48 per page. Each thumbnail carries a **ZÁZNAM badge, top left, with a
-  broadcast glyph** (owner asked for both; the glyph landed 2026-09-08 —
-  inline SVG, `currentColor`, so it costs no request and follows the badge in
-  either theme). It is behind a `badgeIcon` prop rather than always on:
-  `/klipy` reuses the same badge for Twitch's featured flag, where a broadcast
-  glyph would be a lie.
-- `/videa` — 3 videos, then 83 Shorts. Videos first and wider: the page has to
-  look deliberate with three of them. Shorts are two-per-row narrower than
-  first built, at the owner's request.
-- `/klipy` — 471 clips, 48 per page, ten pages. Paginated from the start,
-  which the backfill then justified: 31 → 471 without the route changing.
-
-**Titles are cleaned, not original** — `cleanTitle()` in `content-core.ts`,
-applied in the `content.ts` view rather than in the JSON, so the rule can
-change with no re-fetch. Measured on the real 426: **98% carry 🔴 and 95% carry
-`!dc !ig !clip`**, which is 832 red circles on one page of tiles. What it
-strips is exactly that boilerplate — `🔴 Johny Silverhand | Cyberpunk 2077 🔴
-!dc !ig !ttv` becomes `Johny Silverhand | Cyberpunk 2077` — and nothing else.
-The owner asked on 2026-09-08 whether the ZÁZNAM badge made the originals
-usable again; the argument for keeping them cleaned is that **🔴 means "live
-now", which is a lie in an archive of recordings**, while the badge is true.
-
-> **Filtering and sorting — asked for 2026-09-08, not built. Read this before
-> designing it.**
->
-> Wanted: search by title, a date range, sort newest/oldest, "most viewed" for
-> clips, and a videos/Shorts filter on `/videa`.
->
-> **I got the design wrong first and the owner caught it.** I said filtering
-> and pagination were incompatible on a static site (they are not — both move
-> to the browser), and then proposed dropping pagination and rendering
-> everything on one page. He objected correctly: that means endless scrolling
-> on a page that grows forever. Bytes were never the problem (471 clips is
-> 36 kB gzipped); the scroll is.
->
-> So: **client-side filtering *and* client-side pagination.** The build emits
-> every item; the browser filters the full set and shows 48 at a time. Keep the
-> server-paginated routes working with JavaScript off.
->
-> "Most viewed" is the one part that needs new data: view counts are
-> deliberately **not** stored (they churn on every fetch, see clips-store).
-> Capture them in the **weekly** reconciliation, which already fetches every
-> clip by id, so the churn is one commit a week rather than four a day.
-
 **Gear / used software** — styled like arcadebulls' gear page. Confirmed in scope
 and the easiest page here; build it early. Plain markdown, no CMS.
 
@@ -665,12 +614,17 @@ container with `place-content`, never `margin`, or `.container` loses its
 
 ### The content archive
 
-Three pages, owner's call 2026-09-08 after seeing the numbers:
+Three pages, owner's call 2026-09-08 after seeing the numbers. All render
+through one `MediaCard.astro`, because a stream, a video, a Short and a clip
+are the same shape: a picture, a title, a line of context.
 
-- **`/streamy`** — 400+ recordings, paginated 48 a page, tiles grouped by month
+- **`/streamy`** — 426 recordings, paginated 48 a page, tiles grouped by month
   with a sticky heading and a **ZÁZNAM** badge on each thumbnail so a recording
   is never taken for an edited video (owner's call 2026-09-08; it started as a
-  list).
+  list). The badge carries a **broadcast glyph** — inline SVG, `currentColor`,
+  so it costs no request and follows the badge in either theme — behind a
+  `badgeIcon` prop rather than always on, because `/klipy` reuses the same
+  badge for Twitch's featured flag where a broadcast glyph would be a lie.
 
   **The gaps in the archive are real, not a bug.** 42 streams in 2023, none at
   all in 2024, 211 in 2025. The owner's account: in 2023 he streamed to YouTube
@@ -684,8 +638,78 @@ Three pages, owner's call 2026-09-08 after seeing the numbers:
   thirty, so videos use `auto-fill` rather than a fixed column count.
 - **`/klipy`** — viewer-made Twitch clips, paginated 48 a page (already
   paginated at 31 clips: retrofitting it onto a linked page is worse than
-  having it early). Credits the clip's author, which is the reason these are not
-  merged with Shorts.
+  having it early — and the backfill then proved the point, 31 → 471 with no
+  route change). Credits the clip's author, which is the reason these are not
+  merged with Shorts. Its badge sits **bottom left**, not top: owner's
+  preference 2026-09-08, and it reads as a caption there rather than as a
+  label, which suits "Doporučeno" — `badgeAt` on `MediaCard` decides.
+
+**Titles are cleaned, not original.** `cleanTitle()` runs in the `content.ts`
+view rather than over the JSON, so the rule can change with no re-fetch.
+Measured on the real 426 stream titles: **98% carry 🔴 and 95% carry
+`!dc !ig !clip`** — 832 red circles on a single page of tiles. It strips
+exactly that boilerplate and nothing else: `🔴 Johny Silverhand | Cyberpunk
+2077 🔴 !dc !ig !ttv` becomes `Johny Silverhand | Cyberpunk 2077`. The owner
+asked on 2026-09-08 whether the ZÁZNAM badge made the originals usable again;
+they stay cleaned because **🔴 means "live now", which is a lie in an archive
+of recordings**, while the badge is true.
+
+### Filtering and sorting
+
+Built 2026-09-08. `src/lib/archive-filter.ts` (pure, tested) plus
+`ArchiveFilter.astro`, which wraps all three archive pages. Search by title,
+a date range, newest/oldest, most-viewed on `/klipy`, and a videos/Shorts
+filter on `/videa`.
+
+**Read this before changing it — the first design was wrong and the owner
+caught it.** I claimed filtering and pagination were incompatible on a static
+site (they are not: both move to the browser), then proposed dropping
+pagination and rendering everything on one page. He objected correctly — that
+is endless scrolling on a page that grows with every stream. Bytes were never
+the problem; the scroll was. So it is client-side filtering **and** client-side
+paging.
+
+How it holds together, and each piece is load-bearing:
+
+- **Two views, only ever one visible.** The *server view* is exactly what the
+  build rendered — the right 48 tiles with real `<a>` pagination — and it is
+  what a visitor without JavaScript gets and what a crawler indexes. The
+  *results view* is built in the browser the moment anything is filtered.
+  While nothing is filtered, paging is the server's job; once something is, it
+  is the browser's. That split is what stops two pagers ever both being live,
+  and it is why `isDefault()` ignores `page`.
+- **The whole archive rides along in a `<template>`.** Template content is
+  inert, so those hundreds of `<img>` tags are never fetched and never laid
+  out — verified: on `/klipy` the document has 48 `<img>` elements and made 21
+  image requests while holding 471 cards. Only the bytes cost anything: 56 kB
+  gzipped for `/klipy`, 47 kB for `/streamy`, 20 kB for `/videa`.
+- **The bar is `hidden` in the markup and unhidden by the script.** It has to
+  be: there is no server to filter, so without JavaScript it would be a
+  control that silently does nothing. `.bar[hidden]` needs its own
+  `display: none` because the author `display: flex` beats the attribute —
+  the same gotcha as the schedule rows.
+- **`data-text` is normalised at build time**, not per keystroke. Diacritics
+  are stripped so "zaznam" finds "záznam"; that is not tidiness, it is the
+  difference between the search being usable and not.
+- **`/videa` keeps two results grids**, keyed by `data-results` and matched
+  against each card's `kind`. A portrait Short and a 16:9 video in one grid
+  look like a layout bug, so the type filter hides a whole section instead,
+  and a section with an empty grid hides itself. Its `pageSize` is 0 — 86
+  items do not need paging.
+- **URL state via `replaceState`**, in Czech params (`q`, `od`, `do`, `typ`,
+  `razeni`, `strana`), and only what differs from the default. A filtered view
+  is shareable and survives reload; `pushState` would take a dozen Back
+  presses to leave the page after typing a query.
+
+**View counts** are what makes most-viewed possible, and they are written by
+the **weekly reconciliation** — never the nightly fetch, which is the whole
+point. The reconciliation already asks Twitch about every clip by id and the
+answer carries `view_count` regardless. `shouldUpdateViews` then only rewrites
+a line when the count moved by **at least a tenth, and at least 10** — the
+site needs the ranking, not the number, and written verbatim a weekly run
+would rewrite nearly every line and bury real changes in the history. The
+floor of 10 is what stops 3 → 4 views churning every week. Range on the real
+471: 1 to 139, median 34.
 
 `src/lib/content-core.ts` holds the pure helpers (tested); `content.ts` binds
 them to the JSON, applies `hidden.json` / `featured.json`, drops clips the
@@ -846,7 +870,8 @@ The generated assets are committed instead.
   (socials, Twitch player, compact schedule, gear teaser), `/kalendar`,
   `/vybaveni`, `/admin`, the 404 page, favicon, share card, `robots.txt`,
   `sitemap.xml`, the deploy keepalive, the content pipeline, and the three
-  archive pages — `/streamy`, `/videa`, `/klipy`.
+  archive pages — `/streamy`, `/videa`, `/klipy` — with filtering and sorting
+  on all three.
 
   The pipeline runs on its own schedule and has been committing unprompted
   since 2026-09-07: `data/youtube.json` (a few videos, ~80 Shorts, 400+
@@ -857,16 +882,13 @@ The generated assets are committed instead.
   fetches locally under Data layer. Prefer that to pushing and waiting.
 
   **Next up, roughly in this order:**
-  1. **Filtering and sorting on the three archive pages.** Asked for
-     2026-09-08: search by title, a date range, sort newest/oldest, "most
-     viewed" for clips, and a videos/Shorts split on `/videa`. See the note
-     under Pages — and read it before starting, because the first design was
-     wrong.
-  2. **The maintenance task under Data layer is now due.** All three jobs have
+  1. **The maintenance task under Data layer is now due.** All three jobs have
      run successfully, so its trigger is met. This file is well over its ~200
      line target.
-  3. Parked, needs the personal PC: branch `gear-software-notes` and the first
+  2. Parked, needs the personal PC: branch `gear-software-notes` and the first
      guide (see Pages).
+  3. The open questions at the end of this file — the "last VOD next to the
+     calendar" one is no longer blocked, since the data now exists.
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
   is 16:30Z in summer but 17:30Z in winter. Covered by tests.

@@ -8,6 +8,7 @@
  * player these can load on view and the site still needs no consent banner.
  * Any new image host has to be checked the same way before it goes in here.
  */
+import { searchKey } from '../lib/archive-filter';
 import { formatDate, formatDuration } from '../lib/content-core';
 
 interface Props {
@@ -18,8 +19,15 @@ interface Props {
   duration?: number;
   /** Small line under the title — a game, a clip's author. */
   meta?: string;
-  /** Corner badge, top left. e.g. "Záznam", or Twitch's "featured" flag. */
+  /** Corner badge, left-hand side. e.g. "Záznam", or Twitch's "featured" flag. */
   badge?: string;
+  /**
+   * Which corner the badge sits in. Top for a badge that says *what this is* —
+   * you want it before you look at the picture. Bottom for one that says
+   * *something extra about it*, where it reads as a caption instead
+   * (owner's call 2026-09-08 for "Doporučeno"). Right is taken by the duration.
+   */
+  badgeAt?: 'top-left' | 'bottom-left';
   /** Adds a broadcast glyph to the badge — for stream recordings. */
   badgeIcon?: boolean;
   /** Vertical thumbnail, for Shorts. */
@@ -35,6 +43,10 @@ interface Props {
   featured?: boolean;
   /** Set on the first few cards, which are above the fold. */
   eager?: boolean;
+  /** Twitch view count, so the filter can sort by it. Clips only. */
+  views?: number;
+  /** Which results grid this card belongs to on a mixed page — see /videa. */
+  kind?: string;
 }
 
 const {
@@ -45,16 +57,35 @@ const {
   duration,
   meta,
   badge,
+  badgeAt = 'top-left',
   badgeIcon = false,
   portrait = false,
   fit = 'cover',
   featured = false,
   eager = false,
+  views,
+  kind,
 } = Astro.props;
 
 const length = duration ? formatDuration(duration) : '';
+
+/**
+ * The filter reads these off the element, so a card is self-describing and the
+ * archive pages need no parallel data structure in the browser.
+ *
+ * `data-text` is normalised here, at build time, rather than in the browser:
+ * stripping diacritics off 471 titles on every keystroke would be work the
+ * visitor pays for, and the answer never changes.
+ */
+const searchText = searchKey([title, meta].filter(Boolean).join(' '));
 ---
-<article class:list={['media', { portrait, featured }, `fit-${fit}`]}>
+<article
+  class:list={['media', { portrait, featured }, `fit-${fit}`]}
+  data-date={date}
+  data-text={searchText}
+  data-views={views === undefined ? undefined : String(views)}
+  data-kind={kind}
+>
   <a href={href} target="_blank" rel="noopener">
     <span class="frame">
       {/* width/height are the intrinsic size of the file we ask for, so the
@@ -69,7 +100,7 @@ const length = duration ? formatDuration(duration) : '';
       />
       {length && <span class="length">{length}</span>}
       {badge && (
-        <span class="badge">
+        <span class:list={['badge', `badge-${badgeAt}`]}>
           {/* Broadcast glyph — a dot with two arcs. Inline so it costs no
               request, and currentColor so it follows the badge. */}
           {badgeIcon && (
@@ -164,7 +195,6 @@ const length = duration ? formatDuration(duration) : '';
     bottom: 0.4rem;
   }
   .badge {
-    top: 0.4rem;
     left: 0.4rem;
     display: flex;
     align-items: center;
@@ -174,6 +204,14 @@ const length = duration ? formatDuration(duration) : '';
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
+  }
+  .badge-top-left {
+    top: 0.4rem;
+  }
+  /* Shares the row with the duration, which is why both use the same 0.4rem
+     inset — they have to line up or the corner looks accidental. */
+  .badge-bottom-left {
+    bottom: 0.4rem;
   }
 
   .badge-icon {

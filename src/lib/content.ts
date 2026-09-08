@@ -30,6 +30,13 @@ export interface Clip extends MediaItem {
   game?: string;
   /** Twitch's own flag. Drives a badge, not the ordering — see below. */
   featured?: boolean;
+  /**
+   * Written by the weekly reconciliation, not the nightly fetch, and only when
+   * it moved materially — see `shouldUpdateViews`. Absent on a clip added
+   * since the last reconciliation, which is why sorting by it falls back to
+   * the date.
+   */
+  views?: number;
   /** Set by the weekly reconciliation when Twitch no longer has the clip. */
   removed?: boolean;
 }
@@ -92,6 +99,7 @@ type ClipRecord = {
   game?: string;
   featured?: boolean;
   removed?: boolean;
+  views?: number;
 };
 
 const clipFiles = import.meta.glob<{ clips: ClipRecord[] }>('../../data/clips/*.json', {
@@ -113,6 +121,7 @@ const allClips: Clip[] = Object.entries(clipFiles)
     ...(record.game ? { game: record.game } : {}),
     ...(record.featured ? { featured: true } : {}),
     ...(record.removed ? { removed: true } : {}),
+    ...(typeof record.views === 'number' ? { views: record.views } : {}),
   }))
   // A clip Twitch no longer has cannot be watched, so it must not be linked.
   // The record stays in the JSON — that is the point of the soft delete — but

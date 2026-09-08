@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --experimental-strip-types --no-warnings test/schedule.test.mjs && node --experimental-strip-types --no-warnings test/calendar-links.test.mjs && node --experimental-strip-types --no-warnings test/clips-store.test.mjs && node --experimental-strip-types --no-warnings test/youtube.test.mjs && node --experimental-strip-types --no-warnings test/clip-title.test.mjs && node --experimental-strip-types --no-warnings test/secrets.test.mjs && node --experimental-strip-types --no-warnings test/content-core.test.mjs && node --experimental-strip-types --no-warnings test/backfill-windows.test.mjs",
+    "test": "node --experimental-strip-types --no-warnings test/schedule.test.mjs && node --experimental-strip-types --no-warnings test/calendar-links.test.mjs && node --experimental-strip-types --no-warnings test/clips-store.test.mjs && node --experimental-strip-types --no-warnings test/youtube.test.mjs && node --experimental-strip-types --no-warnings test/clip-title.test.mjs && node --experimental-strip-types --no-warnings test/secrets.test.mjs && node --experimental-strip-types --no-warnings test/content-core.test.mjs && node --experimental-strip-types --no-warnings test/backfill-windows.test.mjs && node --experimental-strip-types --no-warnings test/archive-filter.test.mjs",
     "fetch:youtube": "node --env-file-if-exists=.env scripts/fetch-youtube.mjs",
     "fetch:clips": "node --env-file-if-exists=.env scripts/fetch-clips.mjs",
     "clips:backfill": "node --env-file-if-exists=.env scripts/backfill-clips.mjs",

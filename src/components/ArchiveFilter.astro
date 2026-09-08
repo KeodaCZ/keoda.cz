@@ -1,0 +1,425 @@
+---
+/**
+ * Filtering, sorting and paging for the archive pages.
+ *
+ * The page it wraps has two views and only ever shows one:
+ *
+ *   - the **server view**, which is exactly what the build rendered — the
+ *     right 48 tiles for this route, with real `<a>` pagination. This is what
+ *     a visitor without JavaScript gets, and what a crawler indexes, so the
+ *     pages keep working untouched.
+ *   - the **results view**, built in the browser from the complete archive the
+ *     page also carries, shown the moment anything is filtered or re-sorted.
+ *
+ * That split is what keeps two pagers from ever both being live: while nothing
+ * is filtered, paging is the server's job; once something is, it is the
+ * browser's.
+ *
+ * The complete archive rides along inside a `<template>`, which is the trick
+ * that makes it free: template content is inert, so those hundreds of `<img>`
+ * tags are never fetched and the tiles are never laid out until the script
+ * moves them into a grid. Only the bytes cost anything, and 471 clips is 36 kB
+ * gzipped.
+ *
+ * The bar itself is `hidden` in the markup and unhidden by the script. It has
+ * to be: without JavaScript there is nothing behind it, and a filter that
+ * silently does nothing is worse than no filter.
+ */
+import type { SortOrder } from '../lib/archive-filter';
+
+interface Props {
+  /** Plural forms for the result count: [1, 2-4, 5+]. Czech needs all three. */
+  nouns: [string, string, string];
+  /** Items per page in the results view. 0 disables paging. */
+  pageSize?: number;
+  sorts: { value: SortOrder; label: string }[];
+  /** Optional type filter. Empty means the page has only one kind of thing. */
+  kinds?: { value: string; label: string }[];
+  /** YYYY-MM-DD bounds of the data, so the date pickers cannot offer nothing. */
+  oldest: string;
+  newest: string;
+  /** Placeholder for the search box — worth naming what is searchable. */
+  searchHint?: string;
+}
+
+const {
+  nouns,
+  pageSize = 0,
+  sorts,
+  kinds = [],
+  oldest,
+  newest,
+  searchHint = 'název…',
+} = Astro.props;
+---
+<div class="archive" data-archive data-page-size={pageSize} data-nouns={nouns.join('|')}>
+  {/* role="search" rather than a plain form: it is a search region, and it
+      never submits — the script cancels that, since there is no server to
+      submit to. */}
+  <form class="bar" data-filter role="search" aria-label="Filtrování a řazení" hidden>
+    <p class="field grow">
+      <label for="af-q">Hledat</label>
+      <input id="af-q" type="search" data-q placeholder={searchHint} autocomplete="off" />
+    </p>
+
+    <p class="field">
+      <label for="af-from">Od</label>
+      <input id="af-from" type="date" data-from min={oldest} max={newest} />
+    </p>
+
+    <p class="field">
+      <label for="af-to">Do</label>
+      <input id="af-to" type="date" data-to min={oldest} max={newest} />
+    </p>
+
+    {kinds.length > 0 && (
+      <p class="field">
+        <label for="af-kind">Typ</label>
+        <select id="af-kind" data-kind>
+          <option value="">Vše</option>
+          {kinds.map((kind) => <option value={kind.value}>{kind.label}</option>)}
+        </select>
+      </p>
+    )}
+
+    <p class="field">
+      <label for="af-order">Řazení</label>
+      <select id="af-order" data-order>
+        {sorts.map((sort) => <option value={sort.value}>{sort.label}</option>)}
+      </select>
+    </p>
+
+    <p class="field reset-field">
+      <button type="button" class="reset" data-reset hidden>Zrušit filtr</button>
+    </p>
+  </form>
+
+  {/* Always in the DOM so the live region is stable — an empty one collapses
+      via :empty rather than being toggled, because a live region that comes
+      and goes tends not to get announced. */}
+  <p class="status" data-status role="status"></p>
+
+  <div data-results-wrap hidden>
+    <slot name="results" />
+    <nav class="pager" data-pager aria-label="Stránkování výsledků" hidden>
+      <button type="button" data-prev>← Novější</button>
+      <span class="count" data-count></span>
+      <button type="button" data-next>Starší →</button>
+    </nav>
+  </div>
+
+  <div data-server>
+    <slot name="server" />
+  </div>
+</div>
+
+<script>
+  import {
+    DEFAULT_STATE,
+    clampPage,
+    countLabel,
+    isDefault,
+    pageCount,
+    pageSlice,
+    selectItems,
+    stateFromParams,
+    stateToParams,
+    type FilterState,
+  } from '../lib/archive-filter';
+
+  const root = document.querySelector<HTMLElement>('[data-archive]');
+  if (root) setup(root);
+
+  function setup(root: HTMLElement) {
+    const form = root.querySelector<HTMLFormElement>('[data-filter]');
+    const template = root.querySelector<HTMLTemplateElement>('template[data-pool]');
+    const wrap = root.querySelector<HTMLElement>('[data-results-wrap]');
+    const serverView = root.querySelector<HTMLElement>('[data-server]');
+    const statusEl = root.querySelector<HTMLElement>('[data-status]');
+    const grids = [...root.querySelectorAll<HTMLElement>('[data-results]')];
+    if (!form || !template || !wrap || !serverView || !statusEl || grids.length === 0) return;
+
+    const pager = root.querySelector<HTMLElement>('[data-pager]');
+    const countEl = root.querySelector<HTMLElement>('[data-count]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-next]');
+    const resetBtn = root.querySelector<HTMLButtonElement>('[data-reset]');
+
+    const qEl = form.querySelector<HTMLInputElement>('[data-q]');
+    const fromEl = form.querySelector<HTMLInputElement>('[data-from]');
+    const toEl = form.querySelector<HTMLInputElement>('[data-to]');
+    const kindEl = form.querySelector<HTMLSelectElement>('[data-kind]');
+    const orderEl = form.querySelector<HTMLSelectElement>('[data-order]');
+
+    const pageSize = Number(root.dataset.pageSize) || 0;
+    const nouns = (root.dataset.nouns ?? '').split('|') as [string, string, string];
+
+    // Taken out of the inert template once. `data-text` was normalised at
+    // build time, so the browser never does that work.
+    const model = [...template.content.children].map((el) => {
+      const node = el as HTMLElement;
+      const views = Number(node.dataset.views);
+      return {
+        el: node,
+        key: node.dataset.text ?? '',
+        date: node.dataset.date ?? '',
+        views: Number.isFinite(views) && node.dataset.views ? views : undefined,
+        kind: node.dataset.kind || undefined,
+      };
+    });
+
+    // Only kinds this page actually declares are accepted out of a URL, so a
+    // stale link cannot filter everything away.
+    const kinds = [...new Set(model.map((item) => item.kind).filter(Boolean))] as string[];
+
+    // Each results grid may sit in a section with its own heading; that
+    // section hides when the grid comes out empty, or /videa would show a
+    // "Shorts" heading over nothing.
+    const sections = grids.map((grid) => grid.closest('[data-results-section]'));
+
+    const gridFor = (kind: string | undefined) =>
+      grids.find((grid) => grid.dataset.results === kind) ?? grids[0];
+
+    let state: FilterState = stateFromParams(new URLSearchParams(location.search), kinds);
+    let timer: number | undefined;
+
+    function writeForm() {
+      if (qEl) qEl.value = state.q;
+      if (fromEl) fromEl.value = state.from;
+      if (toEl) toEl.value = state.to;
+      if (kindEl) kindEl.value = state.kind;
+      if (orderEl) orderEl.value = state.order;
+    }
+
+    function readForm(): FilterState {
+      return {
+        q: qEl?.value ?? '',
+        from: fromEl?.value ?? '',
+        to: toEl?.value ?? '',
+        kind: kindEl?.value ?? '',
+        order: (orderEl?.value as FilterState['order']) ?? DEFAULT_STATE.order,
+        page: 1,
+      };
+    }
+
+    function syncUrl() {
+      const params = stateToParams(state).toString();
+      // replaceState, not pushState: a filter is a view of this page, not a
+      // place. Pushing one entry per keystroke would take a dozen Back presses
+      // to leave the page.
+      history.replaceState(null, '', params ? `${location.pathname}?${params}` : location.pathname);
+    }
+
+    function render() {
+      const selected = selectItems(model, state);
+      const total = selected.length;
+
+      if (isDefault(state)) {
+        wrap.hidden = true;
+        serverView.hidden = false;
+        statusEl.textContent = '';
+        if (resetBtn) resetBtn.hidden = true;
+        syncUrl();
+        return;
+      }
+
+      state.page = clampPage(state.page, total, pageSize);
+      const shown = pageSlice(selected, state.page, pageSize);
+
+      for (const grid of grids) grid.replaceChildren();
+      for (const item of shown) gridFor(item.kind).append(item.el);
+      for (const [index, section] of sections.entries()) {
+        if (section instanceof HTMLElement) section.hidden = grids[index].children.length === 0;
+      }
+
+      const pages = pageCount(total, pageSize);
+      if (pager) pager.hidden = pages <= 1;
+      if (countEl) countEl.textContent = `Strana ${state.page} z ${pages}`;
+      if (prev) prev.disabled = state.page <= 1;
+      if (next) next.disabled = state.page >= pages;
+
+      statusEl.textContent = total === 0 ? 'Nic nenašlo.' : countLabel(total, nouns);
+      if (resetBtn) resetBtn.hidden = false;
+
+      serverView.hidden = true;
+      wrap.hidden = false;
+      syncUrl();
+    }
+
+    function change(nextState: FilterState) {
+      state = nextState;
+      render();
+    }
+
+    form.addEventListener('submit', (event) => {
+      // There is no server to submit to; Enter in the search box should just
+      // apply what is already applied.
+      event.preventDefault();
+      change(readForm());
+    });
+
+    qEl?.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => change(readForm()), 160);
+    });
+
+    for (const el of [fromEl, toEl, kindEl, orderEl]) {
+      el?.addEventListener('change', () => change(readForm()));
+    }
+
+    resetBtn?.addEventListener('click', () => {
+      state = { ...DEFAULT_STATE };
+      writeForm();
+      render();
+      qEl?.focus();
+    });
+
+    prev?.addEventListener('click', () => {
+      state = { ...state, page: state.page - 1 };
+      render();
+      scrollToTop();
+    });
+    next?.addEventListener('click', () => {
+      state = { ...state, page: state.page + 1 };
+      render();
+      scrollToTop();
+    });
+
+    function scrollToTop() {
+      // A new page of results starting halfway down the previous one reads as
+      // nothing having happened.
+      form.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+
+    form.hidden = false;
+    writeForm();
+    render();
+  }
+</script>
+
+<style>
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 0.9rem;
+    align-items: flex-end;
+    margin-bottom: 1.4rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 12px;
+    background: var(--card);
+  }
+  .bar[hidden] {
+    display: none;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    min-width: 0;
+  }
+  /* The search box takes the slack, since it is the one people use most. */
+  .grow {
+    flex: 1 1 12rem;
+  }
+  .reset-field {
+    margin-left: auto;
+  }
+
+  label {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+    background: var(--bg-top);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.95rem;
+  }
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  /* A date input with nothing in it still shows dd.mm.yyyy, which reads as
+     filled-in; muting it says "empty" without hiding the affordance. */
+  input[type='date']:not(:focus):invalid,
+  input[type='date']:not(:focus):placeholder-shown {
+    color: var(--muted);
+  }
+
+  .reset {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .reset:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .reset[hidden] {
+    display: none;
+  }
+
+  .status {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  /* Collapses when there is nothing to say, so the live region can stay in
+     the DOM instead of being toggled. */
+  .status:empty {
+    display: none;
+  }
+
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.4rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-block: 2rem 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-edge);
+  }
+  .pager[hidden] {
+    display: none;
+  }
+  .pager button {
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .pager button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .pager button:disabled {
+    color: var(--muted);
+    cursor: default;
+    opacity: 0.6;
+  }
+  .count {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+</style>

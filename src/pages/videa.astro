@@ -7,11 +7,51 @@
  * come first and get the bigger cards: the page has to look deliberate with
  * three of them and still work with thirty. Shorts sit below in a grid rather
  * than being mixed in — they are a different watch.
+ *
+ * This is the one page where the filter keeps two grids instead of one, for
+ * the same reason the sections exist at all: a portrait Short and a 16:9 video
+ * in one grid look like a layout bug. The `Typ` control therefore hides a
+ * whole section rather than reflowing them together, and each section hides
+ * itself when its grid comes out empty. No paging — 86 items is not enough to
+ * need it, which is what `pageSize` 0 means.
  */
 import Base from '../layouts/Base.astro';
 import MediaCard from '../components/MediaCard.astro';
+import ArchiveFilter from '../components/ArchiveFilter.astro';
+import type { MediaItem, Short } from '../lib/content';
 import { shorts, videos, youtubeThumb } from '../lib/content';
 import { youtubeShortUrl, youtubeUrl } from '../lib/content-core';
+
+const videoProps = (video: MediaItem) =>
+  ({
+    href: youtubeUrl(video.id),
+    title: video.title,
+    thumb: youtubeThumb(video),
+    date: video.date,
+    duration: video.duration,
+    kind: 'videa',
+  }) as const;
+
+/* `short.portrait` is resolved by the fetch script, because deriving the URL
+   here is what broke: oardefault.jpg is missing for 27 of 83 Shorts and
+   answers 404 with a valid grey placeholder, so the page showed grey boxes and
+   nothing errored. Two Shorts have no vertical thumbnail at all and fall back
+   to the landscape one, shown whole rather than cropped to a slice. */
+const shortProps = (short: Short) =>
+  ({
+    href: youtubeShortUrl(short.id),
+    title: short.title,
+    thumb: short.portrait || short.thumb,
+    date: short.date,
+    duration: short.duration,
+    portrait: true,
+    fit: short.portrait ? ('cover' as const) : ('contain' as const),
+    kind: 'shorts',
+  }) as const;
+
+const dates = [...videos, ...shorts].map((item) => item.date.slice(0, 10)).sort();
+const oldest = dates[0] ?? '';
+const newest = dates.at(-1) ?? '';
 ---
 <Base
   title="Videa"
@@ -24,52 +64,67 @@ import { youtubeShortUrl, youtubeUrl } from '../lib/content-core';
       v <a href="/streamy/">archivu streamů</a>.
     </p>
 
-    {videos.length > 0 && (
-      <section class="block">
-        <h2>Videa</h2>
-        <div class="videos">
-          {/* No "featured" first card: with three equal-width cards in a row,
-              making one's title bigger reads as a mistake rather than as
-              emphasis. */}
-          {videos.map((video, index) => (
-            <MediaCard
-              href={youtubeUrl(video.id)}
-              title={video.title}
-              thumb={youtubeThumb(video)}
-              date={video.date}
-              duration={video.duration}
-              eager={index < 3}
-            />
-          ))}
-        </div>
-      </section>
-    )}
+    <ArchiveFilter
+      {/* "výsledek" and not "video": this page holds two kinds of thing, and
+          filtering to Shorts and being told "83 videí" is simply wrong. */}
+      nouns={['výsledek', 'výsledky', 'výsledků']}
+      pageSize={0}
+      oldest={oldest}
+      newest={newest}
+      searchHint="název…"
+      kinds={[
+        { value: 'videa', label: 'Jen videa' },
+        { value: 'shorts', label: 'Jen Shorts' },
+      ]}
+      sorts={[
+        { value: 'nejnovejsi', label: 'Nejnovější' },
+        { value: 'nejstarsi', label: 'Nejstarší' },
+      ]}
+    >
+      <Fragment slot="results">
+        <template data-pool>
+          {videos.map((video) => <MediaCard {...videoProps(video)} />)}
+          {shorts.map((short) => <MediaCard {...shortProps(short)} />)}
+        </template>
 
-    {shorts.length > 0 && (
-      <section class="block">
-        <h2>Shorts <span class="count muted">{shorts.length}</span></h2>
-        <div class="shorts">
-          {/* `short.portrait` is resolved by the fetch script, because
-              deriving the URL here is what broke: oardefault.jpg is missing
-              for 27 of 83 Shorts and answers 404 with a valid grey
-              placeholder, so the page showed grey boxes and nothing errored.
-              Two Shorts have no vertical thumbnail at all and fall back to the
-              landscape one, shown whole rather than cropped to a slice. */}
-          {shorts.map((short, index) => (
-            <MediaCard
-              href={youtubeShortUrl(short.id)}
-              title={short.title}
-              thumb={short.portrait || short.thumb}
-              date={short.date}
-              duration={short.duration}
-              portrait
-              fit={short.portrait ? 'cover' : 'contain'}
-              eager={index < 4}
-            />
-          ))}
-        </div>
-      </section>
-    )}
+        <section class="block" data-results-section>
+          <h2>Videa</h2>
+          <div class="videos" data-results="videa"></div>
+        </section>
+
+        <section class="block" data-results-section>
+          <h2>Shorts</h2>
+          <div class="shorts" data-results="shorts"></div>
+        </section>
+      </Fragment>
+
+      <Fragment slot="server">
+        {videos.length > 0 && (
+          <section class="block">
+            <h2>Videa</h2>
+            <div class="videos">
+              {/* No "featured" first card: with three equal-width cards in a
+                  row, making one's title bigger reads as a mistake rather
+                  than as emphasis. */}
+              {videos.map((video, index) => (
+                <MediaCard {...videoProps(video)} eager={index < 3} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {shorts.length > 0 && (
+          <section class="block">
+            <h2>Shorts <span class="count muted">{shorts.length}</span></h2>
+            <div class="shorts">
+              {shorts.map((short, index) => (
+                <MediaCard {...shortProps(short)} eager={index < 4} />
+              ))}
+            </div>
+          </section>
+        )}
+      </Fragment>
+    </ArchiveFilter>
   </div>
 </Base>
 
@@ -84,11 +139,14 @@ import { youtubeShortUrl, youtubeUrl } from '../lib/content-core';
   }
   .intro {
     max-width: 52ch;
-    margin-bottom: 2.4rem;
+    margin-bottom: 2rem;
   }
 
   .block {
     margin-bottom: 3rem;
+  }
+  .block[hidden] {
+    display: none;
   }
   .block h2 {
     margin-bottom: 1rem;

@@ -8,10 +8,16 @@
  * video. Still grouped by month, which makes the shape of the archive legible
  * — including the two-month gap in 2023 and the whole of 2024, both of which
  * are real (see the note under the heading).
+ *
+ * The month grouping is the reason the filtered view is a flat grid: results
+ * spread over "březen 2025 (1), květen 2025 (2)…" would be mostly headings,
+ * and once you have asked for a date range the months have already served
+ * their purpose.
  */
 import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
 import MediaCard from '../../components/MediaCard.astro';
+import ArchiveFilter from '../../components/ArchiveFilter.astro';
 import type { Stream } from '../../lib/content';
 import { streams, youtubeThumb } from '../../lib/content';
 import { groupByMonth, youtubeUrl } from '../../lib/content-core';
@@ -25,6 +31,21 @@ const { page } = Astro.props as { page: Page<Stream> };
 const months = groupByMonth(page.data);
 
 const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.currentPage}`;
+
+/** One place the card's props are decided, so the two views cannot drift. */
+const cardProps = (stream: Stream) =>
+  ({
+    href: youtubeUrl(stream.id),
+    title: stream.title,
+    thumb: youtubeThumb(stream),
+    date: stream.date,
+    duration: stream.duration,
+    badge: 'Záznam',
+    badgeIcon: true,
+  }) as const;
+
+const newest = streams[0]?.date.slice(0, 10) ?? '';
+const oldest = streams.at(-1)?.date.slice(0, 10) ?? '';
 ---
 <Base
   title={title}
@@ -38,33 +59,46 @@ const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.cu
       Proto archiv začíná až rokem 2025: dřív jsem multistreamoval jen krátce na zkoušku.
     </p>
 
-    {months.map((month, monthIndex) => (
-      <section class="month">
-        <h2>{month.label}</h2>
-        <div class="grid">
-          {month.items.map((stream, index) => (
-            <MediaCard
-              href={youtubeUrl(stream.id)}
-              title={stream.title}
-              thumb={youtubeThumb(stream)}
-              date={stream.date}
-              duration={stream.duration}
-              badge="Záznam"
-              badgeIcon
-              eager={monthIndex === 0 && index < 4}
-            />
-          ))}
-        </div>
-      </section>
-    ))}
+    <ArchiveFilter
+      nouns={['záznam', 'záznamy', 'záznamů']}
+      pageSize={48}
+      oldest={oldest}
+      newest={newest}
+      searchHint="název streamu…"
+      sorts={[
+        { value: 'nejnovejsi', label: 'Nejnovější' },
+        { value: 'nejstarsi', label: 'Nejstarší' },
+      ]}
+    >
+      <Fragment slot="results">
+        {/* Every recording, inert until something is filtered. */}
+        <template data-pool>
+          {streams.map((stream) => <MediaCard {...cardProps(stream)} />)}
+        </template>
+        <div class="grid" data-results></div>
+      </Fragment>
 
-    {(page.url.prev || page.url.next) && (
-      <nav class="pager" aria-label="Stránkování">
-        {page.url.prev ? <a href={page.url.prev}>← Novější</a> : <span class="muted">← Novější</span>}
-        <span class="muted count">Strana {page.currentPage} z {page.lastPage}</span>
-        {page.url.next ? <a href={page.url.next}>Starší →</a> : <span class="muted">Starší →</span>}
-      </nav>
-    )}
+      <Fragment slot="server">
+        {months.map((month, monthIndex) => (
+          <section class="month">
+            <h2>{month.label}</h2>
+            <div class="grid">
+              {month.items.map((stream, index) => (
+                <MediaCard {...cardProps(stream)} eager={monthIndex === 0 && index < 4} />
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {(page.url.prev || page.url.next) && (
+          <nav class="pager" aria-label="Stránkování">
+            {page.url.prev ? <a href={page.url.prev}>← Novější</a> : <span class="muted">← Novější</span>}
+            <span class="muted count">Strana {page.currentPage} z {page.lastPage}</span>
+            {page.url.next ? <a href={page.url.next}>Starší →</a> : <span class="muted">Starší →</span>}
+          </nav>
+        )}
+      </Fragment>
+    </ArchiveFilter>
   </div>
 </Base>
 
@@ -79,7 +113,7 @@ const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.cu
   }
   .intro {
     max-width: 56ch;
-    margin-bottom: 2.4rem;
+    margin-bottom: 2rem;
   }
 
   .month {
