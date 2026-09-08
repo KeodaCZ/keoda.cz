@@ -22,6 +22,13 @@ interface Props {
   badge?: string;
   /** Vertical thumbnail, for Shorts. */
   portrait?: boolean;
+  /**
+   * 'contain' shows the whole image pillarboxed instead of cropping it. Used
+   * for the two Shorts YouTube has no vertical thumbnail for: cropping a
+   * landscape frame to 9:16 would show a random vertical slice, where this at
+   * least shows the real frame and makes the gap obvious rather than odd.
+   */
+  fit?: 'cover' | 'contain';
   /** Bigger type and thumbnail, for the newest item on a page. */
   featured?: boolean;
   /** Set on the first few cards, which are above the fold. */
@@ -37,13 +44,14 @@ const {
   meta,
   badge,
   portrait = false,
+  fit = 'cover',
   featured = false,
   eager = false,
 } = Astro.props;
 
 const length = duration ? formatDuration(duration) : '';
 ---
-<article class:list={['media', { portrait, featured }]}>
+<article class:list={['media', { portrait, featured }, `fit-${fit}`]}>
   <a href={href} target="_blank" rel="noopener">
     <span class="frame">
       {/* width/height are the intrinsic size of the file we ask for, so the
@@ -110,6 +118,9 @@ const length = duration ? formatDuration(duration) : '';
     height: 100%;
     object-fit: cover;
   }
+  .fit-contain .frame img {
+    object-fit: contain;
+  }
   a:hover .frame {
     border-color: var(--accent);
   }
@@ -117,7 +128,6 @@ const length = duration ? formatDuration(duration) : '';
   .length,
   .badge {
     position: absolute;
-    bottom: 0.4rem;
     padding: 0.1rem 0.35rem;
     border-radius: 4px;
     /* Fixed dark ground with light text: it sits on a photograph, so it must
@@ -130,8 +140,10 @@ const length = duration ? formatDuration(duration) : '';
   }
   .length {
     right: 0.4rem;
+    bottom: 0.4rem;
   }
   .badge {
+    top: 0.4rem;
     left: 0.4rem;
     background: var(--btn-bg);
     color: var(--btn-text);

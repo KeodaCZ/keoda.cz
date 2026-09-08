@@ -191,6 +191,66 @@ async function details(ids) {
   return out;
 }
 
+/**
+ * Finds a portrait thumbnail for a Short, or '' if there isn't one.
+ *
+ * Resolved here rather than by deriving a URL at build time, which is what
+ * broke: `oardefault.jpg` is missing for 27 of 83 Shorts, and it does not fail
+ * cleanly — it answers **404 with a valid 1 kB grey placeholder JPEG**, which
+ * browsers happily render. The page showed grey boxes with no error anywhere.
+ *
+ * `frame0.jpg` is the fallback and covers 25 of those 27. It is literally the
+ * first frame, so a Short that fades in from black gives a black image — but
+ * the sizes separate cleanly: usable ones measured 6.4–52 kB across all 83,
+ * the flat ones exactly 1,049–1,050 B. So `content-length` decides it and no
+ * image decoding is needed, which keeps this script dependency-free.
+ *
+ * Three Shorts have neither; the page falls back to the landscape thumbnail
+ * for those.
+ */
+const MIN_PORTRAIT_BYTES = 3000;
+
+async function portraitThumb(id) {
+  const candidates = [
+    // YouTube's own chosen thumbnail, so never a black frame when present.
+    `https://i.ytimg.com/vi/${id}/oardefault.jpg`,
+    `https://i.ytimg.com/vi/${id}/frame0.jpg`,
+  ];
+
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (!response.ok) continue;
+      const bytes = Number(response.headers.get('content-length') ?? 0);
+      if (bytes >= MIN_PORTRAIT_BYTES) return url;
+    } catch {
+      // Treat a network blip as "not available" and try the next one.
+    }
+  }
+
+  return '';
+}
+
+/** Resolves portrait thumbnails a few at a time rather than 83 in a row. */
+async function addPortraitThumbs(items) {
+  const CONCURRENCY = 8;
+  let resolved = 0;
+
+  for (let i = 0; i < items.length; i += CONCURRENCY) {
+    const batch = items.slice(i, i + CONCURRENCY);
+    const urls = await Promise.all(batch.map((item) => portraitThumb(item.id)));
+    batch.forEach((item, index) => {
+      if (urls[index]) {
+        item.portrait = urls[index];
+        resolved += 1;
+      }
+    });
+  }
+
+  console.log(`Portrétový náhled: ${resolved} z ${items.length} Shorts.`);
+  return items;
+}
+
 async function main() {
   const playlistId = await uploadsPlaylistId();
   console.log(`Playlist s uploady: ${playlistId}`);
@@ -243,6 +303,8 @@ async function main() {
   for (const list of Object.values(buckets)) {
     list.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt) || a.id.localeCompare(b.id));
   }
+
+  await addPortraitThumbs(buckets.shorts);
 
   const previous = readJson(OUT, null);
   if (previous) {

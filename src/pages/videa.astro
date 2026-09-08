@@ -49,15 +49,22 @@ import { youtubeShortUrl, youtubeUrl } from '../lib/content-core';
       <section class="block">
         <h2>Shorts <span class="count muted">{shorts.length}</span></h2>
         <div class="shorts">
+          {/* `short.portrait` is resolved by the fetch script, because
+              deriving the URL here is what broke: oardefault.jpg is missing
+              for 27 of 83 Shorts and answers 404 with a valid grey
+              placeholder, so the page showed grey boxes and nothing errored.
+              Two Shorts have no vertical thumbnail at all and fall back to the
+              landscape one, shown whole rather than cropped to a slice. */}
           {shorts.map((short, index) => (
             <MediaCard
               href={youtubeShortUrl(short.id)}
               title={short.title}
-              thumb={`https://i.ytimg.com/vi/${short.id}/oardefault.jpg`}
+              thumb={short.portrait || short.thumb}
               date={short.date}
               duration={short.duration}
               portrait
-              eager={index < 2}
+              fit={short.portrait ? 'cover' : 'contain'}
+              eager={index < 4}
             />
           ))}
         </div>
@@ -106,10 +113,18 @@ import { youtubeShortUrl, youtubeUrl } from '../lib/content-core';
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
   }
 
-  /* Shorts: many, small, vertical. */
+  /* Shorts: vertical, and bigger than they first were — owner's call
+     2026-09-08, two fewer per row. Two columns on a phone regardless, since
+     one full-width portrait card per screen is a lot of scrolling. */
   .shorts {
     display: grid;
     gap: 1rem 0.9rem;
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+  }
+  @media (min-width: 40rem) {
+    .shorts {
+      gap: 1.3rem 1.1rem;
+      grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    }
   }
 </style>

@@ -597,13 +597,17 @@ container with `place-content`, never `margin`, or `.container` loses its
 
 Three pages, owner's call 2026-09-08 after seeing the numbers:
 
-- **`/streamy`** — 400+ recordings, paginated 40 a page, grouped by month with a
-  sticky heading. A **list, not a thumbnail grid**: median length is four and a
-  half hours and nobody picks a VOD by its picture, they look for *when*.
-  Grouping also makes the shape of the archive legible, including that **2024
-  is missing entirely** (42 streams in 2023, none in 2024, 211 in 2025) while
-  Shorts from 2024 exist — so he streamed, but those recordings are not on
-  YouTube. Worth asking about before anyone treats it as a bug.
+- **`/streamy`** — 400+ recordings, paginated 48 a page, tiles grouped by month
+  with a sticky heading and a **ZÁZNAM** badge on each thumbnail so a recording
+  is never taken for an edited video (owner's call 2026-09-08; it started as a
+  list).
+
+  **The gaps in the archive are real, not a bug.** 42 streams in 2023, none at
+  all in 2024, 211 in 2025. The owner's account: in 2023 he streamed to YouTube
+  only for about two months to try it, then went back to Twitch alone, and only
+  started multistreaming in 2025. So YouTube holds everything from 2025 on and
+  almost nothing before. Don't "fix" it, and don't go looking for lost
+  recordings — Twitch VODs from then are long expired.
 - **`/videa`** — the three edited videos first with wide cards, then all 83
   Shorts in a portrait grid. Together because both are his own published
   output. The page has to look deliberate with three videos and still work with
@@ -643,10 +647,26 @@ emptied, and the five biggest reductions all correct.
 so a 16:9 box with `object-fit: cover` crops them off and shows the full frame
 at a ninth of the bytes. That crop is load-bearing, not tidying.
 
-**Do not switch Shorts to `frame0`.** It is small and truly 9:16, but it is
-literally the first frame — two of ten sampled Shorts came back solid black
-(brightness 0.0) because they fade in. `oardefault` stays, at roughly 7×
-oversized for a 150px card; lazy loading keeps the cost to what is scrolled to.
+**Shorts' portrait thumbnail is resolved by the fetch script, not derived in
+the page**, and this is the one to remember:
+
+`oardefault.jpg` is **missing for 27 of 83 Shorts, and it does not fail
+cleanly — it answers 404 with a valid 1 kB grey placeholder JPEG**, which
+browsers render happily. The page showed grey boxes with three dots and nothing
+errored anywhere; the owner spotted it, no test could have. Deriving thumbnail
+URLs from an id is exactly the assumption that broke.
+
+So `fetch-youtube.mjs` probes and stores a `portrait` URL per Short:
+`oardefault` if it really is 200, else `frame0`, else nothing. `frame0` is
+literally the first frame, so a Short that fades in gives a black image — but
+the sizes separate cleanly, measured across all 83: usable 6.4–52 kB, flat ones
+exactly 1,049–1,050 B. A `content-length` check settles it, so the script needs
+no image decoding and stays dependency-free. Result: 56 via `oardefault`, 25
+via `frame0`, 2 with neither — those fall back to the landscape thumbnail shown
+whole (`fit="contain"`) rather than cropped to a random vertical slice.
+
+`oardefault` is ~7× oversized for a 220px card and there is no smaller
+reliable portrait variant; lazy loading keeps the cost to what is scrolled to.
 
 Neither `i.ytimg.com` nor `static-cdn.jtvnw.net` sets a cookie (verified
 2026-09-08), so unlike the Twitch player these load on view and the site still

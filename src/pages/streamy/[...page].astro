@@ -3,24 +3,25 @@
  * The stream archive — the bulk of the site's content: 400+ recordings, median
  * length four and a half hours.
  *
- * A grid of thumbnails would be the obvious thing and would be wrong here.
- * Nobody browses four-hour VODs by picture; they look for *when*. So this is a
- * list grouped by month, which also makes the shape of the archive legible —
- * including the fact that 2024 is missing entirely.
+ * Tiles rather than the list it started as (owner's call 2026-09-08), with a
+ * ZÁZNAM tag on each thumbnail so a recording is never mistaken for an edited
+ * video. Still grouped by month, which makes the shape of the archive legible
+ * — including the two-month gap in 2023 and the whole of 2024, both of which
+ * are real (see the note under the heading).
  */
 import type { GetStaticPaths, Page } from 'astro';
 import Base from '../../layouts/Base.astro';
+import MediaCard from '../../components/MediaCard.astro';
+import type { Stream } from '../../lib/content';
 import { streams, youtubeThumb } from '../../lib/content';
-import { formatDuration, groupByMonth, youtubeUrl } from '../../lib/content-core';
-
-const PER_PAGE = 40;
+import { groupByMonth, youtubeUrl } from '../../lib/content-core';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const { streams } = await import('../../lib/content');
-  return paginate(streams, { pageSize: 40 });
+  return paginate(streams, { pageSize: 48 });
 }) satisfies GetStaticPaths;
 
-const { page } = Astro.props as { page: Page<(typeof streams)[number]> };
+const { page } = Astro.props as { page: Page<Stream> };
 const months = groupByMonth(page.data);
 
 const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.currentPage}`;
@@ -32,55 +33,35 @@ const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.cu
   <div class="container">
     <h1>Archiv <span class="accent">streamů</span></h1>
     <p class="muted intro">
-      {streams.length} záznamů na YouTube, od nejnovějšího. Streamuju na Twitchi a zároveň na
-      YouTube, takže tam záznamy zůstávají — na Twitchi po chvíli mizí.
+      {streams.length} záznamů na YouTube, od nejnovějšího. Streamuju na Twitchi a zároveň
+      na YouTube, takže tam záznamy zůstávají — na Twitchi po chvíli mizí.
+      Proto archiv začíná až rokem 2025: dřív jsem multistreamoval jen krátce na zkoušku.
     </p>
 
-    {months.map((month) => (
+    {months.map((month, monthIndex) => (
       <section class="month">
         <h2>{month.label}</h2>
-        <ul>
-          {month.items.map((stream) => (
-            <li>
-              <a href={youtubeUrl(stream.id)} target="_blank" rel="noopener">
-                <img
-                  class="thumb"
-                  src={youtubeThumb(stream)}
-                  alt=""
-                  width="480"
-                  height="270"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span class="body">
-                  <span class="stream-title">{stream.title}</span>
-                  <span class="meta muted">
-                    <span class="day">{Number(stream.date.slice(8, 10))}. {Number(stream.date.slice(5, 7))}.</span>
-                    {stream.duration > 0 && (
-                      <><span aria-hidden="true">·</span><span>{formatDuration(stream.duration)}</span></>
-                    )}
-                  </span>
-                </span>
-              </a>
-            </li>
+        <div class="grid">
+          {month.items.map((stream, index) => (
+            <MediaCard
+              href={youtubeUrl(stream.id)}
+              title={stream.title}
+              thumb={youtubeThumb(stream)}
+              date={stream.date}
+              duration={stream.duration}
+              badge="Záznam"
+              eager={monthIndex === 0 && index < 4}
+            />
           ))}
-        </ul>
+        </div>
       </section>
     ))}
 
     {(page.url.prev || page.url.next) && (
       <nav class="pager" aria-label="Stránkování">
-        {page.url.prev ? (
-          <a href={page.url.prev}>← Novější</a>
-        ) : (
-          <span class="muted">← Novější</span>
-        )}
+        {page.url.prev ? <a href={page.url.prev}>← Novější</a> : <span class="muted">← Novější</span>}
         <span class="muted count">Strana {page.currentPage} z {page.lastPage}</span>
-        {page.url.next ? (
-          <a href={page.url.next}>Starší →</a>
-        ) : (
-          <span class="muted">Starší →</span>
-        )}
+        {page.url.next ? <a href={page.url.next}>Starší →</a> : <span class="muted">Starší →</span>}
       </nav>
     )}
   </div>
@@ -96,21 +77,21 @@ const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.cu
     color: var(--accent);
   }
   .intro {
-    max-width: 52ch;
-    margin-bottom: 2rem;
+    max-width: 56ch;
+    margin-bottom: 2.4rem;
   }
 
   .month {
-    margin-bottom: 2.2rem;
+    margin-bottom: 2.4rem;
   }
   .month h2 {
     position: sticky;
     top: 0;
     z-index: 2;
-    /* Opaque, or the rows scroll visibly through the heading. */
+    /* Opaque, or the tiles scroll visibly through the heading. */
     background: var(--bg-top);
-    margin-bottom: 0.6rem;
-    padding-block: 0.4rem;
+    margin-bottom: 0.9rem;
+    padding-block: 0.45rem;
     border-bottom: 1px solid var(--card-edge);
     font-size: 1.05rem;
     letter-spacing: 0.1em;
@@ -118,64 +99,16 @@ const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.cu
     color: var(--muted);
   }
 
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  .grid {
     display: grid;
-    gap: 0.4rem;
+    gap: 1.2rem 0.9rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
   }
-  li a {
-    display: flex;
-    gap: 0.9rem;
-    align-items: center;
-    padding: 0.45rem;
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--text);
-  }
-  li a:hover {
-    background: var(--card);
-  }
-
-  /* Small on purpose. It says which stream this was, not "look at this
-     picture" — the title and date are what people scan. */
-  .thumb {
-    flex: none;
-    width: 6.5rem;
-    aspect-ratio: 16 / 9;
-    height: auto;
-    /* Crops YouTube's 4:3 letterboxing off hqdefault. */
-    object-fit: cover;
-    border: 1px solid var(--card-edge);
-    border-radius: 6px;
-    background: var(--card);
-  }
-
-  .body {
-    display: grid;
-    gap: 0.1rem;
-    min-width: 0;
-  }
-  .stream-title {
-    font-weight: 600;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  li a:hover .stream-title {
-    color: var(--accent);
-  }
-  .meta {
-    display: flex;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    font-variant-numeric: tabular-nums;
-  }
-  .day {
-    font-weight: 600;
+  @media (min-width: 40rem) {
+    .grid {
+      gap: 1.4rem 1.1rem;
+      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    }
   }
 
   .pager {
@@ -193,11 +126,5 @@ const title = page.currentPage === 1 ? 'Streamy' : `Streamy — strana ${page.cu
   }
   .count {
     font-size: 0.9rem;
-  }
-
-  @media (min-width: 700px) {
-    .thumb {
-      width: 8.5rem;
-    }
   }
 </style>

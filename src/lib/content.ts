@@ -17,6 +17,12 @@ export interface Stream extends MediaItem {
   endedAt?: string;
 }
 
+export interface Short extends MediaItem {
+  /** Vertical thumbnail, resolved by the fetch script. Absent for the few
+   *  Shorts YouTube has neither an oardefault nor a usable frame0 for. */
+  portrait?: string;
+}
+
 export interface Clip extends MediaItem {
   /** Who made the clip — always someone other than the owner, so credit it. */
   creator: string;
@@ -50,6 +56,7 @@ type YoutubeRecord = {
   duration: number;
   thumb: string;
   endedAt?: string;
+  portrait?: string;
 };
 
 const fromYoutube = (record: YoutubeRecord) => ({
@@ -62,11 +69,12 @@ const fromYoutube = (record: YoutubeRecord) => ({
   duration: record.duration,
   date: record.publishedAt,
   ...(record.endedAt ? { endedAt: record.endedAt } : {}),
+  ...(record.portrait ? { portrait: record.portrait } : {}),
 });
 
 export const streams: Stream[] = prepare((youtube.streams as YoutubeRecord[]).map(fromYoutube));
 export const videos: MediaItem[] = prepare((youtube.videos as YoutubeRecord[]).map(fromYoutube));
-export const shorts: MediaItem[] = prepare((youtube.shorts as YoutubeRecord[]).map(fromYoutube));
+export const shorts: Short[] = prepare((youtube.shorts as YoutubeRecord[]).map(fromYoutube));
 
 /**
  * Every year file at once. A glob rather than a list of imports, so the year
