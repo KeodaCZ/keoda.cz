@@ -25,9 +25,27 @@ const WEEKDAY_SHORT: Record<string, string> = {
   neděle: 'NE',
 };
 
-function rowTitle(day: ScheduleDay): string {
-  if (!day.streaming) return 'Nestreamuju';
-  return day.game || 'Stream';
+/**
+ * The row's headline and the smaller line under it.
+ *
+ * **The note leads and the game sits under it** (owner's call 2026-09-10). On a
+ * day with both, "NightfallCraft Co-Op s Terousch" is what makes that evening
+ * worth turning up to and "Minecraft" is just the label. It also brings these
+ * rows in line with the homepage's compact ones, which already print the note
+ * first.
+ *
+ * A cancelled day is the deliberate exception: it keeps "Nestreamuju" as the
+ * headline with the note underneath. There the row's whole job is to stop
+ * someone turning up, and setting the reason big while demoting the
+ * cancellation buries the one word that matters.
+ *
+ * `prose` says the headline is a sentence rather than a label, which decides
+ * the type treatment — see the styles.
+ */
+function rowText(day: ScheduleDay): { title: string; sub?: string; prose: boolean } {
+  if (!day.streaming) return { title: 'Nestreamuju', sub: day.note, prose: false };
+  if (day.note) return { title: day.note, sub: day.game, prose: true };
+  return { title: day.game || 'Stream', prose: false };
 }
 
 /** Only a real, timed stream can go into someone's calendar. */
@@ -47,6 +65,7 @@ function calendarLinks(day: ScheduleDay) {
     <ul>
       {days.map((day, index) => {
         const links = calendarLinks(day);
+        const text = rowText(day);
         return (
           <li
             class:list={['row', { off: !day.streaming, today: day.isToday }]}
@@ -59,8 +78,8 @@ function calendarLinks(day: ScheduleDay) {
             </span>
 
             <span class="body">
-              <span class="row-title">{rowTitle(day)}</span>
-              {day.note && <span class="row-note muted">{day.note}</span>}
+              <span class:list={['row-title', { prose: text.prose }]}>{text.title}</span>
+              {text.sub && <span class="row-sub muted">{text.sub}</span>}
             </span>
 
             <span class="time">
@@ -187,7 +206,18 @@ function calendarLinks(day: ScheduleDay) {
   .off .row-title {
     text-decoration: line-through;
   }
-  .row-note {
+  /* A note is a sentence, not a label. Condensed uppercase suits a one-word
+     category — "MINECRAFT" — and turns a real title into shouting that is
+     genuinely harder to read, so a prose headline drops the whole treatment.
+     Same distinction the live stream's own title makes in TwitchEmbed. */
+  .row-title.prose {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .row-sub {
     font-size: 0.85rem;
   }
 
@@ -287,6 +317,11 @@ function calendarLinks(day: ScheduleDay) {
     }
     .row-title {
       font-size: 1rem;
+    }
+    /* Needs restating: `.row-title.prose` outranks `.row-title`, so the plain
+       override above would not reach it. */
+    .row-title.prose {
+      font-size: 0.95rem;
     }
     .time-value {
       font-size: 1.25rem;
