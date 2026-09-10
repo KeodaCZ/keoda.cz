@@ -105,11 +105,12 @@ Dropped on purpose — do not build, do not suggest:
 Twitch login, user accounts, points/leaderboards, polls, predictions, giveaways.
 All need auth + a database.
 
-**Live status**: no build-time badge, ever — Actions cron can't do it (see
-Workflow schedule) and a real one would need a Worker. What exists instead is a
-client-side check in `TwitchEmbed.astro`, described below: player when live,
-one-line strip when offline. Nothing else on the site may claim live status,
-because nothing else can know it.
+**Live status**: no build-time badge, ever. Actions cron cannot do it — delays
+measured on this repo run **one to four hours**, so a "live now" badge would be
+wrong most of the time it mattered — and a real one would need a Worker. What
+exists instead is a client-side check in `TwitchEmbed.astro`, described below:
+player when live, one-line strip when offline. Nothing else on the site may
+claim live status, because nothing else can know it.
 
 The player lives in `TwitchEmbed.astro`, **inside the homepage hero between the
 tagline and the socials row** (owner's call 2026-09-07, after comparing all
@@ -196,130 +197,35 @@ stream out loud on page load; both are set explicitly.
 
 ## Data layer
 
-> **Maintenance task — Claude Code, act on this without being asked.**
->
-> Trigger: the YouTube fetch, the Twitch clips fetch, and the reconciliation job
-> all exist and have each run successfully at least once.
->
-> Then move these subsections out of this file into
-> `.claude/rules/data-fetching.md`, path-scoped so they load only when working on
-> the fetch scripts or workflows (roughly `scripts/**` and
-> `.github/workflows/**`):
->
-> - YouTube
-> - Twitch clips
-> - Full archive: merge, don't overwrite
-> - Reconciliation (deleted clips)
-> - Workflow schedule
->
-> **Keep in this file** (they inform work across the whole site, not just the
-> scripts): the Files list, Schedule, and Why JSON and not a database.
->
-> Check the current Claude Code docs for the exact frontmatter syntax for
-> path-scoped rules rather than guessing it. Leave a one-line pointer here saying
-> where the content went. Tell the owner you've done it; don't do it silently.
->
-> Why: this file loads into context at the start of every session. The API
-> gotchas below are worth carrying while the pipeline is being built, and dead
-> weight once it works. Target for this file is under ~200 lines.
-
 All external content is pulled by GitHub Actions and committed as JSON. The site
 never calls an API at runtime.
 
-### Running the fetches locally
-
-`npm run fetch:youtube`, `npm run fetch:clips`, `npm run clips:reconcile`.
-
-Each is `node --env-file-if-exists=.env …`, so the same command reads a local
-`.env` here and takes the values from Secrets in Actions — the workflows call
-these npm scripts, so what gets tested locally is literally what CI runs. No
-dependency for it; Node 24 reads env files itself.
-
-`.env` is gitignored (along with `.env.*`, excepting `.env.example`), and the
-ignore rule went in before the file ever existed. Never commit it.
-
-**Local credentials must be separate from the ones in Secrets.** Twitch's own
-docs: "Getting a new secret invalidates the previous secret" — so regenerating
-on the existing app would leave the Actions secret dead and the pipeline
-failing silently. Register a second application instead. A second YouTube API
-key in the same project is fine; keys don't interfere.
-
-Errors print one scrubbed line (`DEBUG=1` adds the stack). `scrub()` in
-`scripts/lib/secrets.mjs` strips the API key and the client secret from
-anything printed, because the YouTube key rides in the query string and a
-network-layer failure can carry the whole URL into an error — which then gets
-pasted somewhere. Tested. The Twitch *client id* is deliberately left readable:
-it is not a credential, and hiding it only makes errors harder to read.
-
-Use `process.exitCode`, not `process.exit()`, in these scripts: exiting while a
-fetch is in flight trips a libuv assertion on Windows and returns 127, which in
-CI reads as "command not found".
+**The API gotchas and script conventions moved to
+`.claude/rules/data-fetching.md` on 2026-09-10** — YouTube, Twitch clips, the
+merge rule, reconciliation, the workflow schedule, and running the fetches
+locally. It is path-scoped to `scripts/**`, `.github/workflows/**` and the four
+fetch test files, so it loads when you open one of those rather than in every
+session. Note it loads on *reading a matching file*, so open the script you're
+about to change before trusting your memory of how it works.
 
 ### Files
 
 ```
 data/youtube.json        videos + shorts + stream archive
-data/clips/2025.json     Twitch clips, split by year
-data/clips/2026.json
+data/clips/<year>.json   Twitch clips, split by year — 2023 through 2026
 data/hidden.json         hand-edited: IDs the site always skips
 data/featured.json       hand-edited: manually pinned items
 data/schedule.json       hand-edited: recurring stream pattern
 data/exceptions.json     CMS-edited: dated overrides
 ```
 
+The clip year files are globbed, not listed, so January opening a new one needs
+no code change. The fetch scripts can be run by hand against a gitignored
+`.env` — see the rules file above; prefer that to pushing and waiting.
+
 **Generated files are never hand-edited.** Manual curation goes in
 `featured.json` / `hidden.json` only. This is deliberate: the owner will forget to
 add things manually, so automation must be the only path in.
-
-### YouTube
-
-One fetch, three buckets. `channels.list` → uploads playlist → `playlistItems.list`
-→ `videos.list` with `contentDetails,liveStreamingDetails`:
-
-- `liveStreamingDetails` present → it was a livestream → stream archive
-- duration <= 180s → Short
-- otherwise → regular video
-
-Owner multistreams to YouTube, so YouTube is the canonical stream archive. Do not
-pull Twitch VODs: they expire (7 days base / 14 Affiliate / 60 Partner+Turbo+Prime),
-so any Twitch-sourced history rots.
-
-Quota is a non-issue: 10,000 units/day, these calls cost 1 unit each.
-
-Shorts have no official API flag. Duration is a heuristic with one known trap: a
-vertical video **longer** than 3 min is classified by YouTube as a regular video.
-Support a manual override list.
-
-### Twitch clips
-
-`helix/clips?broadcaster_id=<id>`. App access token via client_credentials —
-no user scope needed.
-
-**Actions Secrets names, fixed so scripts and setup cannot drift:**
-`YOUTUBE_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`. Repository
-secrets, not Actions *variables* — variables are unencrypted and shown in
-plain text in the UI and logs. Both credentials are read-only against public
-data: a YouTube API key does no account operations at all, and a
-client_credentials token carries no user scope, so neither can touch the
-owner's channels even if it leaked. Recovery is regenerating in the
-respective console.
-
-- Use the **numeric** `broadcaster_id`, not the login name. Fetch once via
-  `Get Users?login=keodacz` and hardcode it.
-- Clips do **not** expire, unlike VODs — worth archiving permanently.
-- Results are ordered by **view count**, never chronologically. Owner wants
-  **recent** clips: fetch a date window, then sort by `created_at` yourself.
-- Widen the window if sparse: try 30 days, and if under ~8 results retry at
-  90 then 365, so the section is never empty during quiet periods.
-- `started_at`/`ended_at` only work alongside `broadcaster_id` or `game_id`.
-  If `ended_at` is omitted the range defaults to one week.
-
-Field gotchas:
-- `title` is often useless (Twitch's own docs warn about this; auto-titles like
-  "a" are common). Allow a manual title override; fall back to game name.
-- Don't build on `video_id` / `vod_offset` — both go empty/null once the source
-  VOD expires, which is most of the archive.
-- `is_featured` exists and can drive a highlights row.
 
 ### Schedule: base pattern + exceptions
 
@@ -444,67 +350,21 @@ evening and tomorrow's off"), which is why the CMS exists — a date picker and 
 status dropdown on mobile beats hand-committing JSON, where a malformed date
 fails silently.
 
-### Full archive: merge, don't overwrite
+### The archive is append-only
 
-There is no "get all clips" call — the API caps pagination at roughly 1,000
-results and the documented workaround is paging over separate `started_at` /
-`ended_at` windows. So:
+One rule worth carrying everywhere, because it governs what the data means
+rather than how it is fetched: **the clip archive only ever grows.** There is no
+"get all clips" call, so any fetch sees a window, never the whole history —
+code that writes what it fetched would silently delete everything outside that
+window. Removal is a flag (`removed: true`), never a deletion, so a clip that
+vanishes from Twitch stops being linked without the archive forgetting it.
 
-- The scheduled job **merges**: read existing JSON, append unseen IDs, write back.
-  The repo is the database.
-- **Done 2026-09-08:** `scripts/backfill-clips.mjs` (`npm run clips:backfill`)
-  walks month windows back to channel start and merges. The floor is the
-  channel's own `created_at` from `Get Users` — 2017-07-17, so 110 windows —
-  not a year typed into the script: a guess that is too recent loses clips
-  with no error anywhere. A window that hits the pagination cap is **split in
-  half and retried**, because results come back by view count, so a capped
-  window loses an arbitrary slice rather than the oldest.
+Consequence for the site: 2024 holds 157 clips against **zero** stream
+recordings, and that is correct rather than a gap — 2024 was Twitch-only, and
+YouTube is the stream archive. Don't "fix" it.
 
-  Result: 31 → **471 clips**, 2023-02-25 to 2026-09-06 (2023: 27, 2024: 157,
-  2025: 156, 2026: 131). Twitch's clip manager says ~475; the four missing are
-  presumably deleted ones. Re-running found 0 new and wrote nothing, which is
-  the merge behaving as designed — it is safe to run again.
-
-  Note 2024 has 157 clips against **zero** stream recordings. That is correct,
-  not a gap: 2024 was Twitch-only, and YouTube is the stream archive.
-
-  `monthWindows` is exported and unit-tested (`test/backfill-windows.test.mjs`)
-  because a gap between two windows is invisible — it is just clips that never
-  appear, from a script reporting success.
-- Write the merge logic from the start. Overwrite-style code is what gets written
-  by default and it silently destroys the archive.
-
-### Reconciliation (deleted clips)
-
-Merge-only would keep deleted clips forever as dead links. Weekly job:
-
-- Batch archive IDs into `Get Clips?id=…`, **max 100 IDs per request**. Anything
-  absent from the response no longer exists. 1,000 clips = 10 requests.
-- **Soft delete**: set `removed: true`, keep the record. Never delete the line.
-  Unmark if it reappears.
-- **Safety valve**: if a run reports more than ~20% of the archive missing, abort
-  without committing. That's an API failure, not mass deletion.
-
-### Workflow schedule
-
-- Incremental add: **once nightly** at 02:00 UTC, plus `workflow_dispatch`.
-  Owner's call 2026-09-08 — clips do not need to be up seconds after a stream,
-  and the manual button covers wanting one right now. 02:00 UTC rather than the
-  07:00 Prague he asked for, precisely because of the delay above: it lands
-  around 05:30–08:30 Prague, where aiming at 07:00 would have drifted to
-  midday.
-- Reconciliation: weekly.
-
-Actions cron caveats:
-- 5-minute minimum interval. **Delays measured on this repo are one to four
-  hours**, not the 5–30 minutes usually quoted — ten consecutive nights of the
-  deploy cron fired 1h35m to 2h06m late, and content runs up to 4h30m late.
-  Never schedule anything here that needs to happen at a particular time; if
-  correctness depends on the clock, resolve it in the browser instead (as the
-  calendar does).
-- **Scheduled workflows auto-disable after 60 days without commits.** The job's own
-  commits reset this while content flows, but a quiet spell kills it silently.
-  Already handled: `.github/workflows/keepalive.yml` (see Deployment).
+The mechanics — window walking, the backfill, the reconciliation safety valve —
+are in the rules file.
 
 ## Why JSON and not a database
 
@@ -879,29 +739,31 @@ The generated assets are committed instead.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- **State as of 2026-09-08, end of session.** Live and working: homepage
-  (socials, Twitch player, compact schedule, gear teaser), `/kalendar`,
-  `/vybaveni`, `/admin`, the 404 page, favicon, share card, `robots.txt`,
-  `sitemap.xml`, the deploy keepalive, the content pipeline, and the three
-  archive pages — `/streamy`, `/videa`, `/klipy` — with filtering and sorting
-  on all three.
+- **State as of 2026-09-10.** Live and working: homepage (socials, Twitch
+  player, compact schedule, gear teaser), `/kalendar`, `/vybaveni`, `/admin`,
+  the 404 page, favicon, share card, `robots.txt`, `sitemap.xml`, the deploy
+  keepalive, the content pipeline, and the three archive pages — `/streamy`,
+  `/videa`, `/klipy` — with filtering and sorting on all three.
 
   The pipeline runs on its own schedule and has been committing unprompted
-  since 2026-09-07: `data/youtube.json` (a few videos, ~80 Shorts, 400+
-  streams) and `data/clips/*.json` (471 after the backfill). Tests gate the
-  deploy — deliberately no count here, it only goes stale.
-
-  The fetches can be run locally against a gitignored `.env` — see Running the
-  fetches locally under Data layer. Prefer that to pushing and waiting.
+  since 2026-09-07. Tests gate the deploy — deliberately no count here, it only
+  goes stale.
 
   **Next up, roughly in this order:**
-  1. **The maintenance task under Data layer is now due.** All three jobs have
-     run successfully, so its trigger is met. This file is well over its ~200
-     line target.
-  2. Parked, needs the personal PC: branch `gear-software-notes` and the first
+  1. Parked, needs the personal PC: branch `gear-software-notes` and the first
      guide (see Pages).
-  3. The open questions at the end of this file — the "last VOD next to the
+  2. The open questions at the end of this file — the "last VOD next to the
      calendar" one is no longer blocked, since the data now exists.
+  3. **This file is still ~4× its ~200-line target.** The data-fetching move on
+     2026-09-10 took it 1008 → 870, which is progress and not the goal. The four
+     sections that would actually move the needle are all component-level rather
+     than cross-cutting, so they want the owner's read before they go:
+     *Filtering and sorting* (153 lines), *Schedule* (123, of which the ticker
+     invariants are the movable part), the Twitch player detail under
+     *Explicitly out of scope* (96), and *The content archive* (42). The
+     site-wide rules living inside them have to stay here whatever else moves:
+     no live badge anywhere, times are local Prague and approximate, generated
+     files are never hand-edited, titles are cleaned.
 - Times converted to UTC for calendar exports only, in
   `src/lib/calendar-links.ts`, with the offset resolved per date — 18:30 Prague
   is 16:30Z in summer but 17:30Z in winter. Covered by tests.
