@@ -393,12 +393,53 @@ title middle, big accent time right, dotted card texture, bell menu for
 add-to-calendar), rendered in Keoda's own colors. Owner asked for this directly.
 Do not extend that borrowing to other pages without asking.
 
+**Homepage** — hero (Twitch player or offline strip, socials), then the
+compact schedule, **"Co si pustit"** (`LatestContent.astro`), then the gear
+teaser. That third section exists because the page said nothing about 427
+recordings and 471 clips, reachable only from the header nav, while most
+traffic lands here from a social bio. The newest recording leads and two clips
+sit beside it — three and a half hours is a lot to ask of a first-time
+visitor, and a fifty-second clip is the better calling card.
+
+Its layout was settled by measuring, and the numbers are worth keeping so
+nobody re-litigates it: as a card in the 2fr column beside the calendar the
+right column came out **976px against the calendar's 317px**; full width with
+the clips as a side column was **1118px**, because three stacked 16:9
+thumbnails are always taller than one. One row with the recording spanning two
+of four columns is **485px**. Two clips and not three for the same arithmetic —
+a third wrapped onto a line of its own. The section sizes itself with a
+**container query** on its own width, not the viewport, so it works in a narrow
+column or full width without knowing which it got.
+
+**Markup order on the homepage is the phone's reading order** — schedule,
+newest, gear — and the desktop layout puts gear back beside the schedule with
+explicit `grid-row`/`grid-column` rather than relying on source order. Gear is
+the least urgent thing for someone arriving cold and it used to be buried
+under everything.
+
 **Kalendář** (`/kalendar`) — the full schedule, arcadebulls-style rows with an
 add-to-calendar menu per stream (Google Calendar link + a real `.ics` file built
 at `/ics/<date>.ics`). The homepage carries only a **compact** version
 (`ScheduleCompact.astro`) plus a link through; the full rows live on their own
 page. Deliberately no per-row "notify me" — notifications would need accounts,
 and a button that just links to Twitch was rejected as useless.
+
+**A row leads with its note, not its category** (owner's call 2026-09-10). On a
+day with both, "NightfallCraft Co-Op s Terousch" is what makes that evening
+worth turning up to and "Minecraft" is the label, so the note takes the
+headline and the game goes under it — which also matches the compact rows,
+which always printed the note first. Two things ride along:
+
+- **The type treatment follows the content.** A prose headline drops the
+  condensed uppercase; that suits a one-word category and turns a real title
+  into shouting. Same distinction `TwitchEmbed` already makes for a live
+  stream's own title. The narrow-screen font-size override has to be restated
+  for `.row-title.prose`, since two classes outrank one.
+- **A cancelled day is exempt** and keeps "Nestreamuju" as its headline with
+  the reason underneath. There the row's whole job is to stop someone turning
+  up, and setting the reason big buries the one word that matters. Verify this
+  case with a *future* off-day — the real ones are usually already in the past
+  and past days are not rendered at all.
 
 **Gear / used software** — styled like arcadebulls' gear page. Confirmed in scope
 and the easiest page here; build it early. Plain markdown, no CMS.
@@ -684,7 +725,18 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
 - Two-tone display headings: first word in `--text`, second in `--accent`,
   both solid. An outline-only variant was tried and rejected by the owner.
 - A site-wide "Ve výstavbě" strip sits under the header, outline only so it
-  does not compete with the yellow schedule banner below it.
+  does not compete with the yellow schedule banner below it. **Keep its wording
+  true** — it promised clips, videos and guides, two of which shipped, so by
+  2026-09-10 it was telling visitors the site lacked things it had. It now
+  claims only guides, and **when those land the component should go rather than
+  be reworded a third time**.
+- The schedule banner is **centred in its single-entry form only** (owner's
+  call 2026-09-10). The multi-entry form is a marquee: it is moving, so it has
+  no resting position to centre, and its text must start at the edge.
+- The header nav **takes the room between the logo and the theme toggle and
+  spreads across it** with `space-evenly` (owner's call 2026-09-10) — not
+  `space-between`, which butts the outer links against both. At 1200px that is
+  ~124px between links, which is airy; the owner saw it and approved.
 - Gotcha: on an element that also carries `.container`, never write
   `margin: 0` — it wipes out `margin-inline: auto`, so the 1200px box sticks
   to the left edge and centred text inside it drifts with window width and
@@ -739,11 +791,20 @@ The generated assets are committed instead.
   machines where the owner put it; the site build does not need it. Anything
   from it that should appear on the site gets copied into the repo
   deliberately, with approval.
-- **State as of 2026-09-10.** Live and working: homepage (socials, Twitch
-  player, compact schedule, gear teaser), `/kalendar`, `/vybaveni`, `/admin`,
-  the 404 page, favicon, share card, `robots.txt`, `sitemap.xml`, the deploy
-  keepalive, the content pipeline, and the three archive pages — `/streamy`,
-  `/videa`, `/klipy` — with filtering and sorting on all three.
+- **State as of 2026-09-10, end of session.** Live and working: homepage
+  (socials, Twitch player, compact schedule, "Co si pustit", gear teaser),
+  `/kalendar`, `/vybaveni`, `/admin`, the 404 page, favicon, share card,
+  `robots.txt`, `sitemap.xml`, the deploy keepalive, the content pipeline, and
+  the three archive pages — `/streamy`, `/videa`, `/klipy` — with filtering and
+  sorting on all three. Working tree clean, everything pushed.
+
+  **One thing to check early next session:** whether `.claude/rules/`
+  actually loads. The session that created it began before the directory
+  existed, and reading a matching script did not pull the rule in — consistent
+  with discovery happening at launch, but unproven. Open a file under
+  `scripts/` and run `/context`; if the rule is not listed under memory files,
+  the documented next step is the `InstructionsLoaded` hook. The globs
+  themselves are verified (eight patterns, 17 files, nothing in `src/`).
 
   The pipeline runs on its own schedule and has been committing unprompted
   since 2026-09-07. Tests gate the deploy — deliberately no count here, it only
@@ -816,6 +877,28 @@ DNS at Vedos: four A records to GitHub Pages (185.199.108–111.153), CNAME for
 `www`. If Vedos webhosting or WebSite is ever ordered it will overwrite these with
 their own — simplest not to order it.
 
+### A CMS edit takes a few minutes to appear, and that is not a bug
+
+Measured 2026-09-10, because the owner reported his exception showing on the
+homepage but not on `/kalendar` even after Ctrl+Shift+R, while an incognito
+window was correct.
+
+GitHub Pages serves every page with the same headers —
+`max-age=600, stale-while-revalidate=3600` — so past the ten-minute freshness
+window the browser and the Fastly edge **serve the stale copy and revalidate
+behind it**, meaning one request gets the old page and the next gets the new
+one. Proved on one URL seconds apart: plain request `last-modified 13:54:33`,
+`age 604`, old content; same URL with `?cb=…`, `last-modified 14:10:50`,
+`age 0`, new content.
+
+**Nothing to fix on our side** — those headers come from Pages and cannot be
+overridden, and the build and deploy were both correct. Appending any query
+string bypasses the cache if you need to confirm something immediately.
+
+Do **not** "solve" this by fetching `exceptions.json` in the browser and
+re-rendering rows: that is a lot of machinery for a ten-minute delay and it
+would make a build input into a runtime fetch.
+
 ### Dev server caveat
 
 `astro dev` serves no CSS in the HTML at all — Vite injects it from
@@ -853,12 +936,10 @@ memberships only, **not** donations. Streamer.bot is the right tool.
 
 ## Open questions
 
-- [ ] Last VOD / latest clip as a **card next to the calendar** — owner's call
-      2026-09-07, when the offline strip was built. Explicitly *not* in the
-      player's slot: that stays the one-line status. Blocked on the data
-      pipeline (`data/youtube.json`, `data/clips/*.json`), so it lands with it.
-      Exact placement still open — beside `ScheduleCompact` on the homepage, or
-      wherever it earns the space once there is real data to show.
+- [x] Last VOD / latest clip on the homepage — **done 2026-09-10** as
+      "Co si pustit" (see Pages). It landed full width under the panels rather
+      than as a card beside the calendar, which is what the 2026-09-07 note
+      asked for; the measurements that decided it are recorded there.
 
 - [ ] Do we want `kontakt@keoda.cz`? (needs Vedos mailhosting + MX records)
 - [ ] Move the data-fetching subsections to `.claude/rules/` once the pipeline
