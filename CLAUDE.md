@@ -696,6 +696,19 @@ How it holds together, and each piece is load-bearing:
   look like a layout bug, so the type filter hides a whole section instead,
   and a section with an empty grid hides itself. Its `pageSize` is 0 — 86
   items do not need paging.
+
+  **`pageSize` with `kinds` now throws at build time**, and the reason is
+  measured rather than assumed: set to 12 on `/videa`, the two grids shared
+  one budget of 12 taken off the top of the globally sorted list, so with 3
+  videos among 86 items the "Videa" section landed on page 2 and was hidden on
+  pages 1, 3 and 4 — a heading blinking in and out as you page. Filtering and
+  sorting are unaffected: those run over one flat pool of everything and the
+  result is then split into the grids, so the counts are always right. It is
+  only the *page budget* that cannot be shared.
+
+  If `/videa` ever grows enough to need paging, the fix is a pager **per
+  section** with its own page number. Don't pre-build it — it is three videos
+  today, and the `Typ` filter is the natural way to narrow that page.
 - **URL state via `replaceState`**, in Czech params (`q`, `od`, `do`, `typ`,
   `razeni`, `strana`), and only what differs from the default. A filtered view
   is shareable and survives reload; `pushState` would take a dozen Back

@@ -51,6 +51,28 @@ const {
   newest,
   searchHint = 'název…',
 } = Astro.props;
+
+/**
+ * Paging and per-kind grids do not mix, and this is here so nobody finds that
+ * out by shipping it.
+ *
+ * Measured on /videa with `pageSize` 12: the kind grids share one budget of 12,
+ * taken off the top of the globally sorted list. With 3 videos among 86 items
+ * that put the "Videa" section on page 2 and hid it on pages 1, 3 and 4 — a
+ * heading blinking in and out as you page, which reads as a bug.
+ *
+ * If a page with kinds ever does grow enough to need paging, the fix is a pager
+ * *per section*, each with its own page number — not a shared budget. Don't
+ * pre-build that: /videa is three videos and eighty-three Shorts, and 86 items
+ * do not need paging at all.
+ */
+if (pageSize > 0 && kinds.length > 0) {
+  throw new Error(
+    'ArchiveFilter: pageSize together with kinds pages every kind grid off one ' +
+      'shared budget, so a section appears and disappears between pages. Pass ' +
+      'pageSize 0, or give each section its own pager first.',
+  );
+}
 ---
 <div class="archive" data-archive data-page-size={pageSize} data-nouns={nouns.join('|')}>
   {/* role="search" rather than a plain form: it is a search region, and it
