@@ -1,9 +1,26 @@
 ---
 paths:
+  - "scripts/*"
   - "scripts/**/*"
+  - ".github/workflows/*"
   - ".github/workflows/**/*"
-  - "test/{clips-store,youtube,backfill-windows,secrets}.test.mjs"
+  - "test/clips-store.test.mjs"
+  - "test/youtube.test.mjs"
+  - "test/backfill-windows.test.mjs"
+  - "test/secrets.test.mjs"
 ---
+
+<!--
+Written out rather than using brace expansion on purpose: this machine runs
+Claude Code 2.1.211, and brace groups in `paths` were only made safe at
+startup in 2.1.217. Four literal filenames cost nothing.
+
+Both `scripts/*` and `scripts/**/*` are listed for the same reason — belt and
+braces on whether `**` is allowed to match zero directory segments, which
+decides whether a file sitting directly in `scripts/` is covered. Verified by
+reading one file from each depth; see the note at the bottom.
+-->
+
 
 # Fetching the content data
 
@@ -199,3 +216,20 @@ Actions cron caveats:
 - A push by `GITHUB_TOKEN` does not trigger other workflows. That is why the
   content workflows are wired to the deploy with `workflow_run`, and why the
   keepalive cannot cause a deploy loop.
+
+<!--
+Verification of the `paths` list, 2026-09-10. Checked with Node's own
+`globSync` against the real tree: the eight patterns cover 17 files, including
+`scripts/fetch-clips.mjs` (directly in the directory), `scripts/lib/twitch.mjs`
+(nested), `.github/workflows/content.yml` and the four test files, and they do
+not reach `src/`. Both `scripts/*` and `scripts/**/*` matched the file sitting
+directly in `scripts/`.
+
+Not verified from the session that wrote this file: whether Claude Code loads
+it. That session began before `.claude/rules/` existed, and reading a matching
+file did not pull the rule in — consistent with rule discovery happening at
+launch. If it is still missing from `/context` in a fresh session after opening
+one of these files, the documented next step is the `InstructionsLoaded` hook,
+which logs which instruction files load and why.
+-->
+
