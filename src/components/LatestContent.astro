@@ -1,6 +1,10 @@
 ---
 /**
- * "Nejnovější" — the homepage's answer to *what can I watch right now*.
+ * "Co si pustit" — the homepage's answer to *what can I watch right now*.
+ *
+ * The heading is a question in his own voice rather than the label
+ * "Nejnovější" it started as (owner's call 2026-09-10), matching how the rest
+ * of the site talks: "Na čem streamuju", "Co jsem natočil".
  *
  * The page already answers *when is he next on* (ScheduleCompact) and, while a
  * stream is running, *is he on now* (TwitchEmbed). It said nothing at all about
@@ -33,7 +37,7 @@ const newestClips = clips.slice(0, 2);
 ---
 {stream && (
   <section class="latest card">
-    <h2>Nejnovější</h2>
+    <h2>Co si pustit</h2>
 
     {/* One row, not a lead with a sidebar. Three stacked 16:9 thumbnails are
         always taller than one, so a side column either dwarfs the recording or
