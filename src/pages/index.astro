@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import ScheduleCompact from '../components/ScheduleCompact.astro';
 import TwitchEmbed from '../components/TwitchEmbed.astro';
 import SocialLinks from '../components/SocialLinks.astro';
+import LatestContent from '../components/LatestContent.astro';
 ---
 <Base title="KeodaCZ" description="KeodaCZ — český streamer. Twitch, YouTube a spol.">
   <div class="container">
@@ -21,10 +22,17 @@ import SocialLinks from '../components/SocialLinks.astro';
       <SocialLinks />
     </section>
 
+    {/* DOM order is the phone's reading order, and it is deliberate: is he on
+        now (above), when is he next on, what can I watch, and only then what
+        he streams on. Gear is the least urgent thing here for someone
+        arriving from a social bio, so it goes last in the markup — the desktop
+        layout then places it back up beside the schedule explicitly. */}
     <div class="panels">
       <ScheduleCompact />
 
-      <section class="card">
+      <LatestContent />
+
+      <section class="card gear">
         <h2>Vybavení</h2>
         <p>Na čem streamuju — PC sestava, technika i software.</p>
         <p class="more"><a href="/vybaveni/">Prohlédnout vybavení →</a></p>
@@ -59,6 +67,18 @@ import SocialLinks from '../components/SocialLinks.astro';
   @media (min-width: 800px) {
     .panels {
       grid-template-columns: 3fr 2fr;
+    }
+    /* Explicit placement rather than source order: the markup is ordered for
+       the phone, so the two-column layout has to put gear back on the first
+       row beside the schedule and give the newest content the full width
+       below it. */
+    .gear {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .panels :global(.latest) {
+      grid-column: 1 / -1;
+      grid-row: 2;
     }
   }
 </style>

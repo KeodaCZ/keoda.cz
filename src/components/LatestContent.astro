@@ -1,0 +1,124 @@
+---
+/**
+ * "Nejnovější" — the homepage's answer to *what can I watch right now*.
+ *
+ * The page already answers *when is he next on* (ScheduleCompact) and, while a
+ * stream is running, *is he on now* (TwitchEmbed). It said nothing at all about
+ * 427 recordings and 471 clips, which were reachable only from the header nav —
+ * and most traffic lands here from a social bio, so this was the gap.
+ *
+ * Two levels of commitment on purpose. The newest recording is the substance of
+ * the channel but it is three and a half hours long, which is a lot to ask of
+ * someone seeing him for the first time; a 50-second clip is the better calling
+ * card. So the recording leads and the clips sit beside it.
+ *
+ * It sizes itself off its own width with a container query rather than the
+ * viewport, so it works stacked in a narrow column *or* full-width without
+ * knowing which one it got. That is what makes the placement a one-line change
+ * in `index.astro` instead of a rewrite.
+ */
+import MediaCard from './MediaCard.astro';
+import { clips, streams, videos, youtubeThumb } from '../lib/content';
+import { youtubeUrl } from '../lib/content-core';
+import { clipLabel } from '../lib/clip-title';
+
+const stream = streams[0];
+
+/**
+ * Two, not three, and it is arithmetic rather than taste: the row is four
+ * columns with the recording spanning two, so two clips fill it exactly. A
+ * third wrapped onto a line of its own and left the card 706px tall.
+ */
+const newestClips = clips.slice(0, 2);
+---
+{stream && (
+  <section class="latest card">
+    <h2>Nejnovější</h2>
+
+    {/* One row, not a lead with a sidebar. Three stacked 16:9 thumbnails are
+        always taller than one, so a side column either dwarfs the recording or
+        leaves a hole under it — measured at 1118px and 976px tall respectively
+        before this. Spanning the lead across two columns of the same grid
+        keeps every card top-aligned in a single row. */}
+    <div class="row">
+      <div class="lead">
+        <MediaCard
+          href={youtubeUrl(stream.id)}
+          title={stream.title}
+          thumb={youtubeThumb(stream)}
+          date={stream.date}
+          duration={stream.duration}
+          badge="Záznam"
+          badgeIcon
+          featured
+          eager
+        />
+      </div>
+
+      {newestClips.map((clip) => (
+        <MediaCard
+          href={clip.url}
+          title={clipLabel(clip).text}
+          thumb={clip.thumb}
+          date={clip.date}
+          duration={clip.duration}
+          meta={clip.creator ? `klip: ${clip.creator}` : undefined}
+        />
+      ))}
+    </div>
+
+    {/* Counts rather than bare labels: "427 záznamů" says the archive is worth
+        opening in a way "Záznamy" does not. */}
+    <p class="more">
+      <a href="/streamy/">{streams.length} záznamů →</a>
+      <a href="/klipy/">{clips.length} klipů →</a>
+      {videos.length > 0 && <a href="/videa/">Videa a Shorts →</a>}
+    </p>
+  </section>
+)}
+
+<style>
+  /* The element measures itself, so the same component works in the 2fr
+     column and full-width below the panels. */
+  .latest {
+    container-type: inline-size;
+  }
+
+  h2 {
+    margin-bottom: 0.9rem;
+  }
+
+  /* Narrow: the recording full width, clips two-up underneath. */
+  .row {
+    display: grid;
+    gap: 1.1rem 0.8rem;
+    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lead {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  /* Wide enough for the whole thing on one line: four equal columns with the
+     recording taking two of them, so it stays twice the size of a clip and the
+     row's height is set by the tallest single card rather than by a stack. */
+  @container (min-width: 46rem) {
+    .row {
+      gap: 1.1rem;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .lead {
+      grid-column: span 2;
+    }
+  }
+
+  .more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    margin-top: 1.2rem;
+    margin-bottom: 0;
+    font-weight: 600;
+  }
+</style>
