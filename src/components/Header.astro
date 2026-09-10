@@ -38,12 +38,17 @@
     text-decoration: none;
     color: var(--text);
   }
+  /* Takes all the room between the logo and the toggle and spreads the links
+     evenly across it (owner's call 2026-09-10), rather than the margin-left:
+     auto that used to bunch them against the right-hand edge. `space-evenly`
+     over `space-between` so the outer links keep a gap from the logo and the
+     toggle instead of butting up against them. */
   nav {
     display: flex;
+    flex: 1;
     flex-wrap: wrap;
+    justify-content: space-evenly;
     gap: 0.4rem 1rem;
-    /* Pushes the nav and the toggle to the right on a wide screen. */
-    margin-left: auto;
   }
 
   /* Narrow: the nav gets its own row and the toggle stays up beside the logo.
@@ -53,7 +58,6 @@
     nav {
       order: 3;
       flex-basis: 100%;
-      margin-left: 0;
     }
     #theme-toggle {
       margin-left: auto;

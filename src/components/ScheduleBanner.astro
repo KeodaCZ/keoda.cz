@@ -66,10 +66,13 @@ const seconds = Math.max(12, Math.round(characters * 0.12));
     font-size: 0.95rem;
   }
 
-  /* Single change: an ordinary line, aligned with the rest of the page. */
+  /* Single change: one centred line (owner's call 2026-09-10). Centring only
+     makes sense here — a ticker is moving, so it has no resting position to
+     centre, and the marquee below needs its text to start at the edge. */
   .single {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0.4rem;
     align-items: baseline;
     padding-block: 0.7rem;
