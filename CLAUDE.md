@@ -55,9 +55,10 @@ dev server.
   2026-09-11, meaning every page load pulled whatever had been published most
   recently. That afternoon saving began failing with "Při ukládání položky
   došlo k chybě"; the last working save was the previous day, and 0.209.2 and
-  0.210.0 had shipped in between. Pinned to **0.209.1**, the version that
-  demonstrably worked. To upgrade: bump the number, open `/admin`, and save
-  something for real before pushing.
+  0.210.0 had shipped in between. Pinning to **0.209.1** fixed it — **confirmed
+  by the owner**, who saved successfully straight after the pin deployed, and
+  after a fresh token had already failed to help. To upgrade: bump the number,
+  open `/admin`, and save something for real before pushing.
 
   Auth: **"Sign In with Token"** with a fine-grained GitHub PAT. No OAuth app,
   no auth server, no config change needed. PATs expire (90 days by default), so
@@ -481,7 +482,9 @@ which always printed the note first. Two things ride along:
   the reason underneath. There the row's whole job is to stop someone turning
   up, and setting the reason big buries the one word that matters. Verify this
   case with a *future* off-day — the real ones are usually already in the past
-  and past days are not rendered at all.
+  and past days are not rendered at all. Confirmed on real data 2026-09-11:
+  a genuine cancellation renders "Nestreamuju" struck through, the reason
+  underneath, a dash for the time and no add-to-calendar bell.
 
 **Gear / used software** — styled like arcadebulls' gear page. Confirmed in scope
 and the easiest page here; build it early. Plain markdown, no CMS.
