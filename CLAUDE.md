@@ -200,13 +200,32 @@ stream out loud on page load; both are set explicitly.
 All external content is pulled by GitHub Actions and committed as JSON. The site
 never calls an API at runtime.
 
-**The API gotchas and script conventions moved to
-`.claude/rules/data-fetching.md` on 2026-09-10** — YouTube, Twitch clips, the
-merge rule, reconciliation, the workflow schedule, and running the fetches
-locally. It is path-scoped to `scripts/**`, `.github/workflows/**` and the four
-fetch test files, so it loads when you open one of those rather than in every
-session. Note it loads on *reading a matching file*, so open the script you're
-about to change before trusting your memory of how it works.
+**The API gotchas and script conventions live in
+`.claude/rules/data-fetching.md`** (moved there 2026-09-10) — YouTube, Twitch
+clips, the merge rule, reconciliation, the workflow schedule, and running the
+fetches locally.
+
+> **Claude Code: read that file before changing anything under `scripts/`,
+> `.github/workflows/`, or the fetch tests. It will not arrive on its own.**
+>
+> It carries `paths:` frontmatter and the globs are verified correct (Node
+> `globSync`: eight patterns, 17 files, nothing in `src/`), but **nothing that
+> loads on demand works in this setup** — tested 2026-09-11 in a fresh session
+> that read a matching script: the rule did not load, and `/context` listed
+> only the root CLAUDE.md. A nested `scripts/CLAUDE.md` with a marker in it
+> failed exactly the same way, which is what rules out the rules feature, the
+> frontmatter and the globs as the cause: the one thing both mechanisms share
+> is loading when a matching file is read.
+>
+> Unexplained, and not worth more digging — the owner is on Claude Code
+> 2.1.211, whose changelog note about on-demand rules and `--setting-sources`
+> is a plausible culprit but was not confirmed. If it ever matters, the
+> documented tool is the `InstructionsLoaded` hook, which logs which
+> instruction files load and why.
+>
+> The split still earns its keep: it is 140 lines out of a file that loads in
+> full every session, against one deliberate `Read` when working on the
+> scripts. Do not undo it by pasting the content back here.
 
 ### Files
 
@@ -798,13 +817,11 @@ The generated assets are committed instead.
   the three archive pages — `/streamy`, `/videa`, `/klipy` — with filtering and
   sorting on all three. Working tree clean, everything pushed.
 
-  **One thing to check early next session:** whether `.claude/rules/`
-  actually loads. The session that created it began before the directory
-  existed, and reading a matching script did not pull the rule in — consistent
-  with discovery happening at launch, but unproven. Open a file under
-  `scripts/` and run `/context`; if the rule is not listed under memory files,
-  the documented next step is the `InstructionsLoaded` hook. The globs
-  themselves are verified (eight patterns, 17 files, nothing in `src/`).
+  **Settled 2026-09-11: nothing loads on demand here.** Neither a path-scoped
+  rule nor a nested `scripts/CLAUDE.md` reached context after a fresh session
+  read a matching file. Consequence for how to work: **only this file arrives
+  by itself**, so anything that must be known has to be here, and everything
+  else has to be read deliberately. See the note under Data layer.
 
   The pipeline runs on its own schedule and has been committing unprompted
   since 2026-09-07. Tests gate the deploy — deliberately no count here, it only

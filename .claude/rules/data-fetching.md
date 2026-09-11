@@ -30,6 +30,14 @@ fetch scripts or the workflows, dead weight in every other session. `CLAUDE.md`
 keeps what the whole site needs — the `data/` file list, the schedule rules, and
 why the archive is JSON.
 
+> **This file does not load itself.** The `paths:` frontmatter above is correct
+> and its globs are verified, but on-demand instruction loading does not work
+> in the owner's setup — tested 2026-09-11, and a nested `scripts/CLAUDE.md`
+> failed identically, so it is the mechanism and not this file. `CLAUDE.md`
+> therefore carries a standing instruction to read this before touching these
+> files. If you are reading it because you opened a script and it appeared on
+> its own, the mechanism has started working — say so, and that note can go.
+
 The four listed test files are here too, on top of the two directories the
 original note named: they *are* the fetch logic's other half, and someone
 editing `clips-store.test.mjs` needs the same context as someone editing the
