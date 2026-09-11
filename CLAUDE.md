@@ -911,12 +911,29 @@ uložíme jako cílové adresy WEDOS Global" — the panel still lists exactly
 addresses. It left the `www` CNAME alone, which is why the two hostnames
 differ. Nothing was misconfigured; the change was WEDOS's, on activation.
 
-**Decision 2026-09-11: keep it, and tune the cache rather than remove it.** The
-only measurable cost is the publish delay, and the panel exposes **CDN Cache**
-as its own section, so the sensible fix is a shorter TTL or a purge there —
-throwing away DDoS protection to fix a cache setting would be the wrong trade.
-Also in that panel: **PoW výzva**, which is what answers scripted clients with
-the 401 challenge.
+**Decision 2026-09-11: keep it, accept the delay, and do not pay to fix it.**
+
+The delay is the only measurable cost, and the obvious lever turned out not to
+be one. Tested on the live site: the owner switched **CDN Cache off** and
+requested a purge, and over three and a half minutes of sampling
+`cache-control` still read `max-age=600, stale-while-revalidate=3600,
+stale-if-error=86400` and `x-cdn-cache-status` still said `HIT`. So the
+proxy adds that header regardless of the caching settings.
+
+That is also the argument against upgrading: the paid **Doba držení CDN cache**
+sits in the same section we just proved does not control this header, so paying
+would be a gamble on top of poor value. Leave CDN Cache off — it costs nothing
+and stops WEDOS holding its own copy.
+
+**PoW výzva** is the other thing in that panel worth knowing: *Vynutit PoW pro
+veškerý provoz* is off, which is why visitors and crawlers sail through, but
+AUTO AI still challenges what it judges suspicious — which is what a bare Node
+`fetch` runs into. Correct behaviour; leave it.
+
+Practical consequence: to confirm something is live, append a query string.
+Disabling protection to make publishing instant is the only real alternative,
+and it trades DDoS cover for a delay that mostly inconveniences the owner
+checking his own site — new visitors hold no stale copy.
 
 **`www` is not a way round the proxy.** It reaches GitHub directly but answers
 `301 → https://keoda.cz/…`, so the page itself still comes through WEDOS. A
