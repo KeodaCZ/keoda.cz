@@ -743,12 +743,13 @@ Decided with the owner 2026-08-27. Change only with explicit approval.
 - Layout: 1200px container; gear cards two-column from 800px up.
 - Two-tone display headings: first word in `--text`, second in `--accent`,
   both solid. An outline-only variant was tried and rejected by the owner.
-- A site-wide "Ve výstavbě" strip sits under the header, outline only so it
-  does not compete with the yellow schedule banner below it. **Keep its wording
-  true** — it promised clips, videos and guides, two of which shipped, so by
-  2026-09-10 it was telling visitors the site lacked things it had. It now
-  claims only guides, and **when those land the component should go rather than
-  be reworded a third time**.
+- **The "Ve výstavbě" strip is gone** (owner's call 2026-09-11, component
+  deleted). It had already been reworded once when clips and videos shipped;
+  with the archive, filtering, the calendar and the gear page all live, a site
+  advertising itself as unfinished was underselling itself. Guides are still
+  missing, and that is fine — an absent page says less than a banner announcing
+  the absence. **Do not bring it back for the guides**; if it ever returns it
+  needs a reason of its own.
 - The schedule banner is **centred in its single-entry form only** (owner's
   call 2026-09-10). The multi-entry form is a marquee: it is moving, so it has
   no resting position to centre, and its text must start at the edge.
