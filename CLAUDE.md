@@ -893,14 +893,24 @@ Must stay as-is:
 DNS at WEDOS (the owner spells it Vedos). **Measured 2026-09-11, and it is not
 what this file used to say** — the two hostnames take different paths:
 
-| hostname | resolves to | path |
+| hostname | resolves to | what it does |
 | --- | --- | --- |
 | `keoda.cz` | `185.8.237.5`, `.6` | **WEDOS Global CDN → GitHub Pages** |
-| `www.keoda.cz` | CNAME `keodacz.github.io` | GitHub Pages direct |
+| `www.keoda.cz` | CNAME `keodacz.github.io` | GitHub **301 → the apex** |
 
 So the apex is **proxied through WEDOS**, not pointed at GitHub's own
-185.199.108–111.153 as this file previously claimed. Whether that was switched
-on deliberately is not recorded; ask before changing it.
+185.199.108–111.153 as this file claimed from its very first commit — that line
+was written before the domain existed and describes the plan, not what was
+configured. Whether the CDN was switched on deliberately is not recorded; ask
+before changing it.
+
+**`www` is not a way round the proxy.** It reaches GitHub directly but answers
+`301 → https://keoda.cz/…`, so the page itself still comes through WEDOS. A
+query string is the only reliable bypass.
+
+WEDOS terminates TLS itself (Let's Encrypt, `CN=keoda.cz`) and rewrites
+response headers, so it is a full HTTP reverse proxy, not a DNS-level
+redirect.
 
 Consequences, both verified rather than assumed:
 
@@ -940,8 +950,9 @@ cannot be overridden", and that was wrong.** GitHub Pages alone sends only
 `stale-while-revalidate=3600` and `stale-if-error=86400` are added by **WEDOS
 Global CDN**, which the apex domain is proxied through (see DNS above). So
 there *is* a lever — a purge or a shorter TTL in the WEDOS panel — and it
-belongs to the owner, not to this repo. `www.keoda.cz` skips that layer
-entirely, which makes it a quick way to see the page without the extra delay.
+belongs to the owner, not to this repo. (`www.keoda.cz` is **not** a way round
+it: GitHub answers that host with a 301 to the apex, so the page still comes
+through WEDOS. A query string remains the only reliable bypass.)
 
 The build and deploy were correct throughout; none of this was ever a bug here.
 
