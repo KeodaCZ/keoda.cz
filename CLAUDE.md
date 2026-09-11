@@ -890,9 +890,35 @@ Must stay as-is:
   edit that file by hand)
 - Settings → Pages → Enforce HTTPS
 
-DNS at Vedos: four A records to GitHub Pages (185.199.108–111.153), CNAME for
-`www`. If Vedos webhosting or WebSite is ever ordered it will overwrite these with
-their own — simplest not to order it.
+DNS at WEDOS (the owner spells it Vedos). **Measured 2026-09-11, and it is not
+what this file used to say** — the two hostnames take different paths:
+
+| hostname | resolves to | path |
+| --- | --- | --- |
+| `keoda.cz` | `185.8.237.5`, `.6` | **WEDOS Global CDN → GitHub Pages** |
+| `www.keoda.cz` | CNAME `keodacz.github.io` | GitHub Pages direct |
+
+So the apex is **proxied through WEDOS**, not pointed at GitHub's own
+185.199.108–111.153 as this file previously claimed. Whether that was switched
+on deliberately is not recorded; ask before changing it.
+
+Consequences, both verified rather than assumed:
+
+- **The extra caching is WEDOS's, not GitHub's.** GitHub Pages alone sends
+  `cache-control: max-age=600`. Through `keoda.cz` the response carries
+  `max-age=600, stale-while-revalidate=3600, stale-if-error=86400` plus
+  `x-cdn-cache-status` and `x-proxy-cache`. See the CMS-edit note below — an
+  earlier version of it blamed GitHub and said nothing could be done, which
+  was wrong.
+- **WEDOS Global Protection challenges scripted clients.** A bare Node `fetch`
+  gets a 401 "WEDOS.protection – Security verification" HTML page; curl and
+  anything with a browser user-agent get through. Tooling that checks the live
+  site must send a real user-agent. Link-preview crawlers are **not** affected
+  — Discordbot, Googlebot, Twitterbot and facebookexternalhit all get 200 with
+  the og tags, tested 2026-09-11.
+
+If WEDOS webhosting or WebSite is ever ordered it will overwrite these DNS
+records with their own — simplest not to order it.
 
 ### A CMS edit takes a few minutes to appear, and that is not a bug
 
@@ -900,17 +926,24 @@ Measured 2026-09-10, because the owner reported his exception showing on the
 homepage but not on `/kalendar` even after Ctrl+Shift+R, while an incognito
 window was correct.
 
-GitHub Pages serves every page with the same headers —
-`max-age=600, stale-while-revalidate=3600` — so past the ten-minute freshness
-window the browser and the Fastly edge **serve the stale copy and revalidate
-behind it**, meaning one request gets the old page and the next gets the new
-one. Proved on one URL seconds apart: plain request `last-modified 13:54:33`,
-`age 604`, old content; same URL with `?cb=…`, `last-modified 14:10:50`,
-`age 0`, new content.
+Every page is served with `max-age=600, stale-while-revalidate=3600,
+stale-if-error=86400`, so past the ten-minute freshness window the browser and
+the CDN **serve the stale copy and revalidate behind it** — one request gets
+the old page and the next gets the new one. Proved on one URL seconds apart:
+plain request `last-modified 13:54:33`, `age 604`, old content; same URL with
+`?cb=…`, `last-modified 14:10:50`, `age 0`, new content. Appending any query
+string bypasses it when you need to confirm something immediately.
 
-**Nothing to fix on our side** — those headers come from Pages and cannot be
-overridden, and the build and deploy were both correct. Appending any query
-string bypasses the cache if you need to confirm something immediately.
+**Correction, 2026-09-11: this first said the headers "come from Pages and
+cannot be overridden", and that was wrong.** GitHub Pages alone sends only
+`max-age=600` — verified against `keodacz.github.io` directly. The
+`stale-while-revalidate=3600` and `stale-if-error=86400` are added by **WEDOS
+Global CDN**, which the apex domain is proxied through (see DNS above). So
+there *is* a lever — a purge or a shorter TTL in the WEDOS panel — and it
+belongs to the owner, not to this repo. `www.keoda.cz` skips that layer
+entirely, which makes it a quick way to see the page without the extra delay.
+
+The build and deploy were correct throughout; none of this was ever a bug here.
 
 Do **not** "solve" this by fetching `exceptions.json` in the browser and
 re-rendering rows: that is a lot of machinery for a ten-minute delay and it
