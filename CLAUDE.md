@@ -901,8 +901,22 @@ what this file used to say** — the two hostnames take different paths:
 So the apex is **proxied through WEDOS**, not pointed at GitHub's own
 185.199.108–111.153 as this file claimed from its very first commit — that line
 was written before the domain existed and describes the plan, not what was
-configured. Whether the CDN was switched on deliberately is not recorded; ask
-before changing it.
+configured.
+
+**How it got that way, from the owner's WEDOS panel 2026-09-11:** he did set
+the four GitHub A records. Activating **WEDOS Global Protection** then scanned
+the domain, saved those four IPs as the *origin* ("Naskenované DNS záznamy …
+uložíme jako cílové adresy WEDOS Global" — the panel still lists exactly
+185.199.108–111.153), and replaced the public A records with WEDOS's own proxy
+addresses. It left the `www` CNAME alone, which is why the two hostnames
+differ. Nothing was misconfigured; the change was WEDOS's, on activation.
+
+**Decision 2026-09-11: keep it, and tune the cache rather than remove it.** The
+only measurable cost is the publish delay, and the panel exposes **CDN Cache**
+as its own section, so the sensible fix is a shorter TTL or a purge there —
+throwing away DDoS protection to fix a cache setting would be the wrong trade.
+Also in that panel: **PoW výzva**, which is what answers scripted clients with
+the 401 challenge.
 
 **`www` is not a way round the proxy.** It reaches GitHub directly but answers
 `301 → https://keoda.cz/…`, so the page itself still comes through WEDOS. A
