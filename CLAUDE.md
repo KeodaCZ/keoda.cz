@@ -50,9 +50,32 @@ dev server.
   the CMS has loaded. It stays presentation-only: duplicating any scheduling
   rule there would drift from `schedule-core.ts`. Commits go straight to `main`, which triggers the deploy.
 
+  **The CMS version is pinned in `public/admin/index.html` and must stay
+  pinned.** It was loaded from `unpkg.com/@sveltia/cms` with no version until
+  2026-09-11, meaning every page load pulled whatever had been published most
+  recently. That afternoon saving began failing with "Při ukládání položky
+  došlo k chybě"; the last working save was the previous day, and 0.209.2 and
+  0.210.0 had shipped in between. Pinned to **0.209.1**, the version that
+  demonstrably worked. To upgrade: bump the number, open `/admin`, and save
+  something for real before pushing.
+
   Auth: **"Sign In with Token"** with a fine-grained GitHub PAT. No OAuth app,
   no auth server, no config change needed. PATs expire (90 days by default), so
   expect to regenerate occasionally.
+
+  **Diagnosing a failed save**, in the order worth trying — the repo is public,
+  so Sveltia reads `exceptions.json` with no token at all and the panel looks
+  perfectly healthy however broken the write path is:
+
+  1. **The pinned version.** See above; this is what it was on 2026-09-11.
+  2. **The token.** Fine-grained PAT, the `keoda.cz` repo selected, and
+     **Contents: Read and write** — a freshly made token has no permissions by
+     default, so "I made a new one" does not rule this out.
+  3. **A conflict**, if something else pushed to `main` since the panel loaded.
+     Signing out and back in clears it.
+
+  The browser console prints the actual status and settles which it is: 401/403
+  is the token, 409 is a conflict.
 
   Do **not** configure PKCE. As of Sveltia's current docs, GitHub has put
   client-side PKCE support on hold and Sveltia cannot support it yet — their docs

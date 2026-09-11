@@ -9,7 +9,16 @@
     <title>KeodaCZ — správa kalendáře</title>
   </head>
   <body>
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <!-- PIN THE VERSION. This was unpinned until 2026-09-11, which means every
+         page load fetched whatever Sveltia had released most recently — a live
+         third-party dependency that could, and did, break the admin with no
+         change on our side. Saving started failing that afternoon; the owner's
+         last working save was the day before, and 0.209.2 and 0.210.0 had been
+         published in between.
+
+         Upgrade deliberately: bump the number, open /admin, and actually save
+         something before pushing. Never go back to an unpinned URL. -->
+    <script src="https://unpkg.com/@sveltia/cms@0.209.1/dist/sveltia-cms.js"></script>
     <!-- Compact preview pane for the schedule. Uses the createClass/h globals
          the CMS provides, so no React script is needed.
 
