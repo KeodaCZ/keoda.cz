@@ -278,6 +278,14 @@ Not an event calendar. Two files:
 Mon, Wed, Fri, Sat, Sun, from ~18:30 to ~23:00. The site generates the next
 2–3 weeks from this pattern.
 
+A day is **either a bare time or `{ start, game }`** (the object form added
+2026-09-14 so Monday could read "Co-Op s Terousch" at 19:00 instead of the
+generic "Stream"). The name replaces "Stream" in the calendar row, the compact
+homepage list and the `.ics` event title alike, because all three already read
+`day.game`. An exception's own `game` still overrides it — and note the merge
+uses `||`, not `??`, since the CMS writes `""` for a blank field and an empty
+game must fall through to the pattern's name rather than erase it.
+
 **`exceptions.json`** — sparse dated overrides applied on top. Empty is the
 normal state. The list is wrapped in an `{ "exceptions": [...] }` object because
 Sveltia CMS edits named fields, not a bare top-level array. Entry shape:
@@ -294,8 +302,9 @@ Sveltia CMS edits named fields, not a bare top-level array. Entry shape:
 there is deliberately no "moved" status. A time change is just `start`, which
 overrides the pattern time; that keeps one way to say one thing. `timeUnknown`
 means the stream happens but no time is promised (renders a dash, and no
-calendar export). `highlight` opts an entry into the banner. An exception on a
-normally free day adds a stream.
+calendar export). **`highlight` is the only thing that puts an entry in the
+homepage banner** — see the rule below. An exception on a normally free day
+adds a stream.
 
 Owner rejected a `moved` status on 2026-09-02: with `start` filled it behaved
 identically to a plain entry, and the Czech name wrongly suggested moving a
@@ -353,13 +362,20 @@ Rules:
   said "cca"; the site must not promise 23:00 sharp.
 - **The banner is derived from this data, not authored separately.** One entry
   drives both the calendar and the banner — no double bookkeeping. It renders
-  from `Base.astro`, so it is on every page: a cancellation is time-critical
-  and someone arriving on `/vybaveni` from a social bio needs it too. Per-page
-  includes drifted (gear never got one), which is why it lives in the layout. It
-  fires automatically only where a viewer would otherwise turn up wrong:
-  `off`, a changed `start`, or `timeUnknown`. Anything else is editorial and
-  needs `highlight: true` — otherwise routine "which game today" entries would
-  hijack the top of the page.
+  from `Base.astro`, so it is on every page rather than per-page (those
+  drifted; gear never got one).
+- **Nothing reaches the banner automatically — `highlight: true` is the only
+  way in** (owner's call 2026-09-14). It used to fire by itself for `off`, a
+  changed `start` or `timeUnknown`, which meant every routine schedule tweak
+  took the top of every page.
+
+  **Know the cost before reverting this: a cancellation no longer announces
+  itself.** The calendar still shows it struck through with the reason, but
+  someone who only sees the homepage banner will miss it unless the box is
+  ticked. That is deliberate and it is the owner's call per entry — the CMS
+  checkbox is right there. The wording still branches on what actually
+  changed, so a highlighted cancellation reads "nestreamuju" rather than a
+  generic notice.
 - **Several changes scroll as a one-line ticker** (owner's call 2026-09-02,
   stacking them felt too tall): a CSS marquee, duration derived from the text
   length so reading speed stays constant. A single change stays still — motion

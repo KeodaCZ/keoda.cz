@@ -13,8 +13,23 @@
 /** Only cancellation needs a status; a stream happening is the default. */
 export type ExceptionStatus = 'off';
 
-/** Weekday key -> start time ('18:30'). Missing key means no stream that day. */
-export type WeekPattern = Record<string, string | undefined>;
+/**
+ * One recurring day. A bare string is just the start time; the object form adds
+ * a name, which replaces the generic "Stream" in the calendar row, the compact
+ * list and the `.ics` export alike. Both forms are supported so the four days
+ * that are only a time stay one line each.
+ */
+export type PatternDay = string | { start: string; game?: string };
+
+/** Weekday key -> that day's recurring stream. A missing key means none. */
+export type WeekPattern = Record<string, PatternDay | undefined>;
+
+/** Normalises the two forms, so callers never branch on which one was written. */
+function patternFor(entry: PatternDay | undefined): { start?: string; game?: string } {
+  if (!entry) return {};
+  if (typeof entry === 'string') return { start: entry };
+  return { start: entry.start, game: entry.game };
+}
 
 export interface ScheduleException {
   date: string;
@@ -199,7 +214,7 @@ export function getUpcomingDays(
     const date = addDays(today, offset);
     const asDate = toDate(date);
     const weekdayIndex = asDate.getUTCDay();
-    const patternStart = pattern[DAY_KEYS[weekdayIndex]];
+    const { start: patternStart, game: patternGame } = patternFor(pattern[DAY_KEYS[weekdayIndex]]);
     const exception = merged.find((entry) => entry.date === date);
 
     if (!patternStart && !exception) continue;
@@ -217,7 +232,9 @@ export function getUpcomingDays(
       // An explicit exception time always wins over the pattern.
       start: cancelled || timeUnknown ? undefined : (exception?.start ?? patternStart),
       note: exception?.note,
-      game: exception?.game,
+      // `||` and not `??`: the CMS writes "" for a field left blank, and an
+      // empty game must fall through to the pattern's name rather than erase it.
+      game: exception?.game || patternGame,
       isException: Boolean(exception),
       status: exception?.status,
       timeUnknown,
@@ -260,10 +277,19 @@ export function dayReferenceFor(date: string, today: string): string {
  * Homepage banners, derived from the same data as the calendar — never authored
  * separately, so one exception entry drives both.
  *
- * Fires automatically only where a viewer would otherwise get it wrong: the
- * stream is off, the time moved, or the time is undecided. Anything else
- * (a bonus day, a programme swap, a note) is editorial and needs `highlight`,
- * so ordinary "which game today" entries don't hijack the top of the page.
+ * **Nothing reaches the banner automatically** (owner's call 2026-09-14). Only
+ * `highlight: true` puts a day here. It used to fire by itself whenever the
+ * stream was off, the time moved, or the time was undecided, which meant every
+ * routine schedule tweak took the top of every page.
+ *
+ * Know what that costs before changing it back: **a cancellation no longer
+ * announces itself.** The calendar still shows it — struck through, with the
+ * reason — but someone who only looks at the homepage banner will not see it
+ * unless the `highlight` box is ticked. That is the owner's to decide per
+ * entry, and the CMS checkbox is right there.
+ *
+ * The wording below still branches on what actually changed, so a highlighted
+ * cancellation reads "nestreamuju" rather than a generic notice.
  *
  * Returns every qualifying day in the next week, soonest first. They are
  * stacked rather than rotated: a carousel needs JavaScript and can be missed
@@ -275,7 +301,7 @@ export function getBanners(
   today: string,
 ): Banner[] {
   return getUpcomingDays(pattern, exceptions, today, 7)
-    .filter((day) => day.status === 'off' || day.timeUnknown || day.timeChanged || day.highlight)
+    .filter((day) => day.highlight)
     .map((day) => {
       const when = dayReferenceFor(day.date, today);
       const rest = bannerRest(day);

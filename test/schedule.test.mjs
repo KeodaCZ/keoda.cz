@@ -159,36 +159,49 @@ check('plain pattern day has no status', plain.status, undefined);
 check('plain pattern day is not "added"', plain.added, false);
 check('plain pattern day is not highlighted', plain.highlight, false);
 
-// --- banner: automatic cases -----------------------------------------------
-check('no exceptions, no banner', firstBanner(PATTERN, NONE, '2026-09-02'), null);
-check('cancelled banners with weekday', firstBanner(PATTERN, off, '2026-09-02'), {
-  label: 'V pátek nestreamuju', detail: 'svatba',
-});
-check('cancelled today reads Dnes', firstBanner(PATTERN, [{ date: '2026-09-02', status: 'off' }], '2026-09-02'), {
-  label: 'Dnes nestreamuju', detail: undefined,
-});
-check('cancelled tomorrow reads Zítra', firstBanner(PATTERN, [{ date: '2026-09-05', status: 'off' }], '2026-09-04'), {
-  label: 'Zítra nestreamuju', detail: undefined,
-});
-check('wednesday uses "Ve"', firstBanner(PATTERN, [{ date: '2026-09-09', status: 'off' }], '2026-09-05'), {
-  label: 'Ve středu nestreamuju', detail: undefined,
-});
-check('changed time banners the new time', firstBanner(PATTERN, later, '2026-09-02'), {
-  label: 'V pátek streamuju od 20:00', detail: 'pozdější start',
-});
-check('undecided time banners', firstBanner(PATTERN, unsure, '2026-09-02'), {
-  label: 'V pátek streamuju, čas ještě nevím', detail: 'čas dám vědět na Discordu',
-});
+// --- banner: nothing gets in on its own ------------------------------------
+//
+// Owner's call 2026-09-14: the banner used to fire by itself for a
+// cancellation, a moved time or an undecided time, which put every routine
+// schedule tweak on top of every page. Now `highlight` is the only way in.
+// These are the cases that used to banner and must now stay quiet.
 
-// --- banner: what must stay quiet ------------------------------------------
+check('no exceptions, no banner', firstBanner(PATTERN, NONE, '2026-09-02'), null);
+check('a cancellation alone is silent', firstBanner(PATTERN, off, '2026-09-02'), null);
+check('a moved time alone is silent', firstBanner(PATTERN, later, '2026-09-02'), null);
+check('an undecided time alone is silent', firstBanner(PATTERN, unsure, '2026-09-02'), null);
 check('game on a pattern day is silent', firstBanner(PATTERN, game, '2026-09-02'), null);
 check('same-as-pattern time is silent', firstBanner(PATTERN, [{ date: '2026-09-04', start: '18:30' }], '2026-09-02'), null);
 check('note alone is silent', firstBanner(PATTERN, [{ date: '2026-09-04', note: 'hrajeme dál' }], '2026-09-02'), null);
 check('bonus day alone is silent', firstBanner(PATTERN, bonus, '2026-09-02'), null);
-check('beyond 7 days is silent', firstBanner(PATTERN, [{ date: '2026-09-20', status: 'off' }], '2026-09-02'), null);
-check('past exception is silent', firstBanner(PATTERN, off, '2026-09-05'), null);
 
-// --- banner: highlight opt-in ----------------------------------------------
+// --- banner: highlight is the only way in ----------------------------------
+//
+// The wording still branches on what actually changed, so a highlighted
+// cancellation reads as one rather than as a generic notice.
+
+const flag = (entries) => entries.map((e) => ({ ...e, highlight: true }));
+
+check('highlighted cancellation reads as one', firstBanner(PATTERN, flag(off), '2026-09-02'), {
+  label: 'V pátek nestreamuju', detail: 'svatba',
+});
+check('cancelled today reads Dnes', firstBanner(PATTERN, [{ date: '2026-09-02', status: 'off', highlight: true }], '2026-09-02'), {
+  label: 'Dnes nestreamuju', detail: undefined,
+});
+check('cancelled tomorrow reads Zítra', firstBanner(PATTERN, [{ date: '2026-09-05', status: 'off', highlight: true }], '2026-09-04'), {
+  label: 'Zítra nestreamuju', detail: undefined,
+});
+check('wednesday uses "Ve"', firstBanner(PATTERN, [{ date: '2026-09-09', status: 'off', highlight: true }], '2026-09-05'), {
+  label: 'Ve středu nestreamuju', detail: undefined,
+});
+check('highlighted time change reads the new time', firstBanner(PATTERN, flag(later), '2026-09-02'), {
+  label: 'V pátek streamuju od 20:00', detail: 'pozdější start',
+});
+check('highlighted undecided time', firstBanner(PATTERN, flag(unsure), '2026-09-02'), {
+  label: 'V pátek streamuju, čas ještě nevím', detail: 'čas dám vědět na Discordu',
+});
+check('beyond 7 days is silent even highlighted', firstBanner(PATTERN, [{ date: '2026-09-20', status: 'off', highlight: true }], '2026-09-02'), null);
+check('past exception is silent even highlighted', firstBanner(PATTERN, flag(off), '2026-09-05'), null);
 check('highlighted bonus day banners', firstBanner(PATTERN, [{ ...bonus[0], highlight: true }], '2026-09-02'), {
   label: 'V úterý bonusový stream od 20:00', detail: undefined,
 });
@@ -217,13 +230,60 @@ check(
 
 // --- banner: picking between several ---------------------------------------
 check('banner picks the soonest', firstBanner(PATTERN, [
-  { date: '2026-09-07', status: 'off', note: 'pozdější' },
-  { date: '2026-09-04', status: 'off', note: 'dřívější' },
+  { date: '2026-09-07', status: 'off', note: 'pozdější', highlight: true },
+  { date: '2026-09-04', status: 'off', note: 'dřívější', highlight: true },
 ], '2026-09-02'), { label: 'V pátek nestreamuju', detail: 'dřívější' });
-check('banner skips silent entries to find a real one', firstBanner(PATTERN, [
-  { date: '2026-09-04', game: 'jen hra' },
-  { date: '2026-09-06', status: 'off', note: 'volno' },
+check('banner skips unhighlighted entries to find a real one', firstBanner(PATTERN, [
+  { date: '2026-09-04', status: 'off', note: 'tichý' },
+  { date: '2026-09-06', status: 'off', note: 'volno', highlight: true },
 ], '2026-09-02'), { label: 'V neděli nestreamuju', detail: 'volno' });
+
+// --- a recurring day can carry a name --------------------------------------
+//
+// Added 2026-09-14 so Monday can read "Co-Op s Terousch" instead of the
+// generic "Stream". A pattern day is either a bare time or {start, game}, and
+// both forms have to behave identically apart from the name.
+
+const NAMED = { ...PATTERN, mon: { start: '19:00', game: 'Co-Op s Terousch' } };
+const namedDay = (date, exceptions = NONE) =>
+  getUpcomingDays(NAMED, exceptions, '2026-09-02', 14).find((d) => d.date === date);
+
+check('the object form still sets the time', namedDay('2026-09-07').start, '19:00');
+check('and carries its name', namedDay('2026-09-07').game, 'Co-Op s Terousch');
+check('the string form still works', namedDay('2026-09-09').start, '18:30');
+check('and has no name', namedDay('2026-09-09').game, undefined);
+check('a named day is not an exception', namedDay('2026-09-07').isException, false);
+check('nor a time change', namedDay('2026-09-07').timeChanged, false);
+check('nor an added day', namedDay('2026-09-07').added, false);
+
+// An exception's own game still wins — that is how a one-off swap works.
+check(
+  'an exception game overrides the pattern name',
+  namedDay('2026-09-07', [{ date: '2026-09-07', game: 'Silent Hill 2' }]).game,
+  'Silent Hill 2',
+);
+// ...but the CMS writes '' for a field left blank, and that must not erase it.
+check(
+  'an empty exception game falls back to the pattern name',
+  namedDay('2026-09-07', [{ date: '2026-09-07', status: '', game: '', note: 'jen poznámka' }]).game,
+  'Co-Op s Terousch',
+);
+// A time moved off the named day's own time is still a change.
+check(
+  'a moved time is measured against the object form',
+  namedDay('2026-09-07', [{ date: '2026-09-07', start: '21:00' }]).timeChanged,
+  true,
+);
+check(
+  'and the same time is not',
+  namedDay('2026-09-07', [{ date: '2026-09-07', start: '19:00' }]).timeChanged,
+  false,
+);
+// Cancelling a named day still hides the time and keeps the name off the row's
+// headline — the row prints "Nestreamuju" regardless.
+check('a named day can still be cancelled', namedDay('2026-09-07', [{ date: '2026-09-07', status: 'off' }]).streaming, false);
+// The name alone must not put anything in the banner.
+check('a named pattern day never banners', getBanners(NAMED, NONE, '2026-09-02'), []);
 
 // --- timezone --------------------------------------------------------------
 check('todayIn returns ISO date', /^\d{4}-\d{2}-\d{2}$/.test(todayIn('Europe/Prague')), true);
@@ -231,15 +291,18 @@ check('todayIn returns ISO date', /^\d{4}-\d{2}-\d{2}$/.test(todayIn('Europe/Pra
 
 // --- several banners at once -----------------------------------------------
 const busyWeek = [
-  { date: '2026-09-04', status: 'off', note: 'svatba' },
-  { date: '2026-09-05', start: '21:00' },
-  { date: '2026-09-07', timeUnknown: true },
+  { date: '2026-09-04', status: 'off', note: 'svatba', highlight: true },
+  { date: '2026-09-05', start: '21:00', highlight: true },
+  { date: '2026-09-07', timeUnknown: true, highlight: true },
 ];
-check('all changes become banners, soonest first', getBanners(PATTERN, busyWeek, '2026-09-02').map((b) => b.label), [
+check('highlighted changes become banners, soonest first', getBanners(PATTERN, busyWeek, '2026-09-02').map((b) => b.label), [
   'V pátek nestreamuju',
   'V sobotu streamuju od 21:00',
   'V pondělí streamuju, čas ještě nevím',
 ]);
+// The same week with the boxes unticked: the calendar still shows all three,
+// the banner shows none. This is the whole point of the 2026-09-14 change.
+check('the same week unhighlighted is silent', getBanners(PATTERN, busyWeek.map(({ highlight, ...rest }) => rest), '2026-09-02'), []);
 check('quiet entries never become banners', getBanners(PATTERN, [
   { date: '2026-09-04', game: 'hra' },
   { date: '2026-09-05', note: 'poznámka' },
@@ -248,14 +311,14 @@ check('banner list is empty without exceptions', getBanners(PATTERN, NONE, '2026
 
 // --- duplicate dates -------------------------------------------------------
 const dupes = [
-  { date: '2026-09-04', status: 'off' },
+  { date: '2026-09-04', status: 'off', highlight: true },
   { date: '2026-09-04', note: 'svatba' },
 ];
 const dupResult = mergeExceptions(dupes);
 check('duplicates collapse to one entry', dupResult.merged.length, 1);
 check('duplicates are reported', dupResult.duplicates, [{ date: '2026-09-04', count: 2 }]);
 check('merged entry keeps both fields', dupResult.merged[0], {
-  date: '2026-09-04', status: 'off', note: 'svatba',
+  date: '2026-09-04', status: 'off', highlight: true, note: 'svatba',
 });
 check('unique dates report nothing', mergeExceptions([
   { date: '2026-09-04' }, { date: '2026-09-05' },
@@ -290,7 +353,7 @@ check(
 // The old behaviour kept only the first entry, which could drop a cancellation.
 check('cancellation survives being second', getBanners(PATTERN, [
   { date: '2026-09-04', game: 'hra' },
-  { date: '2026-09-04', status: 'off' },
+  { date: '2026-09-04', status: 'off', highlight: true },
 ], '2026-09-02').map((b) => b.label), ['V pátek nestreamuju']);
 
 
@@ -319,11 +382,11 @@ check('explicit start is kept', cmsDay('2026-09-02').start, '20:00');
 check('false booleans stay false', cmsDay('2026-09-02').timeUnknown, false);
 check('true booleans stay true', cmsDay('2026-09-03').highlight, true);
 
-// The whole week as it renders from that real data.
-check('real CMS data banners', getBanners(PATTERN, fromCms, '2026-09-02').map((b) => b.label), [
-  'Dnes streamuju od 20:00',
+// The whole week as it renders from that real data. Only the middle entry has
+// the box ticked, and since 2026-09-14 that is the only one that banners — the
+// moved time and the cancellation stay on the calendar alone.
+check('real CMS data banners only the highlighted one', getBanners(PATTERN, fromCms, '2026-09-02').map((b) => b.label), [
   'Zítra bonusový stream od 18:30',
-  'V pátek nestreamuju',
 ]);
 
 // --- weekdayLocative: names the day for the offline strip ---------------
@@ -347,7 +410,7 @@ check('locative on a leap day', weekdayLocative('2028-02-29'), 'v úterý');
 // The banner sits on every page, so a stale build announcing "Dnes
 // nestreamuju" about yesterday is the most visible way this could go wrong.
 // It therefore ships the day word separately from the sentence.
-const offFriday = firstBannerRaw(PATTERN, [{ date: '2026-09-04', status: 'off' }], '2026-09-02');
+const offFriday = firstBannerRaw(PATTERN, [{ date: '2026-09-04', status: 'off', highlight: true }], '2026-09-02');
 check('a banner carries the day it is about', offFriday.date, '2026-09-04');
 check('the day word is separate', offFriday.when, 'V pátek');
 check('and the rest keeps its leading space', offFriday.rest, ' nestreamuju');
