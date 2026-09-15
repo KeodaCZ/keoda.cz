@@ -338,7 +338,27 @@ Rules:
     still on screen; a screenshot caught it and a property read did not.
   - `HORIZON_DAYS` is shared with the `.ics` routes, so a rendered
     add-to-calendar link can never point at a file the build didn't generate.
-    Verified: 15 links, 15 files.
+    Verified again after the 2026-09-15 change, with a December exception in
+    place: 15 links, 15 files, none missing.
+- **The pattern is bounded; exceptions are not** (owner's call 2026-09-15).
+  `dayCount` / `HORIZON_DAYS` limit only the *recurring* days — listing the
+  same five evenings three weeks out says nothing. **Every future exception is
+  rendered however far off**, because a stream cancelled in November is worth
+  knowing about in September.
+
+  `ScheduleFull` shows **10 pattern days** (`VISIBLE_PATTERN_DAYS`) and an
+  unlimited number of exceptions: the visibility budget is spent by plain
+  recurring days only, and the browser script repeats that rule after it knows
+  the real "today" — which is why each row carries `data-exception`.
+
+  Two consequences worth keeping in mind before touching this:
+  - **The banner had to start bounding itself by date.** `dayCount` no longer
+    expresses "the next week", so `getBanners` filters on `date <= today + 6`.
+    Without that, a highlighted day months out would sit on top of every page
+    from today.
+  - **`ScheduleCompact` is deliberately untouched.** It slices the soonest few
+    for the homepage, which is what that widget is for; a December cancellation
+    does not belong in "Příští streamy".
 - **The banner re-anchors itself in the browser too** (2026-09-08). It is on
   every page and its whole job is time-critical accuracy, so a stale build
   saying "Dnes nestreamuju" about yesterday was the most visible way the

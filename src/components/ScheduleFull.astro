@@ -9,11 +9,34 @@ import {
 import { googleCalendarUrl } from '../lib/calendar-links';
 import { streamEvent } from '../lib/stream-event';
 
-/** What the page promises to show. The build renders past this (HORIZON_DAYS)
- *  so the browser still has two full weeks after hiding stale days. */
-const VISIBLE_DAYS = 14;
+/**
+ * How many **recurring** days the page shows ahead (owner's call 2026-09-15:
+ * a week to a fortnight, and this is the middle of that). The build renders
+ * past it, up to HORIZON_DAYS, so the browser still has enough left after
+ * hiding days that have gone by.
+ *
+ * Exceptions are deliberately **not** counted against this: a cancellation or
+ * a moved stream is a real date worth knowing about however far off, so it
+ * always shows. That is the whole point of the change — listing the same five
+ * evenings three weeks out says nothing, while a stream called off in November
+ * matters today.
+ */
+const VISIBLE_PATTERN_DAYS = 10;
 
 const days = getUpcomingDays();
+
+/**
+ * Which rows the build marks visible. Computed per row rather than by index,
+ * because the budget only applies to plain pattern days — the browser script
+ * repeats exactly this rule once it knows the real "today".
+ */
+let patternBudget = VISIBLE_PATTERN_DAYS;
+const visible = days.map((day) => {
+  if (day.isException) return true;
+  if (patternBudget === 0) return false;
+  patternBudget -= 1;
+  return true;
+});
 
 const WEEKDAY_SHORT: Record<string, string> = {
   pondělí: 'PO',
@@ -58,7 +81,7 @@ function calendarLinks(day: ScheduleDay) {
   };
 }
 ---
-<div class="list" data-schedule data-timezone={timezone} data-limit={VISIBLE_DAYS}>
+<div class="list" data-schedule data-timezone={timezone} data-limit={VISIBLE_PATTERN_DAYS}>
   {days.length === 0 ? (
     <p class="muted">Zatím tu nic nesvítí — rozvrh se doplní.</p>
   ) : (
@@ -70,7 +93,8 @@ function calendarLinks(day: ScheduleDay) {
           <li
             class:list={['row', { off: !day.streaming, today: day.isToday }]}
             data-date={day.date}
-            hidden={index >= VISIBLE_DAYS}
+            data-exception={day.isException ? '' : undefined}
+            hidden={!visible[index]}
           >
             <span class="badge">
               <span class="badge-day">{day.dayMonth}</span>
@@ -341,19 +365,23 @@ function calendarLinks(day: ScheduleDay) {
 
   for (const list of document.querySelectorAll<HTMLElement>('[data-schedule]')) {
     const today = todayIn(list.dataset.timezone || 'Europe/Prague');
-    const limit = Number(list.dataset.limit) || 14;
-    let shown = 0;
+    const limit = Number(list.dataset.limit) || 10;
+    let patternShown = 0;
 
     for (const row of list.querySelectorAll<HTMLElement>('.row[data-date]')) {
       const date = row.dataset.date ?? '';
+      // The budget counts plain recurring days only. An exception is a real
+      // date worth seeing however far ahead, so it never spends one and is
+      // never cut off — the same rule the build applied.
+      const isException = row.hasAttribute('data-exception');
 
-      if (date < today || shown >= limit) {
+      if (date < today || (!isException && patternShown >= limit)) {
         row.hidden = true;
         continue;
       }
 
       row.hidden = false;
-      shown += 1;
+      if (!isException) patternShown += 1;
       row.classList.toggle('today', date === today);
     }
   }

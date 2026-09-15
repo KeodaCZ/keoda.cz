@@ -44,16 +44,21 @@ export function todayInPrague(): string {
 }
 
 /**
- * How far ahead the build renders, in calendar days.
+ * How far ahead the build renders **the recurring pattern**, in calendar days.
+ * It no longer bounds exceptions: every future one is rendered however far off
+ * (owner's call 2026-09-15 — see `getUpcomingDays` in schedule-core).
  *
- * Wider than the two weeks the calendar shows, on purpose. The pages decide
- * "today" in the browser so a stale build cannot mislabel a day, and that only
- * works if there are still enough future days left in the page after the past
- * ones are hidden. GitHub's cron runs one to four hours late in practice, and
- * a failed run means a whole day, so the slack is real rather than theoretical.
+ * Wider than the ten pattern days the calendar shows, on purpose. The pages
+ * decide "today" in the browser so a stale build cannot mislabel a day, and
+ * that only works if there are still enough future days left in the page after
+ * the past ones are hidden. GitHub's cron runs one to four hours late in
+ * practice, and a failed run means a whole day, so the slack is real rather
+ * than theoretical.
  *
  * One constant for the pages and the .ics routes together, so a rendered
- * add-to-calendar link can never point at a file the build didn't generate.
+ * add-to-calendar link can never point at a file the build didn't generate —
+ * that still holds now exceptions reach further, because both call the same
+ * function.
  */
 export const HORIZON_DAYS = 21;
 

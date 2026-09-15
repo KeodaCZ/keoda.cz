@@ -238,6 +238,77 @@ check('banner skips unhighlighted entries to find a real one', firstBanner(PATTE
   { date: '2026-09-06', status: 'off', note: 'volno', highlight: true },
 ], '2026-09-02'), { label: 'V neděli nestreamuju', detail: 'volno' });
 
+// --- the pattern is bounded, exceptions are not ----------------------------
+//
+// Owner's call 2026-09-15. Listing the same five evenings weeks ahead says
+// nothing, but a stream cancelled in November is worth knowing about in
+// September. So `dayCount` bounds the recurring pattern only.
+
+const FAR = '2026-12-24';
+const farOff = [{ date: FAR, status: 'off', note: 'Vánoce' }];
+
+check(
+  'a far-future exception is listed despite a short window',
+  dates('2026-09-02', 7, farOff).includes(FAR),
+  true,
+);
+check(
+  'and the pattern is still bounded by the window',
+  dates('2026-09-02', 7, farOff).filter((d) => d < '2026-09-09').length,
+  dates('2026-09-02', 7).length,
+);
+check(
+  'it sorts to the end, not the front',
+  dates('2026-09-02', 7, farOff).at(-1),
+  FAR,
+);
+check(
+  'a past exception is still dropped',
+  dates('2026-09-02', 7, [{ date: '2026-08-01', status: 'off' }]).includes('2026-08-01'),
+  false,
+);
+// An exception inside the window must not produce the day twice.
+check(
+  'an in-window exception is not duplicated',
+  dates('2026-09-02', 7, [{ date: '2026-09-04', status: 'off' }]).filter((d) => d === '2026-09-04').length,
+  1,
+);
+// A far exception on a weekday the pattern does not cover still shows.
+check(
+  'a far exception on a free weekday shows',
+  dates('2026-09-02', 7, [{ date: '2026-12-01', start: '20:00' }]).includes('2026-12-01'),
+  true,
+);
+check('the far day carries its exception flag', (() => {
+  const day = getUpcomingDays(PATTERN, farOff, '2026-09-02', 7).find((d) => d.date === FAR);
+  return { isException: day.isException, streaming: day.streaming, note: day.note };
+})(), { isException: true, streaming: false, note: 'Vánoce' });
+
+// The banner must NOT follow the exceptions out — it is the next week only,
+// and `dayCount` alone no longer expresses that.
+check(
+  'a far highlighted exception never banners',
+  getBanners(PATTERN, [{ date: FAR, status: 'off', highlight: true }], '2026-09-02'),
+  [],
+);
+check(
+  'but one inside the week still does',
+  getBanners(PATTERN, [{ date: '2026-09-06', status: 'off', highlight: true }], '2026-09-02')
+    .map((b) => b.label),
+  ['V neděli nestreamuju'],
+);
+// The edge: the seventh day out is in, the eighth is not.
+check(
+  'the last day of the week is in',
+  getBanners(PATTERN, [{ date: '2026-09-08', highlight: true }], '2026-09-02').length,
+  1,
+);
+check(
+  'the day after is not',
+  getBanners(PATTERN, [{ date: '2026-09-09', highlight: true }], '2026-09-02').length,
+  0,
+);
+
 // --- a recurring day can carry a name --------------------------------------
 //
 // Added 2026-09-14 so Monday can read "Co-Op s Terousch" instead of the

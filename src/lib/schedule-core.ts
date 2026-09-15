@@ -210,8 +210,23 @@ export function getUpcomingDays(
   // Merge here rather than at the call site so no caller can forget to.
   const { merged } = mergeExceptions(exceptions);
 
-  for (let offset = 0; offset < dayCount; offset += 1) {
-    const date = addDays(today, offset);
+  /**
+   * Two sources with deliberately different reach (owner's call 2026-09-15).
+   *
+   * The recurring pattern is the same five evenings every week, so listing it
+   * months ahead says nothing — `dayCount` bounds it. An **exception is a real
+   * commitment on a real date**, and a stream cancelled in November is worth
+   * knowing about in September, so every future one is listed however far away
+   * it is.
+   *
+   * Callers that genuinely want a fixed window — the banner — must bound the
+   * result by date themselves; `dayCount` alone no longer does it.
+   */
+  const dates = new Set<string>();
+  for (let offset = 0; offset < dayCount; offset += 1) dates.add(addDays(today, offset));
+  for (const entry of merged) if (entry.date >= today) dates.add(entry.date);
+
+  for (const date of [...dates].sort()) {
     const asDate = toDate(date);
     const weekdayIndex = asDate.getUTCDay();
     const { start: patternStart, game: patternGame } = patternFor(pattern[DAY_KEYS[weekdayIndex]]);
@@ -300,8 +315,13 @@ export function getBanners(
   exceptions: ScheduleException[],
   today: string,
 ): Banner[] {
+  // `dayCount` bounds only the recurring pattern now, so the week-ahead limit
+  // has to be stated as a date — otherwise a highlighted day months out would
+  // sit at the top of every page from today.
+  const horizon = addDays(today, 6);
+
   return getUpcomingDays(pattern, exceptions, today, 7)
-    .filter((day) => day.highlight)
+    .filter((day) => day.highlight && day.date <= horizon)
     .map((day) => {
       const when = dayReferenceFor(day.date, today);
       const rest = bannerRest(day);
