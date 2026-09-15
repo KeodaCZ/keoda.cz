@@ -13,7 +13,8 @@ import { streamEvent } from '../lib/stream-event';
 
 /**
  * The window the page shows, in **calendar days from today, inclusive**
- * (owner's call 2026-09-15: eight, after trying fourteen and ten).
+ * (owner's call 2026-09-15, settled at ten once the window replaced an
+ * earlier row budget).
  *
  * A window and not a row budget, which is the owner's own framing and the
  * better one: a budget of N streams stretches across more calendar days the
@@ -27,7 +28,7 @@ import { streamEvent } from '../lib/stream-event';
  * November is worth knowing about today, while the same five recurring
  * evenings three weeks out say nothing.
  */
-const VISIBLE_DAYS = 8;
+const VISIBLE_DAYS = 10;
 
 const days = getUpcomingDays();
 

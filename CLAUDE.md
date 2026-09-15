@@ -346,11 +346,10 @@ Rules:
   rendered however far off**, because a stream cancelled in November is worth
   knowing about in September.
 
-  `ScheduleFull` shows an **8-day window from today** (`VISIBLE_DAYS`, tried at
-  14 then 10 then 7). Everything inside it renders, exception or not; outside
-  it, **only exceptions**. The browser script repeats that rule once it knows
-  the real "today", which is why each row carries its date and
-  `data-exception`.
+  `ScheduleFull` shows a **10-day window from today** (`VISIBLE_DAYS`).
+  Everything inside it renders, exception or not; outside it, **only
+  exceptions**. The browser script repeats that rule once it knows the real
+  "today", which is why each row carries its date and `data-exception`.
 
   **A window, not a row budget** — the owner's framing and the better one. A
   budget of N streams stretches over more calendar days the fewer evenings the
