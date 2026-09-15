@@ -346,7 +346,8 @@ Rules:
   rendered however far off**, because a stream cancelled in November is worth
   knowing about in September.
 
-  `ScheduleFull` shows **10 pattern days** (`VISIBLE_PATTERN_DAYS`) and an
+  `ScheduleFull` shows **7 pattern days** (`VISIBLE_PATTERN_DAYS` — tried at
+  10 first, the owner settled on a week) and an
   unlimited number of exceptions: the visibility budget is spent by plain
   recurring days only, and the browser script repeats that rule after it knows
   the real "today" — which is why each row carries `data-exception`.

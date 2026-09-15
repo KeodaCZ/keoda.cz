@@ -10,10 +10,10 @@ import { googleCalendarUrl } from '../lib/calendar-links';
 import { streamEvent } from '../lib/stream-event';
 
 /**
- * How many **recurring** days the page shows ahead (owner's call 2026-09-15:
- * a week to a fortnight, and this is the middle of that). The build renders
- * past it, up to HORIZON_DAYS, so the browser still has enough left after
- * hiding days that have gone by.
+ * How many **recurring** days the page shows ahead — one week (owner's call
+ * 2026-09-15, settled after seeing ten). The build renders past it, up to
+ * HORIZON_DAYS, so the browser still has enough left after hiding days that
+ * have gone by.
  *
  * Exceptions are deliberately **not** counted against this: a cancellation or
  * a moved stream is a real date worth knowing about however far off, so it
@@ -21,7 +21,7 @@ import { streamEvent } from '../lib/stream-event';
  * evenings three weeks out says nothing, while a stream called off in November
  * matters today.
  */
-const VISIBLE_PATTERN_DAYS = 10;
+const VISIBLE_PATTERN_DAYS = 7;
 
 const days = getUpcomingDays();
 
