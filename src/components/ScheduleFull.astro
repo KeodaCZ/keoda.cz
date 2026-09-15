@@ -4,39 +4,41 @@ import {
   getUpcomingDays,
   scheduleNote,
   timezone,
+  todayInPrague,
   type ScheduleDay,
 } from '../lib/schedule';
+import { addDays } from '../lib/schedule-core';
 import { googleCalendarUrl } from '../lib/calendar-links';
 import { streamEvent } from '../lib/stream-event';
 
 /**
- * How many **recurring** days the page shows ahead — one week (owner's call
- * 2026-09-15, settled after seeing ten). The build renders past it, up to
- * HORIZON_DAYS, so the browser still has enough left after hiding days that
- * have gone by.
+ * The window the page shows, in **calendar days from today, inclusive**
+ * (owner's call 2026-09-15: eight, after trying fourteen and ten).
  *
- * Exceptions are deliberately **not** counted against this: a cancellation or
- * a moved stream is a real date worth knowing about however far off, so it
- * always shows. That is the whole point of the change — listing the same five
- * evenings three weeks out says nothing, while a stream called off in November
- * matters today.
+ * A window and not a row budget, which is the owner's own framing and the
+ * better one: a budget of N streams stretches across more calendar days the
+ * fewer evenings the pattern covers, so "a week" quietly became eleven days.
+ * The build renders past this, up to HORIZON_DAYS, so the browser still has
+ * enough left after hiding days that have gone by.
+ *
+ * **An exception inside the window is an ordinary row** — it is one of the
+ * days you were going to see anyway. Only an exception *beyond* the window is
+ * extra, and those are always shown however far off: a stream cancelled in
+ * November is worth knowing about today, while the same five recurring
+ * evenings three weeks out say nothing.
  */
-const VISIBLE_PATTERN_DAYS = 7;
+const VISIBLE_DAYS = 8;
 
 const days = getUpcomingDays();
 
 /**
- * Which rows the build marks visible. Computed per row rather than by index,
- * because the budget only applies to plain pattern days — the browser script
- * repeats exactly this rule once it knows the real "today".
+ * Which rows the build marks visible. The browser script repeats exactly this
+ * rule once it knows the real "today", which is why each row carries its date
+ * and whether it is an exception.
  */
-let patternBudget = VISIBLE_PATTERN_DAYS;
-const visible = days.map((day) => {
-  if (day.isException) return true;
-  if (patternBudget === 0) return false;
-  patternBudget -= 1;
-  return true;
-});
+const buildToday = todayInPrague();
+const windowEnd = addDays(buildToday, VISIBLE_DAYS - 1);
+const visible = days.map((day) => day.date <= windowEnd || day.isException);
 
 const WEEKDAY_SHORT: Record<string, string> = {
   pondělí: 'PO',
@@ -81,7 +83,7 @@ function calendarLinks(day: ScheduleDay) {
   };
 }
 ---
-<div class="list" data-schedule data-timezone={timezone} data-limit={VISIBLE_PATTERN_DAYS}>
+<div class="list" data-schedule data-timezone={timezone} data-limit={VISIBLE_DAYS}>
   {days.length === 0 ? (
     <p class="muted">Zatím tu nic nesvítí — rozvrh se doplní.</p>
   ) : (
@@ -361,27 +363,25 @@ function calendarLinks(day: ScheduleDay) {
    * then the page calls yesterday "Dnes". Without JavaScript the build's own
    * labels stand, which is correct at build time.
    */
-  import { todayIn } from '../lib/schedule-core';
+  import { addDays, todayIn } from '../lib/schedule-core';
 
   for (const list of document.querySelectorAll<HTMLElement>('[data-schedule]')) {
     const today = todayIn(list.dataset.timezone || 'Europe/Prague');
-    const limit = Number(list.dataset.limit) || 10;
-    let patternShown = 0;
+    const windowEnd = addDays(today, (Number(list.dataset.limit) || 8) - 1);
 
     for (const row of list.querySelectorAll<HTMLElement>('.row[data-date]')) {
       const date = row.dataset.date ?? '';
-      // The budget counts plain recurring days only. An exception is a real
-      // date worth seeing however far ahead, so it never spends one and is
-      // never cut off — the same rule the build applied.
+      // Inside the window everything shows. Past it, only exceptions — a real
+      // date is worth seeing however far ahead, where more of the same
+      // recurring evenings is not. Same rule the build applied.
       const isException = row.hasAttribute('data-exception');
 
-      if (date < today || (!isException && patternShown >= limit)) {
+      if (date < today || (date > windowEnd && !isException)) {
         row.hidden = true;
         continue;
       }
 
       row.hidden = false;
-      if (!isException) patternShown += 1;
       row.classList.toggle('today', date === today);
     }
   }

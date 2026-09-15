@@ -346,11 +346,18 @@ Rules:
   rendered however far off**, because a stream cancelled in November is worth
   knowing about in September.
 
-  `ScheduleFull` shows **7 pattern days** (`VISIBLE_PATTERN_DAYS` — tried at
-  10 first, the owner settled on a week) and an
-  unlimited number of exceptions: the visibility budget is spent by plain
-  recurring days only, and the browser script repeats that rule after it knows
-  the real "today" — which is why each row carries `data-exception`.
+  `ScheduleFull` shows an **8-day window from today** (`VISIBLE_DAYS`, tried at
+  14 then 10 then 7). Everything inside it renders, exception or not; outside
+  it, **only exceptions**. The browser script repeats that rule once it knows
+  the real "today", which is why each row carries its date and
+  `data-exception`.
+
+  **A window, not a row budget** — the owner's framing and the better one. A
+  budget of N streams stretches over more calendar days the fewer evenings the
+  pattern covers, so an earlier "one week" silently became eleven days. It also
+  gets the boundary right: an exception *inside* the window is one of the days
+  you were going to see anyway and needs no special treatment, while only one
+  *beyond* it is genuinely extra.
 
   Two consequences worth keeping in mind before touching this:
   - **The banner had to start bounding itself by date.** `dayCount` no longer
