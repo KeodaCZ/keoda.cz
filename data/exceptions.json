@@ -53,6 +53,24 @@
       "game": "",
       "note": "Musím do práce přes noc (Možná bude ranní / denní stream)",
       "highlight": false
+    },
+    {
+      "date": "2026-09-18",
+      "status": "",
+      "start": "",
+      "timeUnknown": false,
+      "game": "Marvel's Wolverine",
+      "note": "Otestujeme jak moc nás to povede za ručičku a co všechno půjde vypnout",
+      "highlight": true
+    },
+    {
+      "date": "2026-09-19",
+      "status": "",
+      "start": "",
+      "timeUnknown": false,
+      "game": "Marvel's Wolverine",
+      "note": "Stihneme dohrát Wolverina?",
+      "highlight": false
     }
   ]
 }
