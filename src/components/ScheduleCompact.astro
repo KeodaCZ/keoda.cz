@@ -56,10 +56,19 @@ function detailParts(day: ScheduleDay): Part[] {
             <span class="weekday">{day.isToday ? 'Dnes' : day.weekday}</span>
             <span class="date muted">{day.dayMonth}</span>
           </span>
+          {/* The spaces around the separator are load-bearing, not formatting:
+              they are the only places a long detail is allowed to break, so
+              without them "18:30·Otestujeme" would be one unbreakable word. */}
           <span class="what">
             {detailParts(day).map((part, index) => (
               <>
-                {index > 0 && <span class="sep muted" aria-hidden="true">·</span>}
+                {index > 0 && (
+                  <>
+                    {' '}
+                    <span class="sep muted" aria-hidden="true">·</span>
+                    {' '}
+                  </>
+                )}
                 <span class:list={[part.kind]}>{part.text}</span>
               </>
             ))}
@@ -107,11 +116,28 @@ function detailParts(day: ScheduleDay): Part[] {
   .today .weekday {
     color: var(--accent);
   }
+  /* Two things make a long row wrap inside its column instead of below it,
+     and both had to change together (owner's call 2026-09-17).
+
+     `flex: 1 1 14rem` decides the *row*. Flexbox breaks lines on an item's
+     flex basis, not on how wide its text would like to be, so with the
+     default `auto` basis a long note measured its full max-content width,
+     failed to fit beside `.when`, and took the whole detail onto a line of
+     its own starting back at the left edge. A fixed basis keeps it on the
+     first line whatever it contains.
+
+     The number doubles as the mobile breakpoint, which is why there is no
+     media query: 9.5rem + the 0.8rem gap + 14rem is 24.3rem, so any card
+     narrower than that — a phone — still stacks the detail full width, where
+     a 14rem column would be too cramped to be worth aligning.
+
+     Not being a flex container decides what happens *inside* it. As one, each
+     part was an atomic item, so text could not flow from the note into the
+     line the time was on: the first line held "od 18:30 ·" alone and every
+     part started a line of its own. Plain inline flow fills each line and
+     only moves what is left over — which is what was actually asked for. */
   .what {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: baseline;
+    flex: 1 1 14rem;
   }
   .off .when,
   .off .what {
