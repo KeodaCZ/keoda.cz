@@ -203,7 +203,7 @@ check('highlighted undecided time', firstBanner(PATTERN, flag(unsure), '2026-09-
 check('beyond 7 days is silent even highlighted', firstBanner(PATTERN, [{ date: '2026-09-20', status: 'off', highlight: true }], '2026-09-02'), null);
 check('past exception is silent even highlighted', firstBanner(PATTERN, flag(off), '2026-09-05'), null);
 check('highlighted bonus day banners', firstBanner(PATTERN, [{ ...bonus[0], highlight: true }], '2026-09-02'), {
-  label: 'V úterý bonusový stream od 20:00', detail: undefined,
+  label: 'V úterý bonusový stream od 20:00', detail: 'bonus',
 });
 check(
   'highlighted bonus day without a time',
@@ -226,6 +226,59 @@ check(
   'highlighted with nothing to say',
   firstBanner(PATTERN, [{ date: '2026-09-05', highlight: true }], '2026-09-02'),
   { label: 'V sobotu speciální stream' },
+);
+
+// --- banner: the game rides along ------------------------------------------
+//
+// Owner's call 2026-09-17: the banner showed only the note, so on an ordinary
+// highlighted evening — a note and a game, nothing else changed — the game
+// never reached the top of the page. It now follows as the detail, mirroring
+// the calendar row. Nothing is ever printed twice.
+
+const evening = { date: '2026-09-04', highlight: true, note: 'Dohrajeme Wolverina', game: "Marvel's Wolverine" };
+
+check('note leads and the game follows', firstBanner(PATTERN, [evening], '2026-09-02'), {
+  label: 'V pátek: Dohrajeme Wolverina', detail: "Marvel's Wolverine",
+});
+check(
+  'the game alone takes the sentence, and does not repeat',
+  firstBanner(PATTERN, [{ date: '2026-09-04', highlight: true, game: 'Silent Hill 2' }], '2026-09-02'),
+  { label: 'V pátek: Silent Hill 2' },
+);
+check(
+  'a note alone still has no detail',
+  firstBanner(PATTERN, [{ date: '2026-09-04', highlight: true, note: 'jen tak' }], '2026-09-02'),
+  { label: 'V pátek: jen tak' },
+);
+// The mechanical cases carry both, note first, in that one line.
+check(
+  'a moved time lists the reason then the game',
+  firstBanner(PATTERN, [{ ...evening, start: '20:00' }], '2026-09-02'),
+  { label: 'V pátek streamuju od 20:00', detail: "Dohrajeme Wolverina · Marvel's Wolverine" },
+);
+check(
+  'an undecided time does too',
+  firstBanner(PATTERN, [{ ...evening, start: undefined, timeUnknown: true }], '2026-09-02'),
+  { label: 'V pátek streamuju, čas ještě nevím', detail: "Dohrajeme Wolverina · Marvel's Wolverine" },
+);
+// A cancellation deliberately drops the game: there is no stream for it to be
+// the game of, and "nestreamuju · svatba · Skyrim" reads as nonsense.
+check(
+  'a cancellation keeps the reason and drops the game',
+  firstBanner(PATTERN, [{ date: '2026-09-04', highlight: true, status: 'off', note: 'svatba', game: 'Skyrim' }], '2026-09-02'),
+  { label: 'V pátek nestreamuju', detail: 'svatba' },
+);
+check(
+  'a cancellation with only a game says just the sentence',
+  firstBanner(PATTERN, [{ date: '2026-09-04', highlight: true, status: 'off', game: 'Skyrim' }], '2026-09-02'),
+  { label: 'V pátek nestreamuju' },
+);
+// The CMS writes '' for blank fields; an empty game must not leave a trailing
+// separator or an empty detail line.
+check(
+  'empty CMS strings produce no detail',
+  firstBanner(PATTERN, [{ date: '2026-09-04', status: '', start: '', game: '', note: '', highlight: true }], '2026-09-02'),
+  { label: 'V pátek speciální stream' },
 );
 
 // --- banner: picking between several ---------------------------------------

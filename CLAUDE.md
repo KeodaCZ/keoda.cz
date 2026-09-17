@@ -415,6 +415,16 @@ Rules:
   checkbox is right there. The wording still branches on what actually
   changed, so a highlighted cancellation reads "nestreamuju" rather than a
   generic notice.
+
+  **`bannerText` returns `rest` and `detail` together** so the two cannot
+  disagree and nothing is printed twice — whatever the sentence already used,
+  the detail leaves out. The **game rides in the detail alongside the note**
+  (owner's call 2026-09-17): before that the banner carried only the note, so
+  on an ordinary highlighted evening the game never reached the top of the page
+  at all. It mirrors the calendar row — the note is the message, the game the
+  label beside it. **A cancellation deliberately drops the game**: there is no
+  stream for it to be the game *of*, and "nestreamuju · svatba · Skyrim" reads
+  as nonsense.
 - **Several changes scroll as a one-line ticker** (owner's call 2026-09-02,
   stacking them felt too tall): a CSS marquee, duration derived from the text
   length so reading speed stays constant. A single change stays still — motion

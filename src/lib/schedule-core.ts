@@ -324,13 +324,8 @@ export function getBanners(
     .filter((day) => day.highlight && day.date <= horizon)
     .map((day) => {
       const when = dayReferenceFor(day.date, today);
-      const rest = bannerRest(day);
-      const base = { date: day.date, when, rest, label: `${when}${rest}` };
-
-      // A highlighted day with nothing else changed says everything in `rest`
-      // already — repeating the note as a detail would print it twice.
-      if (isEditorialOnly(day)) return base;
-      return { ...base, detail: day.note };
+      const { rest, detail } = bannerText(day);
+      return { date: day.date, when, rest, label: `${when}${rest}`, detail };
     });
 }
 
@@ -340,16 +335,46 @@ function isEditorialOnly(day: ScheduleDay): boolean {
 }
 
 /**
- * Everything after the day word, leading separator included, so the browser can
- * swap the day word without re-deriving the sentence.
+ * Everything after the day word — `rest`, with its leading separator so the
+ * browser can swap the day word without re-deriving the sentence — and the
+ * smaller `detail` line that follows it.
+ *
+ * **Both come from here so they cannot disagree**, and so nothing is printed
+ * twice: whatever `rest` already used, `detail` leaves out.
+ *
+ * `detail` carries the game as well as the note (owner's call 2026-09-17). The
+ * banner used to show only the note, so on an ordinary highlighted evening —
+ * a note and a game, nothing else changed — the game never reached the top of
+ * the page at all. This mirrors the calendar row: the note is the message and
+ * the game is the label beside it.
+ *
+ * A cancelled day is the exception: it deliberately omits the game, because
+ * there is no stream for it to be the game *of*.
  */
-function bannerRest(day: ScheduleDay): string {
-  if (day.status === 'off') return ' nestreamuju';
-  if (day.timeUnknown) return ' streamuju, čas ještě nevím';
-  if (day.added) return day.start ? ` bonusový stream od ${day.start}` : ' bonusový stream';
-  if (day.timeChanged) return ` streamuju od ${day.start}`;
+function bannerText(day: ScheduleDay): { rest: string; detail?: string } {
+  const join = (...parts: (string | undefined)[]) => {
+    const kept = parts.filter(Boolean);
+    return kept.length > 0 ? kept.join(' · ') : undefined;
+  };
 
-  // Highlighted with nothing else changed — the owner's own words carry it.
-  const message = day.note ?? day.game;
-  return message ? `: ${message}` : ' speciální stream';
+  if (day.status === 'off') return { rest: ' nestreamuju', detail: join(day.note) };
+  if (day.timeUnknown) {
+    return { rest: ' streamuju, čas ještě nevím', detail: join(day.note, day.game) };
+  }
+  if (day.added) {
+    return {
+      rest: day.start ? ` bonusový stream od ${day.start}` : ' bonusový stream',
+      detail: join(day.note, day.game),
+    };
+  }
+  if (day.timeChanged) {
+    return { rest: ` streamuju od ${day.start}`, detail: join(day.note, day.game) };
+  }
+
+  // Highlighted with nothing else changed — the owner's own words carry it,
+  // and the game follows as the label. With no note the game takes the
+  // sentence itself, so it must not also repeat in the detail.
+  if (day.note) return { rest: `: ${day.note}`, detail: join(day.game) };
+  if (day.game) return { rest: `: ${day.game}`, detail: undefined };
+  return { rest: ' speciální stream', detail: undefined };
 }
