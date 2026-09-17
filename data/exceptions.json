@@ -5,8 +5,8 @@
       "status": "",
       "start": "",
       "timeUnknown": false,
-      "game": "Marvel's Wolverine",
       "note": "Otestujeme jak moc nás to povede za ručičku a co všechno půjde vypnout",
+      "game": "Marvel's Wolverine",
       "highlight": true
     },
     {
@@ -14,8 +14,8 @@
       "status": "",
       "start": "",
       "timeUnknown": false,
-      "game": "Marvel's Wolverine",
       "note": "Stihneme dohrát Wolverina?",
+      "game": "Marvel's Wolverine",
       "highlight": false
     },
     {
@@ -23,9 +23,9 @@
       "status": "",
       "start": "",
       "timeUnknown": false,
-      "game": "Graveyard Keeper 2",
       "note": "V mládí jsem se učil hrobařem",
-      "highlight": false
+      "game": "Graveyard Keeper 2",
+      "highlight": true
     }
   ]
 }
