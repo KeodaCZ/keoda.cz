@@ -6,6 +6,10 @@
  * do not (owner's call 2026-09-17, alongside the same cut on /streamy). Don't
  * reinstate it.
  *
+ * Its wording follows arcadebulls', which the owner pointed at — but only the
+ * register, not the text. Theirs names their own community by a nickname that
+ * is theirs alone, and he ruled that out explicitly; here it is just "diváci".
+ *
  * Paginated from the start, which the backfill then justified: the page went
  * from 31 clips to 471 in one commit, back to 2023, without the route or any
  * link to it changing.
@@ -57,7 +61,10 @@ const oldest = clips.at(-1)?.date.slice(0, 10) ?? '';
   <div class="container">
     <h1>Klipy z <span class="accent">Twitche</span></h1>
     <p class="muted intro">
-      {clips.length} momentů, které nastříhali diváci, od nejnovějšího.
+      {/* `{' '}` because Astro drops the newline before an expression, which
+          would run the sentence straight into the count. */}
+      Smích, fail i clutch — nejlepší momenty, které nastříhali sami diváci.{' '}
+      {clips.length}&nbsp;klipů, od nejnovějšího.
     </p>
 
     <ArchiveFilter
