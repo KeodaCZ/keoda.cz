@@ -50,6 +50,18 @@ dev server.
   the CMS has loaded. It stays presentation-only: duplicating any scheduling
   rule there would drift from `schedule-core.ts`. Commits go straight to `main`, which triggers the deploy.
 
+  **Keep the admin's wording and layout in step with the site** — it drifted
+  twice in a week and both times said something untrue. `preview.js` carries a
+  `rowText` that mirrors `ScheduleFull`'s (note as the headline, game beneath,
+  a cancellation keeping "Nestreamuju", prose headlines dropping the uppercase);
+  it is a deliberate second copy, because a file under `public/` cannot import
+  from `src/`. The field hints and the collapsed `summary` follow the same
+  order. After changing either side, run
+  `scratchpad/preview-vs-site.mjs` — it lifts `rowText` out of the shipped
+  preview file and compares it against the built calendar for the real
+  exceptions, which is the only thing that catches drift, since the preview
+  pane cannot be opened without the owner's token.
+
   **The CMS version is pinned in `public/admin/index.html` and must stay
   pinned.** It was loaded from `unpkg.com/@sveltia/cms` with no version until
   2026-09-11, meaning every page load pulled whatever had been published most

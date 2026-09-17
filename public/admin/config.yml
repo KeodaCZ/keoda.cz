@@ -50,7 +50,9 @@ collections:
             # screen. `summary` only interpolates values — no conditionals — so
             # the toggles are shown in the custom preview instead (preview.js).
             collapsed: true
-            summary: '{{fields.date}} · {{fields.status}} {{fields.start}} {{fields.game}} {{fields.note}}'
+            # Note before game, matching the site since 2026-09-10: the note is
+            # the headline there and the game the label underneath it.
+            summary: '{{fields.date}} · {{fields.status}} {{fields.start}} {{fields.note}} {{fields.game}}'
             fields:
               - name: date
                 label: Datum
@@ -85,21 +87,27 @@ collections:
                 default: false
                 hint: V kalendáři bude místo času pomlčka.
 
+              - name: note
+                label: Popis
+                widget: string
+                required: false
+                hint: >-
+                  Hlavní řádek v kalendáři, např. „Dohrajeme Wolverina“ nebo
+                  „svatba“. Když ho nevyplníš, je nadpisem hra.
+
               - name: game
                 label: Hra
                 widget: string
                 required: false
-                hint: Ukáže se v kalendáři místo slova „Stream“.
-
-              - name: note
-                label: Poznámka
-                widget: string
-                required: false
-                hint: Krátký důvod, např. „svatba“. Zobrazí se v kalendáři.
+                hint: >-
+                  Menším písmem pod popisem. Bez popisu je nadpisem ona,
+                  místo slova „Stream“.
 
               - name: highlight
                 label: Zmínit v banneru na hlavní stránce
                 widget: boolean
                 required: false
                 default: false
-                hint: Zrušení, jiný čas a nejistý čas se v banneru objeví samy.
+                hint: >-
+                  Jediná cesta do banneru. Bez zaškrtnutí je změna vidět jen
+                  v kalendáři — i zrušený stream.

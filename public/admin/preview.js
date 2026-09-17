@@ -161,9 +161,25 @@
     );
   }
 
+  /**
+   * Headline and the smaller line under it — the same split the site makes in
+   * ScheduleFull's `rowText`, kept in step deliberately: the preview is only
+   * useful if it shows what will actually be published.
+   *
+   * The note leads and the game sits under it; a cancelled day keeps
+   * "Nestreamuju" as its headline with the reason beneath. `prose` says the
+   * headline is a sentence rather than a label, which decides whether it gets
+   * the uppercase treatment.
+   */
+  function rowText(entry) {
+    if (entry.status === 'off') return { title: 'Nestreamuju', sub: entry.note, prose: false };
+    if (entry.note) return { title: entry.note, sub: entry.game, prose: true };
+    return { title: entry.game || 'Stream', sub: '', prose: false };
+  }
+
   function row(entry, index, duplicated, isPast) {
     var cancelled = entry.status === 'off';
-    var title = cancelled ? 'Nestreamuju' : entry.game || 'Stream';
+    var text = rowText(entry);
     var timeIsPattern = !cancelled && !entry.timeUnknown && !entry.start;
     // Never restate the recurring time here: it lives in data/schedule.json,
     // and a copy in the admin would go stale without anyone noticing.
@@ -192,19 +208,22 @@
       el(
         'div',
         {
-          fontSize: '13px',
-          fontWeight: '700',
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
+          // A sentence keeps its own case; a one-word category gets the site's
+          // label treatment. Setting a real title in condensed uppercase reads
+          // as shouting, which is the same call the site makes.
+          fontSize: text.prose ? '13.5px' : '13px',
+          fontWeight: text.prose ? '600' : '700',
+          letterSpacing: text.prose ? '0' : '0.04em',
+          textTransform: text.prose ? 'none' : 'uppercase',
           textDecoration: cancelled ? 'line-through' : 'none',
           color: C.fg,
           opacity: cancelled ? '0.6' : '1',
         },
-        title
+        text.title
       ),
     ];
-    if (entry.note) {
-      middle.push(el('div', { fontSize: '12px', color: C.fg, opacity: '0.6', marginTop: '2px' }, entry.note));
+    if (text.sub) {
+      middle.push(el('div', { fontSize: '12px', color: C.fg, opacity: '0.6', marginTop: '2px' }, text.sub));
     }
     if (entry.highlight) {
       middle.push(
@@ -383,7 +402,7 @@
         );
       }
       children.push(
-        note('„V banneru“ je jen ruční zaškrtnutí — zrušený stream, jiný čas a nejistý čas se v banneru objeví i bez něj.')
+        note('Do banneru na hlavní stránce se dostane jen to, co tu zaškrtneš. Bez zaškrtnutí je změna vidět jen v kalendáři — i zrušený stream.')
       );
 
       return wrap(children);
