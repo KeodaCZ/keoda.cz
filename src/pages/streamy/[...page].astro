@@ -7,7 +7,11 @@
  * ZÁZNAM tag on each thumbnail so a recording is never mistaken for an edited
  * video. Still grouped by month, which makes the shape of the archive legible
  * — including the two-month gap in 2023 and the whole of 2024, both of which
- * are real (see the note under the heading).
+ * are real.
+ *
+ * The intro used to explain them, and why the recordings live on YouTube at
+ * all. The owner cut both on 2026-09-17: the archive is the point of the page
+ * and none of that changes what is in it. Don't reinstate it.
  *
  * The month grouping is the reason the filtered view is a flat grid: results
  * spread over "březen 2025 (1), květen 2025 (2)…" would be mostly headings,
@@ -54,9 +58,7 @@ const oldest = streams.at(-1)?.date.slice(0, 10) ?? '';
   <div class="container">
     <h1>Archiv <span class="accent">streamů</span></h1>
     <p class="muted intro">
-      {streams.length} záznamů na YouTube, od nejnovějšího. Streamuju na Twitchi a zároveň
-      na YouTube, takže tam záznamy zůstávají — na Twitchi po chvíli mizí.
-      Proto archiv začíná až rokem 2025: dřív jsem multistreamoval jen krátce na zkoušku.
+      {streams.length} záznamů, od nejnovějšího.
     </p>
 
     <ArchiveFilter

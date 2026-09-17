@@ -1,7 +1,10 @@
 ---
 /**
  * Twitch clips — made by viewers, not by the owner, which is the whole reason
- * they get their own page and carry a credit.
+ * they get their own page and carry a credit. That much the intro still says;
+ * what it no longer says is why clips reach back to 2023 where the recordings
+ * do not (owner's call 2026-09-17, alongside the same cut on /streamy). Don't
+ * reinstate it.
  *
  * Paginated from the start, which the backfill then justified: the page went
  * from 31 clips to 471 in one commit, back to 2023, without the route or any
@@ -54,9 +57,7 @@ const oldest = clips.at(-1)?.date.slice(0, 10) ?? '';
   <div class="container">
     <h1>Klipy z <span class="accent">Twitche</span></h1>
     <p class="muted intro">
-      {clips.length} momentů, které nastříhali diváci, od nejnovějšího. Klipy na Twitchi
-      nemizí, takže tady zůstávají až do roku 2023 — na rozdíl od záznamů streamů,
-      které proto sbírám na <a href="/streamy/">YouTube</a>.
+      {clips.length} momentů, které nastříhali diváci, od nejnovějšího.
     </p>
 
     <ArchiveFilter
