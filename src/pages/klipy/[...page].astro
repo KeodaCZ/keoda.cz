@@ -62,9 +62,9 @@ const oldest = clips.at(-1)?.date.slice(0, 10) ?? '';
     <h1>Klipy z <span class="accent">Twitche</span></h1>
     <p class="muted intro">
       {/* `{' '}` because Astro drops the newline before an expression, which
-          would run the sentence straight into the count. */}
-      Smích, fail i clutch — nejlepší momenty, které nastříhali sami diváci.{' '}
-      {clips.length}&nbsp;klipů, od nejnovějšího.
+          would run the preceding word straight into the count. */}
+      Smích, fail i clutch —{' '}
+      {clips.length}&nbsp;momentů, které nastříhali sami diváci.
     </p>
 
     <ArchiveFilter

@@ -13,8 +13,9 @@
  * all. The owner cut both on 2026-09-17: the archive is the point of the page
  * and none of that changes what is in it. Don't reinstate it. What he asked
  * for in its place, same day, was a line in arcadebulls' voice — what the page
- * is *for*, not where the files came from — kept to one sentence plus the
- * count.
+ * is *for*, not where the files came from — and then trimmed it twice more, to
+ * one sentence carrying the count. "Od nejnovějšího" went with the second trim:
+ * the sort control says it three lines further down.
  *
  * The month grouping is the reason the filtered view is a flat grid: results
  * spread over "březen 2025 (1), květen 2025 (2)…" would be mostly headings,
@@ -61,7 +62,7 @@ const oldest = streams.at(-1)?.date.slice(0, 10) ?? '';
   <div class="container">
     <h1>Archiv <span class="accent">streamů</span></h1>
     <p class="muted intro">
-      Co ti uteklo živě, tady to najdeš celé. {streams.length}&nbsp;záznamů, od nejnovějšího.
+      Co ti uteklo živě, tady to najdeš celé — všech {streams.length}&nbsp;záznamů.
     </p>
 
     <ArchiveFilter
