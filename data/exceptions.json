@@ -1,60 +1,6 @@
 {
   "exceptions": [
     {
-      "date": "2026-09-02",
-      "status": "",
-      "start": "20:00",
-      "timeUnknown": false,
-      "game": "Skyrim",
-      "note": "",
-      "highlight": false
-    },
-    {
-      "date": "2026-09-04",
-      "status": "off",
-      "start": "",
-      "timeUnknown": false,
-      "game": "",
-      "note": "Jedu k rodičům",
-      "highlight": false
-    },
-    {
-      "date": "2026-09-05",
-      "status": "off",
-      "start": "",
-      "timeUnknown": false,
-      "game": "",
-      "note": "Dino_Dodo_ sraz",
-      "highlight": false
-    },
-    {
-      "date": "2026-09-07",
-      "status": "",
-      "start": "",
-      "timeUnknown": false,
-      "game": "",
-      "note": "Vybereme modpack co budeme hrát s Terousch a následně buď minecraft nebo DbD",
-      "highlight": false
-    },
-    {
-      "date": "2026-09-14",
-      "status": "",
-      "start": "19:00",
-      "timeUnknown": false,
-      "game": "Minecraft",
-      "note": "NightfallCraft Co-Op s Terousch",
-      "highlight": false
-    },
-    {
-      "date": "2026-09-16",
-      "status": "off",
-      "start": "",
-      "timeUnknown": false,
-      "game": "",
-      "note": "Musím do práce přes noc (Možná bude ranní / denní stream)",
-      "highlight": false
-    },
-    {
       "date": "2026-09-18",
       "status": "",
       "start": "",
@@ -70,6 +16,15 @@
       "timeUnknown": false,
       "game": "Marvel's Wolverine",
       "note": "Stihneme dohrát Wolverina?",
+      "highlight": false
+    },
+    {
+      "date": "2026-09-23",
+      "status": "",
+      "start": "",
+      "timeUnknown": false,
+      "game": "Graveyard Keeper 2",
+      "note": "V mládí jsem se učil hrobařem",
       "highlight": false
     }
   ]
