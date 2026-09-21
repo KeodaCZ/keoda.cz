@@ -34,7 +34,7 @@
       "timeUnknown": false,
       "note": "Dohrajeme Wolverina",
       "game": "Marvel's Wolverine",
-      "highlight": true
+      "highlight": false
     },
     {
       "date": "2026-09-25",
@@ -43,7 +43,7 @@
       "timeUnknown": false,
       "note": "",
       "game": "",
-      "highlight": false
+      "highlight": true
     }
   ]
 }
