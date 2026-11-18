@@ -752,11 +752,20 @@
   ],
   "streams": [
     {
+      "id": "BjN9158aXDA",
+      "title": "🔴 Chill a DbD | Později možná Čarák XD 🔴 !dc !ig !clip",
+      "publishedAt": "2026-11-17T18:02:07Z",
+      "duration": 15176,
+      "thumb": "https://i.ytimg.com/vi/BjN9158aXDA/maxresdefault.jpg",
+      "wasLive": true,
+      "endedAt": "2026-11-17T22:16:08Z"
+    },
+    {
       "id": "sj7CVYb_gnk",
       "title": "🔴 Legendární Čarovný Minecraft 🔴 !dc !ig !clip",
       "publishedAt": "2026-11-16T18:07:36Z",
       "duration": 25513,
-      "thumb": "https://i.ytimg.com/vi/sj7CVYb_gnk/maxresdefault.jpg?v=56",
+      "thumb": "https://i.ytimg.com/vi/sj7CVYb_gnk/maxresdefault.jpg",
       "wasLive": true,
       "endedAt": "2026-11-17T01:13:07Z"
     },
